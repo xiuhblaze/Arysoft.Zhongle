@@ -1,0 +1,66 @@
+﻿@model Arysoft.ProyectoN.Models.Sector
+
+@{
+    ViewBag.Title = "Details";
+}
+
+<h2>Details</h2>
+
+<div>
+    <h4>Sector</h4>
+    <hr />
+    <dl class="dl-horizontal">
+        <dt>
+            @Html.DisplayNameFor(model => model.PersonaID)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.PersonaID)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Nombre)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Nombre)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Descripcion)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Descripcion)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.VotosMeta)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.VotosMeta)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.UserNameActualizacion)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.UserNameActualizacion)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.FechaActualizacion)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.FechaActualizacion)
+        </dd>
+
+    </dl>
+</div>
+<p>
+    @Html.ActionLink("Edit", "Edit", new { id = Model.SectorID }) |
+    @Html.ActionLink("Back to List", "Index")
+</p>

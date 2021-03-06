@@ -1,0 +1,892 @@
+﻿@model PagedList.IPagedList<Arysoft.ProyectoN.Models.Persona>
+
+@using Arysoft.ProyectoN.Models;
+
+@using PagedList.Mvc;
+
+@{
+    var busquedaAvanzadaShowClass = "display: none; ";
+    var busquedaSectorTipoShowClass = "display: none;";
+
+    ViewBag.Title = "Personas";
+
+    if (ViewBag.BusquedaAvanzada == "1")
+    {
+        busquedaAvanzadaShowClass = string.Empty;
+    }
+
+    if (ViewBag.SectorIDSelected != Guid.Empty)
+    {
+        busquedaSectorTipoShowClass = "";
+    }
+
+    var afinidadList = Enum.GetValues(typeof(AfinidadTipo))
+        .Cast<AfinidadTipo>()
+        .Select(e => new SelectListItem
+        {
+            Value = e.ToString(),
+            Text = e.GetDisplayName(),
+            Selected = ViewBag.Afinidad == e.ToString()
+        });
+
+    var bardaLonaList = new List<SelectListItem>();
+    bardaLonaList.Add(new SelectListItem() { Text = "(barda & lona)", Value = "0" });
+    bardaLonaList.Add(new SelectListItem() { Text = "Tiene barda", Value = "1" });
+    bardaLonaList.Add(new SelectListItem() { Text = "Tiene lona", Value = "2" });
+    bardaLonaList.Add(new SelectListItem() { Text = "Tiene barda o lona", Value = "3" });
+    bardaLonaList.Add(new SelectListItem() { Text = "Tiene barda y lona", Value = "4" });
+
+    var sectorTipoList = new List<SelectListItem>();
+    sectorTipoList.Add(new SelectListItem() { Text = "(sector tipo)", Value = "0" });
+    sectorTipoList.Add(new SelectListItem() { Text = "Brigadistas", Value = "1" });
+    sectorTipoList.Add(new SelectListItem() { Text = "Votan", Value = "2" });
+    sectorTipoList.Add(new SelectListItem() { Text = "Trabajados", Value = "3" });
+
+    var votanteSeguroList = Enum.GetValues(typeof(BoolTipo))
+.Cast<BoolTipo>()
+.Select(e => new SelectListItem
+{
+    Value = e.ToString(),
+    Text = e == BoolTipo.Ninguno ? "(votante seguro)" : e.GetDisplayName(),
+    Selected = ViewBag.VotanteSeguro == e.ToString()
+});
+
+    var verificadaList = Enum.GetValues(typeof(BoolTipo))
+        .Cast<BoolTipo>()
+        .Select(e => new SelectListItem
+        {
+            Value = e.ToString(),
+            Text = e == BoolTipo.Ninguno ? "(verificada)" : e.GetDisplayName(),
+            Selected = ViewBag.VotanteSeguro == e.ToString()
+        });
+
+    var statusList = Enum.GetValues(typeof(StatusTipo))
+        .Cast<StatusTipo>().Where(e => e != StatusTipo.Eliminado)
+        .Select(e => new SelectListItem
+        {
+            Value = e.ToString(),
+            Text = e == StatusTipo.Ninguno ? "(status)" : e.GetDisplayName(),
+            Selected = ViewBag.Status == e.ToString()
+        });
+
+    var yaVotoList = Enum.GetValues(typeof(BoolTipo))
+        .Cast<BoolTipo>()
+        .Select(e => new SelectListItem
+        {
+            Value = e.ToString(),
+            Text = e == BoolTipo.Ninguno ? "(votaron)" : e.GetDisplayName(),
+            Selected = ViewBag.VotanteSeguro == e.ToString()
+        });
+
+    var filtroEspecificoList = Enum.GetValues(typeof(PersonasFiltroEspecificoTipo))
+        .Cast<PersonasFiltroEspecificoTipo>()
+        .Select(e => new SelectListItem
+        {
+            Value = e.ToString(),
+            Text = e == PersonasFiltroEspecificoTipo.Ninguno ? "(específico)" : e.GetDisplayName(),
+            Selected = ViewBag.FiltroEspecifico == e.ToString()
+        });
+
+}
+
+@section styles {
+
+    <link href="~/Content/bootstrap-chosen.css" rel="stylesheet" />
+
+    <style>
+
+        .cortarEMail {
+            max-width: 120px;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            overflow: hidden;
+        }
+
+    </style>
+
+}
+
+<div id="detailsModal" class="modal fade" tabindex="-1" role="dialog" style="display: none;">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content" id="detalles-modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">Detalles</h4>
+            </div>
+            <div id="detalles-modal-body"></div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+<div id="toExcelModal" class="modal fade" tabindex="-1" role="dialog" style="display: none;">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content" id="toExcel-modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">Exportar a Excel</h4>
+            </div>
+            <div id="toExcel-modal-body"></div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+<div class="container">
+
+    <h2>Personas</h2>
+
+    @using (Html.BeginForm("Index", "Persona", FormMethod.Get))
+    {
+        <input type="hidden" id="busquedaAvanzada" name="busquedaAvanzada" value="@ViewBag.BusquedaAvanzada" />
+
+        <div class="row">
+            <div class="col-md-11">
+                <div class="form-inline">
+                    @if (User.IsInRole("Admin") || User.IsInRole("Editor"))
+                    { 
+                        @Html.Raw(
+                            Html.ActionLink("Nuevo", "Create", null, new { @class = "btn btn-link", @title = "Nueva persona" }).ToHtmlString()
+                            .Replace("Nuevo", "<span class='glyphicon glyphicon-file glyphicon-toolbar-size'></span>")
+                        )
+                    }
+                    <div class="form-group">
+                        <label for="buscar" class="sr-only">Buscar</label>
+                        @Html.TextBox("buscar", ViewBag.Filtro as string, htmlAttributes: new { @class = "form-control", @placeholder = "buscar..." })
+                    </div>
+                    <div class="form-group">                       
+                        <button type="button" id="busquedaAvanzadaButton" class="btn btn-link @(ViewBag.BusquedaAvanzada == "1" ? "active" : "")" data-toggle="button" aria-pressed="@(ViewBag.BusquedaAvanzada == "1" ? "true" : "false")" title="Busqueda avanzada">
+                            <span class="glyphicon glyphicon-filter"></span>
+                        </button>
+                        <button type="submit" id="buscarButton" class="btn btn-link" title="Buscar">
+                            <span class="glyphicon glyphicon-search glyphicon-toolbar-size" ></span>
+                        </button>
+                        @Html.Raw(
+                            @Html.ActionLink("Limpiar", "Index", null, new { @class = "btn btn-link" }).ToHtmlString()
+                            .Replace("Limpiar", "<span class='glyphicon glyphicon-remove glyphicon-toolbar-size' title='Limpiar'></span>")
+                        )
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-1 text-right">
+                @if (User.IsInRole("Excel"))
+                {
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown"
+                                aria-haspopup="true" aria-expanded="false">
+                            <span class="glyphicon glyphicon-export glyphicon-toolbar-size"></span>
+                            <span class="caret"></span>
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <a href="javascript:void(0);" id="exportExcelButton">Exportar a Excel</a>
+                            </li>
+                            <li>
+                                <a href="javascript:void(0);" id="exportEstatalExcelButton">Exportar para Estatal</a>
+                            </li>
+                        </ul>
+                    </div>
+                    
+                @*<button type="button" id="exportExcelButton" class="btn btn-link" title="Exportar a Excel">
+                    <span class="glyphicon glyphicon-export glyphicon-toolbar-size"></span>
+                </button>
+                <button type="button" id="exportEstatalExcelButton" class="btn btn-link" title="Exportar para Estatal a Excel">
+                    <span class="glyphicon glyphicon-ex glyphicon-toolbar-size"></span>
+                </button>*@
+                }
+            </div>
+        </div>
+
+        <div id="busquedaAvanzadaPanel" class="row" style="@busquedaAvanzadaShowClass">
+            <div class="col-md-12">
+                <div class="form-inline">
+                    <div class="form-group search-bar-control">
+                        <label for="recepcion" class="sr-only">Forma de recepción</label>
+                        @Html.DropDownList("afinidad", afinidadList, htmlAttributes: new { @class = "form-control" })
+                    </div>
+
+                    <div class="form-group search-bar-control">
+                        <label for="idarea" class="sr-only">Sector</label>
+                        @Html.DropDownList("SectorID", null, htmlAttributes: new { @class = "form-control", style = "width: 300px;" })
+                    </div>
+
+                    <div class="form-group search-bar-control" id="sectorTipoFormGroup" style="@busquedaSectorTipoShowClass">
+                        <label for="sectorTipo" class="sr-only">Sector birgada o votan</label>
+                        @Html.DropDownList("sectorTipo", sectorTipoList, htmlAttributes: new { @class = "form-control" })
+                    </div>
+
+                    <div class="form-group search-bar-control">
+                        <label for="idarea" class="sr-only">Sección</label>
+                        @Html.DropDownList("SeccionID", null, htmlAttributes: new { @class = "chosen-select", style = "width: 100px;" })
+                    </div>
+
+                    <div class="form-group search-bar-control">
+                        <label for="bardaLona" class="sr-only">Tiena barda o lona</label>
+                        @Html.DropDownList("bardaLona", bardaLonaList, htmlAttributes: new { @class = "form-control" })
+                    </div>
+
+                    <div class="form-group search-bar-control">
+                        <label for="bardaLona" class="sr-only">Votante seguro</label>
+                        @Html.DropDownList("votanteSeguro", votanteSeguroList, htmlAttributes: new { @class = "form-control" })
+                    </div>
+
+                    <div class="form-group search-bar-control">
+                        <label for="idarea" class="sr-only">Colonia</label>
+                        @Html.DropDownList("ColoniaID", null, htmlAttributes: new { @class = "chosen-select", style = "width: 300px;" })
+                    </div>
+
+                    <div class="form-group search-bar-control">
+                        <label for="idarea" class="sr-only">Calle</label>
+                        @Html.DropDownList("CalleID", null, htmlAttributes: new { @class = "chosen-select", style = "width: 300px;" })
+                    </div>
+
+                    <div class="form-group search-bar-control">
+                        <label for="idarea" class="sr-only">Calle</label>
+                        @Html.DropDownList("PromotorID", null, htmlAttributes: new { @class = "chosen-select", style = "width: 300px;" })
+                    </div>
+
+                    <div class="form-group search-bar-control">
+                        <label for="status" class="sr-only">Status</label>
+                        @Html.DropDownList("status", statusList, htmlAttributes: new { @class = "form-control" })
+                    </div>
+
+                    <div class="form-group search-bar-control">
+                        <label for="status" class="sr-only">Informacion verificada</label>
+                        @Html.DropDownList("verificada", verificadaList, htmlAttributes: new { @class = "form-control" })
+                    </div>
+
+                    <div class="form-group search-bar-control">
+                        <label for="status" class="sr-only">Ya votó</label>
+                        @Html.DropDownList("yaVoto", yaVotoList, htmlAttributes: new { @class = "form-control" })
+                    </div>
+
+                    <div class="form-group search-bar-control">
+                        <label for="status" class="sr-only">Específico</label>
+                        @Html.DropDownList("filtroEspecifico", filtroEspecificoList, htmlAttributes: new { @class = "form-control" })
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    <div class="well well-sm" style="margin-top: 10px;">
+        Total de resultados en la consulta: @ViewBag.Count
+    </div>
+
+    @Html.PagedListPager(Model, pagina => Url.Action("Index", new
+    {
+        pagina,
+        orden = ViewBag.Orden,
+        filtro = ViewBag.Filtro,
+        afinidad = ViewBag.Afinidad,
+        SectorID = ViewBag.SectorIDSelected,
+        SeccionID = ViewBag.SeccionIDSelected,
+        CalleID = ViewBag.CalleIDSelected,
+        ColoniaID = ViewBag.ColoniaIDSelected,
+        PromotorID = ViewBag.PromotorIDSelected,
+        bardaLona = ViewBag.BardaLona,
+        sectorTipo = ViewBag.SectorTipo,
+        votanteSeguro = ViewBag.VotanteSeguro,
+        status = ViewBag.Status,
+        verificada = ViewBag.Verificada,
+        filtroEspecifico = ViewBag.FiltroEspecifico,
+        yaVoto = ViewBag.YaVoto,
+        busquedaAvanzada = ViewBag.BusquedaAvanzada
+    }))
+
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>
+                        
+                    </th>
+                    <th>
+                        @Html.ActionLink("Sector", "Index", new
+                        {
+                            orden = ViewBag.OrdenSector,
+                            filtro = ViewBag.Filtro,
+                            afinidad = ViewBag.Afinidad,
+                            SectorID = ViewBag.SectorIDSelected,
+                            SeccionID = ViewBag.SeccionIDSelected,
+                            CalleID = ViewBag.CalleIDSelected,
+                            ColoniaID = ViewBag.ColoniaIDSelected,
+                            PromotorID = ViewBag.PromotorIDSelected,
+                            bardaLona = ViewBag.BardaLona,
+                            sectorTipo = ViewBag.SectorTipo,
+                            votanteSeguro = ViewBag.VotanteSeguro,
+                            status = ViewBag.Status,
+                            verificada = ViewBag.Verificada,
+                            busquedaAvanzada = ViewBag.BusquedaAvanzada,
+                            pagina = Model.PageNumber
+                        })
+                    </th>
+                    <th>
+                        @Html.ActionLink("Sección", "Index", new
+                        {
+                            orden = ViewBag.OrdenSeccion,
+                            filtro = ViewBag.Filtro,
+                            afinidad = ViewBag.Afinidad,
+                            SectorID = ViewBag.SectorIDSelected,
+                            SeccionID = ViewBag.SeccionIDSelected,
+                            CalleID = ViewBag.CalleIDSelected,
+                            ColoniaID = ViewBag.ColoniaIDSelected,
+                            PromotorID = ViewBag.PromotorIDSelected,
+                            bardaLona = ViewBag.BardaLona,
+                            sectorTipo = ViewBag.SectorTipo,
+                            votanteSeguro = ViewBag.VotanteSeguro,
+                            status = ViewBag.Status,
+                            verificada = ViewBag.Verificada,
+                            busquedaAvanzada = ViewBag.BusquedaAvanzada,
+                            pagina = Model.PageNumber
+                        })
+                    </th>
+                    <th>                        
+                       @Html.ActionLink("Nombre completo", "Index", new
+                        {
+                            orden = ViewBag.OrdenNombre,
+                            filtro = ViewBag.Filtro,
+                            afinidad = ViewBag.Afinidad,
+                            SectorID = ViewBag.SectorIDSelected,
+                            SeccionID = ViewBag.SeccionIDSelected,
+                            CalleID = ViewBag.CalleIDSelected,
+                            ColoniaID = ViewBag.ColoniaIDSelected,
+                            PromotorID = ViewBag.PromotorIDSelected,
+                            bardaLona = ViewBag.BardaLona,
+                            sectorTipo = ViewBag.SectorTipo,
+                            votanteSeguro = ViewBag.VotanteSeguro,
+                            status = ViewBag.Status,
+                            verificada = ViewBag.Verificada,
+                            busquedaAvanzada = ViewBag.BusquedaAvanzada,
+                            pagina = Model.PageNumber
+                        })
+                    </th>
+                    
+                    <th>
+                        @Html.ActionLink("Brigada", "Index", new
+                        {
+                            orden = ViewBag.OrdenBrigada,
+                            filtro = ViewBag.Filtro,
+                            afinidad = ViewBag.Afinidad,
+                            SectorID = ViewBag.SectorIDSelected,
+                            SeccionID = ViewBag.SeccionIDSelected,
+                            CalleID = ViewBag.CalleIDSelected,
+                            ColoniaID = ViewBag.ColoniaIDSelected,
+                            PromotorID = ViewBag.PromotorIDSelected,
+                            bardaLona = ViewBag.BardaLona,
+                            sectorTipo = ViewBag.SectorTipo,
+                            votanteSeguro = ViewBag.VotanteSeguro,
+                            status = ViewBag.Status,
+                            verificada = ViewBag.Verificada,
+                            busquedaAvanzada = ViewBag.BusquedaAvanzada,
+                            pagina = Model.PageNumber
+                        })
+                    </th>
+                    <th>
+                        Ubicación 
+                        <small style="font-size: 80%;">
+                            [@Html.ActionLink("COLONIA", "Index", new
+                            {
+                                orden = ViewBag.OrdenColonia,
+                                filtro = ViewBag.Filtro,
+                                afinidad = ViewBag.Afinidad,
+                                SectorID = ViewBag.SectorIDSelected,
+                                SeccionID = ViewBag.SeccionIDSelected,
+                                CalleID = ViewBag.CalleIDSelected,
+                                ColoniaID = ViewBag.ColoniaIDSelected,
+                                PromotorID = ViewBag.PromotorIDSelected,
+                                bardaLona = ViewBag.BardaLona,
+                                sectorTipo = ViewBag.SectorTipo,
+                                votanteSeguro = ViewBag.VotanteSeguro,
+                                busquedaAvanzada = ViewBag.BusquedaAvanzada,
+                                pagina = Model.PageNumber
+                            },
+                            new {
+                                @title = "Ordenar por colonia"
+                            })] [@Html.ActionLink("CALLE", "Index", new
+                            {
+                                orden = ViewBag.OrdenCalle,
+                                filtro = ViewBag.Filtro,
+                                afinidad = ViewBag.Afinidad,
+                                SectorID = ViewBag.SectorIDSelected,
+                                SeccionID = ViewBag.SeccionIDSelected,
+                                CalleID = ViewBag.CalleIDSelected,
+                                ColoniaID = ViewBag.ColoniaIDSelected,
+                                PromotorID = ViewBag.PromotorIDSelected,
+                                bardaLona = ViewBag.BardaLona,
+                                sectorTipo = ViewBag.SectorTipo,
+                                votanteSeguro = ViewBag.VotanteSeguro,
+                                busquedaAvanzada = ViewBag.BusquedaAvanzada,
+                                pagina = Model.PageNumber
+                            },
+                            new {
+                                @title = "Ordenar por calle"
+                            })]
+                        </small>
+                    </th>
+                    <th>
+                        (vota)
+                    </th>
+                    <th style="min-width: 120px;">
+                        Contacto                        
+                    </th>                    
+                    <th>
+                        Afinidad
+                    </th>                                
+                    @if(User.IsInRole("Admin") || User.IsInRole("Editor"))
+                    { 
+                    <th class="col-md-1"></th>
+                    }
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    string rowClass = string.Empty;
+                    string rowTitle = string.Empty;
+
+                    string userClassColor = string.Empty;
+                    string userTitle = string.Empty;
+
+                    if (item.Status == StatusTipo.Baja)
+                    {
+                        rowClass = "class='text-muted'";
+                        rowTitle = "title='La persona está dada de baja'";
+                    }
+                    else
+                    {
+                        if (item.Voto != null) {
+                            if (item.Voto.YaVoto == BoolTipo.Si)
+                            {
+                                rowClass = "class='warning'";
+                                rowTitle = "title='La persona ya votó'";
+                            }
+                        }
+                    }
+
+                    switch (item.Afinidad)
+                    {
+                        case AfinidadTipo.Movilizador:
+                        case AfinidadTipo.Simpatizante:
+                            userClassColor = "text-warning";
+                            break;
+                        case AfinidadTipo.PorAfiliado:
+                            userClassColor = "text-info";
+                            break;
+                        case AfinidadTipo.PorSector:
+                            userClassColor = "text-primary";
+                            break;
+                        default:
+                            userClassColor = "text-muted";
+                            break;
+                    }
+                    userTitle = item.Afinidad.GetDisplayName();
+
+                    <tr @Html.Raw(rowClass) @Html.Raw(rowTitle)>
+                        <td>                            
+                            @if (item.Verificada == BoolTipo.Si)
+                            {
+                                <span class="glyphicon glyphicon-ok-sign glyphicon-table-action-size text-primary" title="Datos confiables"></span>
+                            }
+                            else
+                            {
+                                <span class="glyphicon glyphicon-question-sign glyphicon-table-action-size text-muted" title="Datos no verificados"></span>
+                            }
+
+                            <span class="glyphicon glyphicon-user @userClassColor" title="@userTitle"></span>
+
+                            @if (item.VotanteSeguro == BoolTipo.Si)
+                            {
+                                <span class="glyphicon glyphicon-erase glyphicon-table-action-size text-success" title="Votante seguro"></span>
+                            }
+                            else
+                            {
+                                <span class="glyphicon glyphicon-erase glyphicon-table-action-size text-danger" title="Posiblemente votará por otro partido, ver historial de auditorias."></span>
+                            }
+
+                            @if (item.TieneBarda == BoolTipo.Si && item.TieneLona == BoolTipo.Si)
+                            {
+                                <span class="glyphicon glyphicon-tags glyphicon-table-action-size text-primary" title="Cuenta con barda y lona"></span>
+                            }
+                            else if (item.TieneBarda == BoolTipo.Si)
+                            {
+                                <span class="glyphicon glyphicon-tag glyphicon-table-action-size text-primary" title="Cuenta con barda"></span>
+                            }
+                            else if (item.TieneLona == BoolTipo.Si)
+                            {
+                                <span class="glyphicon glyphicon-tag glyphicon-table-action-size text-primary" title="Cuenta con lona"></span>
+                            }
+                            else
+                            {
+                                <span class="glyphicon glyphicon-tag glyphicon-table-action-size text-muted" title="Sin barda ni lona"></span>
+                            }
+
+                            @if (item.Notas.Count == 0)
+                            {
+                                <span class="glyphicon glyphicon-comment glyphicon-table-action-size text-muted" title="Sin comentarios"></span>
+                            }
+                            else
+                            {
+                                string notas = string.Empty;
+                                foreach (Nota nota in item.Notas) {
+                                    notas += nota.VistaAttrbTitle + "\n";
+                                }
+                                <span class="glyphicon glyphicon-comment glyphicon-table-action-size text-info" title="@notas"></span>
+                            }
+                        </td>
+                        <td class="text-right" style="cursor: pointer" onclick="getPersonaDetails('@item.PersonaID')">
+                            @Html.DisplayFor(modelItem => item.Seccion.Sector.Nombre)
+                        </td>
+                        <td class="text-right" style="cursor: pointer" onclick="getPersonaDetails('@item.PersonaID')">
+                            @Html.DisplayFor(modelItem => item.Seccion.Numero)
+                            @if (item.Voto != null)
+                            {
+                                <br />
+                                <span class="text-muted" title="Casilla">
+                                    @item.Voto.Casilla.Tipo.GetDisplayName()
+                                </span>
+                                if (item.Voto.NumeroINE > 0)
+                                {
+                                <span class="text-muted" title="Número INE">[@item.Voto.NumeroINE]</span>
+                                }
+                            }
+                        </td>
+                        <td style="cursor: pointer" onclick="getPersonaDetails('@item.PersonaID')">
+                            <span class="@(item.EsResponsableSector ? "text-primary" : "")" title="@(item.EsResponsableSector ? "Responsable de sector" : "")">
+                                @Html.DisplayFor(modelItem => item.NombreCompleto)
+                            </span>
+                            @if (item.Afinidad == AfinidadTipo.PorAfiliado || item.Afinidad == AfinidadTipo.PorSector)
+                            {
+                                <br />
+                                <small class="text-muted" title="Promotor (invitado por)">
+                                    @Html.DisplayFor(modelItem => item.Promotor.NombreCompleto)
+                                </small>
+                            }
+                        </td>                        
+                        <td style="cursor: pointer" onclick="getPersonaDetails('@item.PersonaID')">
+                            @Html.DisplayFor(modelItem => item.Sector.Nombre)
+                        </td>
+                        <td style="cursor: pointer" onclick="getPersonaDetails('@item.PersonaID')" @Html.Raw(item.VotaEnDomicilio == BoolTipo.Si ? "colspan='2'" : "")>                            
+                            <span class="glyphicon glyphicon-home glyphicon-table-info-size"></span>
+                            @if (item.UbicacionVive != null)
+                            {
+                                <span>
+                                    @if (item.UbicacionVive.Calle != null) { <span>@item.UbicacionVive.Calle.Nombre</span> }
+                                    @item.UbicacionVive.NumExterior
+                                    @if (!string.IsNullOrEmpty(item.UbicacionVive.Letra)) { <span>@item.UbicacionVive.Letra</span> }
+                                    @if (!string.IsNullOrEmpty(item.UbicacionVive.NumInterior)) { <span>@item.UbicacionVive.NumInterior</span> }
+                                    @if (item.UbicacionVive.Colonia != null)
+                                    { 
+                                        @item.UbicacionVive.Colonia.Nombre
+                                        <span>C.P.</span> @item.UbicacionVive.Colonia.CodigoPostal
+                                    }
+                                    @if (!string.IsNullOrEmpty(item.UbicacionVive.Descripcion)) { <br /><span class="text-muted">@item.UbicacionVive.Descripcion</span> }
+                                </span>
+                            }                            
+                        </td>  
+                        @if (item.VotaEnDomicilio == BoolTipo.No)
+                        {
+                        <td style="cursor: pointer" onclick="getPersonaDetails('@item.PersonaID')">
+                            <span class="text-warning" title="Domicilio donde vota">
+                                <span class="glyphicon glyphicon-erase glyphicon-table-info-size"></span>
+                                @if (item.UbicacionVota != null)
+                                {
+                                    <span>
+                                        @if (item.UbicacionVota.Calle != null)
+                                        { <span>@item.UbicacionVota.Calle.Nombre</span> }
+                                        @item.UbicacionVota.NumExterior
+                                        @if (!string.IsNullOrEmpty(item.UbicacionVota.Letra))
+                                        { <span>@item.UbicacionVota.Letra</span> }
+                                        @if (!string.IsNullOrEmpty(item.UbicacionVota.NumInterior))
+                                        { <span>@item.UbicacionVota.NumInterior</span> }
+                                        @if (item.UbicacionVota.Colonia != null)
+                                        {
+                                            @item.UbicacionVota.Colonia.Nombre
+                                            <span>C.P.</span> @item.UbicacionVota.Colonia.CodigoPostal
+                                        }
+                                        @if (!string.IsNullOrEmpty(item.UbicacionVota.Descripcion))
+                                        { <br /><span class="text-muted">@item.UbicacionVota.Descripcion</span> }
+                                    </span>
+                                }
+                            </span>
+                        </td>
+                        }
+
+                        <td style="cursor: pointer" onclick="getPersonaDetails('@item.PersonaID')">
+                            @if (!string.IsNullOrEmpty(item.Telefono))
+                            {
+                                <span class="glyphicon glyphicon-phone-alt glyphicon-table-info-size"></span>
+                                @Html.DisplayFor(modelItem => item.Telefono) <br />
+                            }
+                            @if (!string.IsNullOrEmpty(item.Celular))
+                            {
+                                <span class="glyphicon glyphicon-phone glyphicon-table-info-size"></span>
+                                @Html.DisplayFor(modelItem => item.Celular) <br />
+                            }
+                            @if (!string.IsNullOrEmpty(item.CorreoElectronico))
+                            {
+                                <div class="cortarEMail" title="@item.CorreoElectronico">
+                                    <span class="glyphicon glyphicon-envelope glyphicon-table-info-size"></span>
+                                    @Html.DisplayFor(modelItem => item.CorreoElectronico)
+                                </div>
+                            }
+                        </td>
+                        <td style="cursor: pointer" onclick="getPersonaDetails('@item.PersonaID')">
+                            @item.Afinidad.GetDisplayName()
+                            @if (item.Afinidad == AfinidadTipo.Movilizador || item.Afinidad == AfinidadTipo.Simpatizante) {
+                                int porSector = item.PersonasAfines.Where(p => p.Afinidad == AfinidadTipo.PorSector).Count();
+                                int porAfiliado = item.PersonasAfines.Where(p => p.Afinidad == AfinidadTipo.PorAfiliado).Count();
+                                <br />
+                                <span class="badge" title="@AfinidadTipo.PorSector.GetDisplayName()">@porSector</span>
+                                <span class="badge" title="@AfinidadTipo.PorAfiliado.GetDisplayName()">@porAfiliado</span>
+                            }
+                        </td>
+                        
+                        @if(User.IsInRole("Admin") || User.IsInRole("Editor"))
+                        {
+                        <td class="text-right">
+                            @if(item.Status == StatusTipo.Activo)
+                            { 
+                                @Html.Raw(
+                                    @Html.ActionLink("Editar", "Edit", new { id = item.PersonaID }).ToHtmlString()
+                                        .Replace("Editar", "<span class='glyphicon glyphicon-edit glyphicon-table-action-size' title='Editar'></span>")
+                                )
+                            }
+
+                            @if (item.Status == StatusTipo.Activo || item.Status == StatusTipo.Baja)
+                            {
+                                @Html.Raw(
+                                    @Html.ActionLink("Eliminar", "Delete", new { id = item.PersonaID }).ToHtmlString()
+                                        .Replace("Eliminar", "<span class='glyphicon glyphicon-trash glyphicon-table-action-size' title='Baja/Eliminar'></span>")
+                                )
+                            }
+                        </td>
+                        }
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    
+    @Html.PagedListPager(Model, pagina => Url.Action("Index", new
+    {
+        pagina,
+        orden = ViewBag.Orden,
+        filtro = ViewBag.Filtro,
+        afinidad = ViewBag.Afinidad,
+        SectorID = ViewBag.SectorIDSelected,
+        SeccionID = ViewBag.SeccionIDSelected,
+        CalleID = ViewBag.CalleIDSelected,
+        ColoniaID = ViewBag.ColoniaIDSelected,
+        PromotorID = ViewBag.PromotorIDSelected,
+        bardaLona = ViewBag.BardaLona,
+        sectorTipo = ViewBag.SectorTipo,
+        votanteSeguro = ViewBag.VotanteSeguro,
+        busquedaAvanzada = ViewBag.BusquedaAvanzada
+    }))
+</div>
+
+@section scripts{
+
+<script src="~/Scripts/chosen.jquery.min.js"></script>
+<script src="~/Scripts/jquery.table2excel.js"></script>
+
+<script>
+
+    $(document).ready(function () {
+        var busquedaAvanzadaFlip = @ViewBag.BusquedaAvanzada;
+
+        $('.chosen-select').chosen();
+
+        $('#busquedaAvanzadaButton').on('click', function () {
+
+            $('#busquedaAvanzadaPanel').toggle({
+                duration: 'slow',
+                display: (busquedaAvanzadaFlip++ % 2 === 0)
+            });
+
+            if (busquedaAvanzadaFlip % 2 === 0) {
+                $('#busquedaAvanzada').val('0');
+            }
+            else {
+                $('.chosen-select').chosen('destroy').chosen();
+                $('.chosen-single').attr('style', 'height: 39px;');
+
+                $('#busquedaAvanzada').val('1');
+            }
+        });
+
+        $('#SectorID').on('change', function () {
+
+            if (this.value != "@Guid.Empty.ToString()") {
+                $('#sectorTipoFormGroup').removeAttr('style');
+                $('#sectorTipo').focus();
+            }
+            else {
+                $('#sectorTipoFormGroup').attr('style', 'display: none;');
+            }
+        });
+
+        var toExcelModalOriginalContent = $('#toExcel-modal-content').html();
+
+        $('#exportExcelButton').on('click', function () {
+            var url = '@Url.Action("Index", "Persona")';
+            var orden = '@ViewBag.Orden';
+            var filtro = $('#buscar').val();
+            var afinidad = $('#afinidad').val();
+            var sectorId = $('#SectorID').val();
+            var sectorTipo = $('#sectorTipo').val();
+            var seccionId = $('#SeccionID').val();
+            var bardaLona = $('#bardaLona').val();
+            var calleId = $('#CalleID').val();
+            var coloniaId = $('#ColoniaID').val();
+            var promotorId = $('#PromotorID').val();
+            var votanteSeguro = $('#votanteSeguro').val();
+            var status = $('#status').val();
+            var verificada = $('#verificada').val();
+            var filtroEspecifico = $('#filtroEspecifico').val();
+            var yaVoto = $('#yaVoto').val();
+
+            $('#toExcelModal').modal('show');
+
+            $.ajax({
+                cache: false,
+                async: true,
+                type: 'get',
+                url: url,
+                data: {
+                    filtro: filtro,
+                    orden: orden,
+                    afinidad: afinidad,
+                    SectorID: sectorId,
+                    SeccionID: seccionId,
+                    CalleID: calleId,
+                    ColoniaID: coloniaId,
+                    PromotorID: promotorId,
+                    bardaLona: bardaLona,
+                    sectorTipo: sectorTipo,
+                    votanteSeguro: votanteSeguro,
+                    status: status,
+                    verificada: verificada,
+                    filtroEspecifico: filtroEspecifico,
+                    yaVoto: yaVoto,
+                    llamadaOrigen: 'to-excel'
+                },
+                beforeSend: function () {
+                    $('#toExcel-modal-body').html('<p class="text-center" style="margin: 50px;"><img src="@Url.Content("~/Images/ajax-loader.gif")" /></p>');
+                },
+                success: function (vista) {
+                    $('#toExcel-modal-content').html(vista);
+                },
+                error: function (xhr, status, error) {
+                    alert('A ocurrido una excepción, error: ' + error);
+                }
+            });
+        });
+
+        $('#exportEstatalExcelButton').on('click', function () {
+            var url = '@Url.Action("Index", "Persona")';
+            var orden = '@ViewBag.Orden';
+            var filtro = $('#buscar').val();
+            var afinidad = $('#afinidad').val();
+            var sectorId = $('#SectorID').val();
+            var sectorTipo = $('#sectorTipo').val();
+            var seccionId = $('#SeccionID').val();
+            var bardaLona = $('#bardaLona').val();
+            var calleId = $('#CalleID').val();
+            var coloniaId = $('#ColoniaID').val();
+            var promotorId = $('#PromotorID').val();
+            var votanteSeguro = $('#votanteSeguro').val();
+            var status = $('#status').val();
+            var verificada = $('#verificada').val();
+            var filtroEspecifico = $('#filtroEspecifico').val();
+            var yaVoto = $('#yaVoto').val();
+
+            $('#toExcelModal').modal('show');
+
+            $.ajax({
+                cache: false,
+                async: true,
+                type: 'get',
+                url: url,
+                data: {
+                    filtro: filtro,
+                    orden: orden,
+                    afinidad: afinidad,
+                    SectorID: sectorId,
+                    SeccionID: seccionId,
+                    CalleID: calleId,
+                    ColoniaID: coloniaId,
+                    PromotorID: promotorId,
+                    bardaLona: bardaLona,
+                    sectorTipo: sectorTipo,
+                    votanteSeguro: votanteSeguro,
+                    status: status,
+                    verificada: verificada,
+                    filtroEspecifico: filtroEspecifico,
+                    yaVoto: yaVoto,
+                    llamadaOrigen: 'to-estatal'
+                },
+                beforeSend: function () {
+                    $('#toExcel-modal-body').html('<p class="text-center" style="margin: 50px;"><img src="@Url.Content("~/Images/ajax-loader.gif")" /></p>');
+                },
+                success: function (vista) {
+                    $('#toExcel-modal-content').html(vista);
+                },
+                error: function (xhr, status, error) {
+                    alert('A ocurrido una excepción, error: ' + error);
+                }
+            });
+        });
+
+        $('#toExcelModal').on('hidden.bs.modal', function (e) {
+            $('#toExcel-modal-content').html(toExcelModalOriginalContent);
+        });
+
+        $('#detailsModal').on('hidden.bs.modal', function (e) {
+
+            $('#detalles-modal-content').html(personaDetailsModalOriginalContent);
+        })
+
+    }); // document.ready
+    
+    var personaDetailsModalOriginalContent = $('#detalles-modal-content').html();
+
+    function getPersonaDetails(id) {
+        var url = '@Url.Action("Details", "Persona")/' + id;
+
+        $('#detailsModal').modal('show');
+
+        $.ajax({
+            cache: false,
+            async: true,
+            type: 'get',
+            url: url,
+            data: {},
+            beforeSend: function () {
+                $('#detalles-modal-body').html('<p class="text-center" style="margin: 50px;"><img src="@Url.Content("~/Images/ajax-loader.gif")" /></p>');
+            },
+            success: function (vista) {
+                switch (vista) {
+                    case "noid":
+                        alert('No se recibió un identificador de la persona');
+                        $('#detailsModal').modal('hide');
+                        $('#detalles-modal-content').html(personaDetailsModalOriginalContent);
+                        break;
+                    case "nofound":
+                        alert('No se encontró la persona solicitada');
+                        $('#detailsModal').modal('hide');
+                        $('#detalles-modal-content').html(personaDetailsModalOriginalContent);
+                        break;
+                    default:
+                        $('#detalles-modal-content').html(vista);
+                        break;
+                }
+            },
+            error: function (xhr, status, error) {
+                alert('A ocurrido una excepción: ' + status + '\n error: ' + error);
+            }
+        });
+    } // getPersonaDetails
+
+</script>
+
+}

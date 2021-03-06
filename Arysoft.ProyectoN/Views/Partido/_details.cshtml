@@ -1,0 +1,82 @@
+﻿@model Arysoft.ProyectoN.Models.Partido
+
+<div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+    <h4 class="modal-title">
+        Partido @Model.Nombre <small class="text-primary">@Model.Siglas.ToUpper()</small>
+    </h4>
+</div>
+
+<div class="modal-body">
+    
+    <dl class="dl-horizontal">
+        <dt>
+            @Html.DisplayNameFor(model => model.Nombre)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Nombre)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Siglas)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Siglas)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Candidato)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Candidato)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Status)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Status)
+        </dd>
+
+    </dl>
+</div>
+<div class="modal-footer">
+    <div class="row">
+        <div class="col-md-8 text-left text-muted">
+            @*<small>
+                <strong>Actualizado por</strong> @Model.UserNameActualizacion |
+                <strong>Última actualización</strong> @Model.FechaActualizacion.ToShortDateString()
+            </small>*@
+        </div>
+        <div class="col-md-4 text-right">
+            <button type="button" class="btn btn-default" data-dismiss="modal">
+                <span class="glyphicon glyphicon-remove"></span>
+                Cancelar
+            </button>
+
+            @if (User.IsInRole("Admin") || User.IsInRole("Editor"))
+            {
+                switch (Model.Status)
+                {
+                    case StatusTipo.Activo:
+                        @Html.Raw(
+                                 @Html.ActionLink("Editar", "Edit", new { id = Model.PartidoID }, new { @class = "btn btn-primary" }).ToHtmlString()
+                                     .Replace("Editar", "<span class='glyphicon glyphicon-edit' title='Editar'></span> Editar")
+                             )
+                        break;
+                    case StatusTipo.Baja:
+                        @Html.Raw(
+                                 @Html.ActionLink("[activar]", "Activar", new { id = Model.PartidoID }, new { @class = "btn btn-success" }).ToHtmlString()
+                                     .Replace("[activar]", "<span class='glyphicon glyphicon-ok' title='Reactivar casilla'></span> Reactivar")
+                             )
+                        break;
+                }
+            }
+        </div>
+    </div>
+
+</div>

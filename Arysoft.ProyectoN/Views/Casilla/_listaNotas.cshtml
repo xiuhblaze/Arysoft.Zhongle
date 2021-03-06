@@ -1,0 +1,22 @@
+﻿@model IEnumerable<Nota>
+
+@using Arysoft.ProyectoN.Models;
+
+@{
+    var notas = Model.OrderByDescending(n => n.FechaPublicacion).ToList();
+}
+
+<div class="table-responsive">
+     
+
+    <div class="list-group">
+        @foreach (var item in notas)
+        {
+            <div class="list-group-item">
+                <h6 class="list-group-item-heading">@Html.DisplayFor(modelItem => item.Autor) <small><span class="glyphicon glyphicon-calendar"></span> @item.FechaPublicacion</small></h6>
+                <p class="list-group-item-text">@Html.Raw(item.Texto.Replace(Environment.NewLine, "<br />"))</p>
+            </div>
+        }
+    </div>
+
+</div>

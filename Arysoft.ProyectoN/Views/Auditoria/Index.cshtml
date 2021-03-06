@@ -1,0 +1,328 @@
+﻿@model IEnumerable<Auditoria>
+
+@using Arysoft.ProyectoN.Models;
+
+@using PagedList.Mvc;
+
+@{    
+    ViewBag.Title = "Auditorias";
+
+    var statusList = Enum.GetValues(typeof(AuditoriaStatusTipo))
+        .Cast<AuditoriaStatusTipo>()
+        .Select(e => new SelectListItem
+        {
+            Value = e.ToString(),
+            Text = e == AuditoriaStatusTipo.Ninguno ? "(status)" : e.GetDisplayName(),
+            Selected = ViewBag.Status == e.ToString()
+        });
+}
+
+<div id="detailsModal" class="modal fade" tabindex="-1" role="dialog" style="display: none;">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content" id="detalles-modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">Detalles</h4>
+            </div>
+            <div id="detalles-modal-body"></div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+<div class="container">
+    <h2>Auditorias</h2>
+
+    @using (Html.BeginForm("Index", "Auditoria", FormMethod.Get))
+    {
+        <div class="row">
+            <div class="col-md-12">
+                <div class="form-inline">
+                    @if (User.IsInRole("Admin") || User.IsInRole("Editor"))
+                    {
+                    @Html.Raw(
+                          Html.ActionLink("[replace]", "Create", null, new { @class = "btn btn-link", @title = "Nueva auditoria" }).ToHtmlString()
+                              .Replace("[replace]", "<span class='glyphicon glyphicon-file glyphicon-toolbar-size' ></span>")
+                      )
+                    }
+                    <div class="form-group">
+                        <label for="buscar" class="sr-only">Buscar</label>
+                        @Html.TextBox("buscar", ViewBag.Filtro as string, htmlAttributes: new { @class = "form-control", @placeholder = "buscar..." })
+                    </div>
+
+                    <div class="form-group search-bar-control">
+                        <label for="status" class="sr-only">Status</label>
+                        @Html.DropDownList("status", statusList, htmlAttributes: new { @class = "form-control" })
+                    </div>
+
+                    <div class="form-group">
+                        <button type="submit" id="buscarButton" class="btn btn-link" title="Buscar">
+                            <span class="glyphicon glyphicon-search glyphicon-toolbar-size"></span>
+                        </button>
+                        @Html.Raw(
+                      @Html.ActionLink("Limpiar", "Index", null, new { @class = "btn btn-link" }).ToHtmlString()
+                          .Replace("Limpiar", "<span class='glyphicon glyphicon-remove glyphicon-toolbar-size' title='Limpiar'></span>")
+                  )
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    <div class="well well-sm" style="margin-top: 10px;">
+        Total de resultados en la consulta: @Model.Count()
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>
+
+                    </th>
+                    <th>
+                        @Html.ActionLink("Folio", "Index", new
+                        {
+                            orden = ViewBag.OrdenFolio,
+                            filtro = ViewBag.Filtro                       
+                        })
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Nombre)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Descripcion)
+                    </th>
+                    <th>
+                        @Html.ActionLink("Responsable", "Index", new
+                        {
+                            orden = ViewBag.OrdenResponsable,
+                            filtro = ViewBag.Filtro
+                        })
+                    </th>
+                    <th>
+                        @Html.ActionLink("Realizacion", "Index", new
+                        {
+                            orden = ViewBag.OrdenRealizacion,
+                            filtro = ViewBag.Filtro
+                        })
+                    </th>
+                    <th>
+                        @Html.ActionLink("Personas auditadas", "Index", new
+                        {
+                            orden = ViewBag.OrdenNoPersonas,
+                            filtro = ViewBag.Filtro
+                        })
+                    </th>
+                    <th>
+
+                    </th>
+                    @if (User.IsInRole("Admin") || User.IsInRole("Editor"))
+                    {
+                    <th></th>
+                    }
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    int countSinVisitar = item.PersonasAuditadas.Where(p => p.ResultadoTipo == AuditoriaResultadoTipo.Ninguno).Count();
+                    int countNoDomicilio = item.PersonasAuditadas.Where(p => p.ResultadoTipo == AuditoriaResultadoTipo.NoDomicilio).Count();
+                    int countNoEncontado = item.PersonasAuditadas.Where(p => p.ResultadoTipo == AuditoriaResultadoTipo.NoEncontrado).Count();
+                    int countNoViveNadie = item.PersonasAuditadas.Where(p => p.ResultadoTipo == AuditoriaResultadoTipo.NoViveNadie).Count();
+                    int countVisitada = item.PersonasAuditadas.Where(p => p.ResultadoTipo == AuditoriaResultadoTipo.Visitada).Count();
+                <tr>
+                    <td>
+                        @switch (item.Status)
+                        {
+                            case AuditoriaStatusTipo.Espera:
+                                <span class="glyphicon glyphicon-time glyphicon-table-action-size text-warning" title="Auditoria en espera"></span>
+                                break;
+                            case AuditoriaStatusTipo.Realizada:
+                                <span class="glyphicon glyphicon-ok-circle glyphicon-table-action-size text-success" title="Auditoria realizada"></span>
+                                break;
+                            case AuditoriaStatusTipo.Cancelada:
+                                <span class="glyphicon glyphicon-ban-circle glyphicon-table-action-size text-danger" title="Auditoria cancelada"></span>
+                                break;
+                            case AuditoriaStatusTipo.Cerrada:
+                                <span class="glyphicon glyphicon-lock glyphicon-table-action-size text-primary" title="Auditoria cerrada"></span>
+                                break;
+                        }
+
+                        @if (item.Notas.Count == 0)
+                        {
+                            <span class="glyphicon glyphicon-comment glyphicon-table-action-size text-muted" title="Sin comentarios"></span>
+                        }
+                        else
+                        {
+                            string notas = string.Empty;
+                            foreach (Nota nota in item.Notas.OrderByDescending(n => n.FechaPublicacion))
+                            {
+                                notas += nota.VistaAttrbTitle + "\n";
+                            }
+                            <span class="glyphicon glyphicon-comment glyphicon-table-action-size text-info" title="@notas"></span>
+                        }
+                    </td>
+                    <td class="text-danger text-right" style="cursor: pointer" onclick="getAuditoriaDetails('@item.AuditoriaID')">
+                        @Html.DisplayFor(modelItem => item.Folio)
+                    </td>
+                    <td style="cursor: pointer" onclick="getAuditoriaDetails('@item.AuditoriaID')">
+                        @Html.DisplayFor(modelItem => item.Nombre)
+                    </td>
+                    <td style="cursor: pointer" onclick="getAuditoriaDetails('@item.AuditoriaID')">
+                        @Html.DisplayFor(modelItem => item.Descripcion)
+                    </td>
+                    <td style="cursor: pointer" onclick="getAuditoriaDetails('@item.AuditoriaID')">
+                        @Html.DisplayFor(modelItem => item.Responsable.NombreCompleto)
+                    </td>
+                    <td style="cursor: pointer" onclick="getAuditoriaDetails('@item.AuditoriaID')">
+                        @Html.DisplayFor(modelItem => item.FechaRealizacion)
+                    </td>
+                    <td class="text-right" style="cursor: pointer" onclick="getAuditoriaDetails('@item.AuditoriaID')">
+                        @Html.DisplayFor(modelItem => item.PersonasAuditadas.Count)
+                    </td>
+                    <td>
+                        @if (countSinVisitar > 0)
+                        {
+                            <span class="label label-default" title="@countSinVisitar sin registrar visita">@countSinVisitar</span>
+                        }
+                        @if (countVisitada > 0)
+                        {
+                            <span class="label label-success" title="@countVisitada personas visitadas">@countVisitada</span>
+                        }
+                        @if (countNoDomicilio > 0)
+                        {
+                            <span class="label label-danger" title="@countNoDomicilio no viven en ese domicilio">@countNoDomicilio</span>
+                        }
+                        @if (countNoViveNadie > 0)
+                        {
+                            <span class="label label-warning" title="@countNoViveNadie no vive nadie">@countNoViveNadie</span>
+                        }
+                        @if (countNoEncontado > 0)
+                        {
+                            <span class="label label-info" title="@countNoEncontado no se encontrarón">@countNoEncontado</span>
+                        }
+                    </td>
+                    @if (User.IsInRole("Admin") || User.IsInRole("Editor"))
+                    { 
+                    <td class="text-right">
+                        @if(item.Status == AuditoriaStatusTipo.Espera || item.Status == AuditoriaStatusTipo.Realizada)
+                        { 
+                            @Html.Raw(
+                                 @Html.ActionLink("Editar", "Edit", new { id = item.AuditoriaID }).ToHtmlString()
+                                     .Replace("Editar", "<span class='glyphicon glyphicon-edit glyphicon-table-action-size' title='Editar'></span>")
+                             )
+                        }
+
+                        @if (item.Status == AuditoriaStatusTipo.Ninguno)
+                        {
+                            @Html.Raw(
+                                @Html.ActionLink("Eliminar", "Delete", new { id = item.AuditoriaID }).ToHtmlString()
+                                    .Replace("Eliminar", "<span class='glyphicon glyphicon-trash glyphicon-table-action-size' title='Eliminar'></span>")
+                            )
+                        }
+                    </td>
+                    }
+                </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@section scripts {
+
+    <script>
+
+        $(document).ready(function () {
+
+            $('#detailsModal').on('hidden.bs.modal', function (e) {
+
+                $('#detalles-modal-content').html(detailsModalOriginalContent );
+            })
+
+        }); // document.ready
+
+        var detailsModalOriginalContent = $('#detalles-modal-content').html();
+
+        function getAuditoriaDetails(id) {
+            var url = '@Url.Action("Details", "Auditoria")/' + id;
+
+            $('#detailsModal').modal('show');
+
+            $.ajax({
+                cache: false,
+                async: true,
+                type: 'get',
+                url: url,
+                data: {},
+                beforeSend: function () {
+                    $('#detalles-modal-body').html('<p class="text-center" style="margin: 50px;"><img src="@Url.Content("~/Images/ajax-loader.gif")" /></p>');
+                },
+                success: function (vista) {
+                    switch (vista) {
+                        case "noid":
+                            alert('No se recibió un identificador de la persona');
+                            $('#detailsModal').modal('hide');
+                            $('#detalles-modal-content').html(detailsModalOriginalContent);
+                            break;
+                        case "nofound":
+                            alert('No se encontró la persona solicitada');
+                            $('#detailsModal').modal('hide');
+                            $('#detalles-modal-content').html(detailsModalOriginalContent);
+                            break;
+                        default:
+                            $('#detalles-modal-content').html(vista);
+                            break;
+                    }
+                },
+                error: function (xhr, status, error) {
+                    alert('A ocurrido una excepción: ' + status + '\n error: ' + error);
+                }
+            });
+
+        } // getAuditoriaDetails
+
+
+        function getPersonaAuditoriaDetails(id) {
+            var url = '@Url.Action("DetallesPersona", "Auditoria")/' + id;
+
+            $('#detalles-modal-content').html(detailsModalOriginalContent);
+            $('#detailsModal').modal('show');
+
+            $.ajax({
+                cache: false,
+                async: true,
+                type: 'get',
+                url: url,
+                data: {
+                    url: 'index'
+                },
+                beforeSend: function () {
+                    $('#detalles-modal-body').html('<p class="text-center" style="margin: 50px;"><img src="@Url.Content("~/Images/ajax-loader.gif")" /></p>');
+                },
+                success: function (vista) {
+                    switch (vista) {
+                        case "notid":
+                            alert('No se recibió un identificador de la persona');
+                            $('#detailsModal').modal('hide');
+                            $('#detalles-modal-content').html(detailsModalOriginalContent);
+                            break;
+                        case "notfound":
+                            alert('No se encontró la persona asociada a la auditoria solicitada');
+                            $('#detailsModal').modal('hide');
+                            $('#detalles-modal-content').html(detailsModalOriginalContent);
+                            break;
+                        default:
+                            $('#detalles-modal-content').html(vista);
+                            break;
+                    }
+                },
+                error: function (xhr, status, error) {
+                    alert('A ocurrido una excepción: ' + status + '\n error: ' + error);
+                }
+            });
+
+        } // getPersonaDetails
+
+    </script>
+}

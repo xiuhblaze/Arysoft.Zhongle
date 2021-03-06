@@ -1,0 +1,611 @@
+﻿@model Arysoft.ProyectoN.Models.Auditoria
+
+@using Arysoft.ProyectoN.Models;
+
+@{
+    bool esNuevo = Model.Status == AuditoriaStatusTipo.Ninguno;
+
+
+    if (esNuevo)
+    {
+        ViewBag.Title = "Nueva Auditoria";
+    }
+    else { ViewBag.Title = "Editar Auditoria"; }
+
+}
+
+@section styles {
+    <link href="~/Content/bootstrap-submenu.min.css" rel="stylesheet" />
+    <link href="~/Content/bootstrap-datepicker3.min.css" rel="stylesheet" />
+    <link href="~/Content/bootstrap-chosen.css" rel="stylesheet" />
+
+    <style>
+
+        .cortarEMail {
+            max-width: 120px;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            overflow: hidden;
+        }
+    </style>
+}
+
+<div id="detailsModal" class="modal fade" tabindex="-1" role="dialog" style="display: none;">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content" id="detalles-modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">Detalles</h4>
+            </div>
+            <div id="detalles-modal-body"></div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+<div id="agregarPersonasModal" class="modal fade" tabindex="-1" role="dialog" style="display: none;">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content" id="agregarPersonas-modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">Agregar personas</h4>
+            </div>
+            <div id="agregarPersonas-modal-body"></div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+<div id="notaModal" class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title"><span class="glyphicon glyphicon-comment"></span> Notas</h4>
+            </div>
+            <div class="modal-body">
+                <div class="form-horizontal">
+                    <div class="form-group">
+                        <label for="notaTexto" class="control-label col-md-3 text-primary">Escribe una nota</label>
+                        <div class="col-md-9">
+                            <textarea class="form-control" id="notaTexto" name="notaTexto" rows="5"
+                                      placeholder="Escribe la anotación para anexarla a la solicitud"></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">
+                    <span class="glyphicon glyphicon-remove"></span>
+                    Cancelar
+                </button>
+                <button id="agregarNota" type="button" class="btn btn-primary">
+                    <span class="glyphicon glyphicon-plus"></span>
+                    Agregar
+                </button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+<div class="container">
+
+    <h2>Auditoria <small>@(esNuevo ? "NUEVA" : "EDITAR")</small></h2>
+
+    @using (Html.BeginForm())
+    {
+        @Html.AntiForgeryToken()
+
+        <div class="form-horizontal">
+            <hr />
+            @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+            @Html.HiddenFor(model => model.AuditoriaID)
+            @Html.HiddenFor(model => model.Folio)
+            @Html.HiddenFor(model => model.Status)
+            @Html.HiddenFor(model => model.UserNameActualizacion)
+            @Html.HiddenFor(model => model.FechaActualizacion)
+
+            <div class="form-group">
+                @Html.LabelFor(model => model.Folio, htmlAttributes: new { @class = "control-label col-md-2" })
+                <div class="col-md-10">
+                    @if (esNuevo)
+                    {
+                        <p class="form-control-static text-muted">(por generar)</p>
+                    }
+                    else
+                    {
+                        <p class="form-control-static text-danger">
+                            @Html.DisplayFor(model => model.Folio)
+                        </p>
+                    }
+                </div>
+            </div>
+
+            <div class="form-group">
+                @Html.LabelFor(model => model.Nombre, htmlAttributes: new { @class = "control-label col-md-2" })
+                <div class="col-md-10">
+                    @Html.EditorFor(model => model.Nombre, new { htmlAttributes = new { @class = "form-control" } })
+                    @Html.ValidationMessageFor(model => model.Nombre, "", new { @class = "text-danger" })
+                </div>
+            </div>
+
+            <div class="form-group">
+                @Html.LabelFor(model => model.Descripcion, htmlAttributes: new { @class = "control-label col-md-2" })
+                <div class="col-md-10">
+                    @Html.TextAreaFor(model => model.Descripcion, 4, 0, new { @class = "form-control" })
+                    @Html.ValidationMessageFor(model => model.Descripcion, "", new { @class = "text-danger" })
+                </div>
+            </div>
+
+            <div class="form-group">
+                @Html.LabelFor(model => model.ResponsableID, "Responsable", htmlAttributes: new { @class = "control-label col-md-2" })
+                <div class="col-md-10">
+                    @Html.DropDownList("ResponsableID", null, htmlAttributes: new { @class = "chosen-select" })
+                    @Html.ValidationMessageFor(model => model.ResponsableID, "", new { @class = "text-danger" })
+                </div>
+            </div>
+
+            <div class="form-group">
+                @Html.LabelFor(model => model.FechaRealizacion, htmlAttributes: new { @class = "control-label col-md-2" })
+                <div class="col-md-10">
+                    @Html.EditorFor(model => model.FechaRealizacion, new { htmlAttributes = new { @class = "form-control datepicker", @placeHolder = "dd/mm/aaaa" } })
+                    @Html.ValidationMessageFor(model => model.FechaRealizacion, "", new { @class = "text-danger" })
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="col-md-offset-2 col-md-10 text-muted">
+                    <strong>@Html.DisplayNameFor(model => model.UserNameActualizacion)</strong>
+                    @Html.DisplayFor(model => model.UserNameActualizacion)
+                    |
+                    <strong>@Html.DisplayNameFor(model => model.FechaActualizacion)</strong>
+                    @Html.DisplayFor(model => model.FechaActualizacion)
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="col-md-offset-2 col-md-4">
+                    @if (Model.Status == AuditoriaStatusTipo.Espera)
+                    {
+                        <button type="submit" id="realizadaButton" name="submitButton" value="realizada" class="btn btn-success" title="Marcar como realizada la auditoria, después puede ingresar notas a las personas.">
+                            <span class="glyphicon glyphicon-ok-circle"></span>
+                            Realizada
+                        </button>
+                        <button type="submit" id="cancelarButton" name="submitButton" value="cancelar" class="btn btn-danger" title="Cancelar la auditoria">
+                            <span class="glyphicon glyphicon-ban-circle"></span>
+                            Cancelar
+                        </button>
+                    }
+                    else if (Model.Status == AuditoriaStatusTipo.Realizada)
+                    {
+                        <button type="submit" id="cerrarButton" name="submitButton" value="cerrar" class="btn btn-success" title="Cerrar la auditoria">
+                            <span class="glyphicon glyphicon-lock"></span>
+                            Cerrar
+                        </button>
+                    }
+                </div>
+                <div class="col-md-6 text-right">
+
+                    @Html.Raw(
+                        @Html.ActionLink("Cancelar", "Index", null, new { @class = "btn btn-default" }).ToHtmlString()
+                        .Replace("Cancelar", "<span class='glyphicon glyphicon-remove' title='Cancelar cambios'></span> Cancelar")
+                    )
+                    @if (Model.Status != AuditoriaStatusTipo.Cancelada && Model.Status != AuditoriaStatusTipo.Cerrada)
+                    {
+                        <button type="submit" name="submitButton" value="guardar" class="btn btn-primary">
+                            <span class="glyphicon glyphicon-floppy-disk"></span>
+                            Guardar
+                        </button>
+                    }
+                    else
+                    {
+                        <button type="submit" name="submitButton" value="guardar" class="btn btn-primary" disabled>
+                            <span class="glyphicon glyphicon-floppy-disk"></span>
+                            Guardar
+                        </button>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+
+    <ul class="nav nav-tabs">
+        <li class="active">
+            <a href="#personas" data-toggle="tab">
+                <span class="glyphicon glyphicon-user"></span>
+                Personas
+                <span class="badge">@Html.DisplayFor(model => model.PersonasAuditadas.Count)</span>
+            </a>
+        </li>
+        <li>
+            <a href="#notas" data-toggle="tab">
+                <span class="glyphicon glyphicon-comment"></span>
+                Notas
+                <span class="badge" id="notasBadge">@Html.DisplayFor(model => model.Notas.Count)</span>
+            </a>
+        </li>
+    </ul>
+
+    <div class="tab-content">
+        <div class="tab-pane fade in active" name="personas" id="personas">
+            <h4>Personas</h4>
+
+            @if (Model.Status != AuditoriaStatusTipo.Cancelada && Model.Status != AuditoriaStatusTipo.Cerrada)
+            {
+                <div class="form-inline">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <button type="button" id="agregarPersonasButton" class="btn btn-default">
+                                <span class="glyphicon glyphicon-user"></span>
+                                Agregar personas
+                            </button>
+
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" data-submenu="" aria-haspopup="true" aria-expanded="false">
+                                    Acciones <span class="caret"></span>
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li><a href="javascript:void(0)" id="actualizarSeleccionadas">Actualizar seleccionadas</a></li>
+                                    <li><a href="javascript:void(0);" id="quitarPersonasSeleccionadas">Quitar seleccionadas</a></li>
+                                    <li role="separator" class="divider"></li>
+                                    <li>
+                                        <a href="javascript:void(0);" id="exportarExcel">
+                                            <span class="glyphicon glyphicon-export"></span>
+                                            Exportar a Excel
+                                        </a>
+                                    </li>
+                                    @*<li class="dropdown-submenu" style="cursor: pointer;">
+                                            <a tabindex="0">Marcar seleccionadas como</a>
+                                            <ul class="dropdown-menu">
+                                                <li><a href="javascript:void(0)" id="marcarComoVisitados">Visitadas</a></li>
+                                                <li><a href="javascript:void(0)" id="marcarComoNoEncontrado">No encontradas</a></li>
+                                                <li><a href="javascript:void(0)" id="marcarComoNoDomicilio">No es el domicilio</a></li>
+                                                <li><a href="javascript:void(0)" id="marcarComoNoViveNadie">No vive nadie</a></li>
+                                            </ul>
+                                        </li>*@
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="col-md-6 text-right">
+                            <div class="form-group">
+                                <label for="buscarPersona" style="margin-right: 10px;"><span class="glyphicon glyphicon-search"></span></label>
+                                <input type="text" id="buscarPersona" placeholder="Buscar..." class="form-control" />
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            }
+            <div id="listaPersonas" name="listaPersonas">
+                @Html.Partial("_listaPersonas", Model)
+            </div>
+        </div>
+
+        <div class="tab-pane fade in" name="notas" id="notas">
+            <h4>Notas</h4>
+
+            <button type="button" id="notaModalButton" name="notaModalButton"
+                    class="btn btn-default" data-toggle="modal" data-target="#notaModal" title="Agregar nota">
+                <span class="glyphicon glyphicon-plus"></span>
+                Agregar nota
+            </button>
+
+            <div id="notasLista" name="notasLista">
+                @Html.Partial("_listaNotas", Model.Notas)
+            </div>
+        </div>
+    </div>
+
+</div>
+
+@section Scripts {
+
+    @Scripts.Render("~/bundles/jqueryval")
+
+    <script src="~/Scripts/jquery.table2excel.js"></script>
+    <script src="~/Scripts/bootstrap-submenu.min.js"></script>
+    <script src="~/Scripts/bootstrap-checkbox.js"></script>
+    <script src="~/Scripts/bootstrap-datepicker.min.js"></script>
+    <script src="~/Scripts/chosen.jquery.min.js"></script>
+    <script src="~/Scripts/jquery.sortElements.js"></script>
+
+    <script>
+
+        $(document).ready(function () {
+
+            // Bootstrap-submenu https://vsn4ik.github.io/bootstrap-submenu/
+            $('[data-submenu]').submenupicker();
+
+            $('.chosen-select').chosen();
+
+            $('.datepicker').datepicker({
+                format: "dd/mm/yyyy",
+                weekStart: 0,
+                todayBtn: "linked",
+                language: "es",
+                autoclose: true
+            });
+
+            $('#cancelarButton').on('click', function (event) {
+
+                if (!confirm('¿Esta seguro de cancelar la auditoria, esta acción no se puede deshacer?')) {
+                    event.preventDefault(); // Cancela la acción del metodo que lo llamó
+                }
+            });
+
+            // Persona EDIT
+
+            var agregarPersonasModalOriginalContent = $('#agregarPersonas-modal-content').html();
+
+            $('#agregarPersonasButton').on('click', function () {
+                var id = $('#AuditoriaID').val();
+                var url = '@Url.Action("AgregarPersonas", "Auditoria")/' + id;
+
+                $('#agregarPersonasModal').modal('show');
+
+                $.ajax({
+                    cache: false,
+                    async: true,
+                    type: 'get',
+                    url: url,
+                    data: {},
+                    beforeSend: function () {
+                        $('#agregarPersonas-modal-body').html('<p class="text-center" style="margin: 50px;"><img src="@Url.Content("~/Images/ajax-loader.gif")" /></p>');
+                    },
+                    success: function (vista) {
+                        $('#agregarPersonas-modal-content').html(vista);
+                    },
+                    error: function (xhr, status, error) {
+                        alert('A ocurrido una excepción: ' + error);
+                    }
+                });
+            }); // agregarPersonasButton.click
+
+            $('#agregarPersonasModal').on('shown.bs.modal', function () {
+                $('.chosen-select', this).chosen('destroy').chosen();
+            });
+
+            $('#agregarPersonasModal').on('hidden.bs.modal', function (e) {
+
+                $('#agregarPersonas-modal-content').html(agregarPersonasModalOriginalContent);
+            });
+
+            $('#actualizarSeleccionadas').on('click', function () {
+                var IDs = '';
+
+                $('input[name=personaSeleccionadaEdit]:checked').each(function () {
+                    IDs += $(this).val() + ',';
+                });
+
+                if (IDs.length == 0) {
+                    alert('No ha seleccionado ninguna persona.');
+                }
+                else {
+                    var url = '@Url.Action("EditarPersonas", "Auditoria")';
+                    
+                    $('#agregarPersonasModal').modal('show');
+                    
+                    $.ajax({
+                        cache: false,
+                        async: true,
+                        type: 'get',
+                        url: url,
+                        data: {},
+                        beforeSend: function () {
+                            $('#agregarPersonas-modal-body').html('<p class="text-center" style="margin: 50px;"><img src="@Url.Content("~/Images/ajax-loader.gif")" /></p>');
+                        },
+                        success: function (vista) {
+                            switch (vista) {
+                                case 'notids':
+                                    alert('No se recibieron los identificadores selecconados.');
+                                    $('#agregarPersonasModal').modal('hide');
+                                    break;
+                                default:
+                                    $('#agregarPersonas-modal-content').html(vista);
+                                    break;
+                            }
+
+                        },
+                        error: function (xhr, status, error) {
+                            alert('A ocurrido una excepción: ' + error);
+                        }
+                    });
+                }
+
+            }); // actualizarSeleccionadas.click
+
+            $('#quitarPersonasSeleccionadas').on('click', function () {
+                var IDs = '';
+                var count = 0;
+
+                $('input[name=personaSeleccionadaEdit]:checked').each(function () {
+                    IDs += $(this).val() + ',';
+                    count++;
+                });
+
+                if (IDs.length == 0) {
+                    alert('No se ha seleccionado ninguna persona.');
+                }
+                else {
+
+                    if (confirm(count + " personas van a ser removidas de la lista.\n\n¿Esta seguro?")) {
+                        var url = '@Url.Action("EliminarPersonas", "Auditoria")';
+                        var id = $('#AuditoriaID').val();
+
+                        IDs = IDs.substring(0, IDs.length - 1);
+
+                        $.ajax({
+                            cache: false,
+                            async: true,
+                            type: 'post',
+                            url: url,
+                            data: {
+                                id: id,
+                                personas: IDs
+                            },
+                            beforeSend: function () {
+
+                            },
+                            success: function (vista) {
+                                $('#listaPersonas').html(vista); // Listado en Edit
+                                alert('Personas seleccionadas, quitadas de la lista satisfactoriamente.');
+                            },
+                            error: function (xhr, status, error) {
+                                alert('A ocurrido una excepción: ' + status + '\n error: ' + error);
+                            }
+                        });
+                    } // if confirm
+                }
+            }); // quitarPersonasSeleccionadas.click
+
+            // TO EXCEL
+
+            $('#exportarExcel').on('click', function () {
+                var filename = 'personasAuditoria' + '@Model.Folio.ToString().PadLeft(3, '0')';
+                var tempTable = $('#tablePersonas').clone();
+
+                tempTable.find('br').remove();
+
+                tempTable.table2excel({
+                    exclude: ".noExl",
+                    name: 'Personas de la auditoria',
+                    filename: filename
+                });
+
+                //$('#tablePersonas').table2excel({
+                //    exclude: ".noExl",
+                //    name: 'Personas de la auditoria',
+                //    filename: filename
+                //});
+
+            });
+
+            // NOTAS
+
+            $('#notaModal').on('shown.bs.modal', function () {
+                $('#notaTexto').focus();
+            });
+
+            $('#agregarNota').on('click', function () {
+                var texto = $('#notaTexto').val();
+                var id = $('#AuditoriaID').val();
+
+                if (texto.length == 0) {
+                    alert('No se ha especificado la nota.');
+                    $('#notaTexto').focus();
+                }
+                else {
+                    var url = '@Url.Action("AgregarNota", "Auditoria")';
+                    var tipo = '@PropietarioTipo.Auditoria';
+
+                    $.ajax({
+                        cache: false,
+                        async: true,
+                        type: 'post',
+                        url: url,
+                        data: {
+                            id: id,
+                            texto: texto,
+                            tipo: tipo
+                        },
+                        success: function (view) {
+                            if (view.message != null) {
+                                alert(view.message);
+                            }
+                            else {
+                                $('#notaTexto').val('');
+                                $('#notasLista').html(view);
+                                $('#notaModal').modal('hide');
+                            }
+                        },
+                        error: function (xhr, status, error) {
+                            alert('A ocurrido una excepción: ' + status + '\n error: ' + error);
+                        }
+                    });
+                }
+            });
+
+        }); // document.ready
+
+        var auditoriaPersonaDetailsModalOriginalContent = $('#detalles-modal-content').html();
+
+        function getPersonaAuditoriaDetails(id) {
+            var url = '@Url.Action("DetallesPersona", "Auditoria")/' + id;
+
+            $('#detailsModal').modal('show');
+
+            $.ajax({
+                cache: false,
+                async: true,
+                type: 'get',
+                url: url,
+                data: {},
+                beforeSend: function () {
+                    $('#detalles-modal-body').html('<p class="text-center" style="margin: 50px;"><img src="@Url.Content("~/Images/ajax-loader.gif")" /></p>');
+                },
+                success: function (vista) {
+                    switch (vista) {
+                        case "notid":
+                            alert('No se recibió un identificador de la persona');
+                            $('#detailsModal').modal('hide');
+                            $('#detalles-modal-content').html(auditoriaPersonaDetailsModalOriginalContent);
+                            break;
+                        case "notfound":
+                            alert('No se encontró la persona asociada a la auditoria solicitada');
+                            $('#detailsModal').modal('hide');
+                            $('#detalles-modal-content').html(auditoriaPersonaDetailsModalOriginalContent);
+                            break;
+                        default:
+                            $('#detalles-modal-content').html(vista);
+                            break;
+                    }
+                },
+                error: function (xhr, status, error) {
+                    alert('A ocurrido una excepción: ' + status + '\n error: ' + error);
+                }
+            });
+
+        } // getPersonaDetails
+
+        function getPersonaAuditoriaEdit(id) {
+            var url = '@Url.Action("EditarPersona", "Auditoria")/' + id;
+
+            $('#detailsModal').modal('show');
+
+            $.ajax({
+                cache: false,
+                async: true,
+                type: 'get',
+                url: url,
+                data: {},
+                beforeSend: function () {
+                    $('#detalles-modal-body').html('<p class="text-center" style="margin: 50px;"><img src="@Url.Content("~/Images/ajax-loader.gif")" /></p>');
+                },
+                success: function (vista) {
+                    switch (vista) {
+                        case "notid":
+                            alert('No se recibió un identificador de la persona');
+                            $('#detailsModal').modal('hide');
+                            $('#detalles-modal-content').html(auditoriaPersonaDetailsModalOriginalContent);
+                            break;
+                        case "notfound":
+                            alert('No se encontró la persona asociada a la auditoria solicitada');
+                            $('#detailsModal').modal('hide');
+                            $('#detalles-modal-content').html(auditoriaPersonaDetailsModalOriginalContent);
+                            break;
+                        default:
+                            $('#detalles-modal-content').html(vista);
+                            break;
+                    }
+                },
+                error: function (xhr, status, error) {
+                    alert('A ocurrido una excepción: ' + status + '\n error: ' + error);
+                }
+            });
+
+        } // getPersonaAuditoriaEdit
+
+        $('#detailsModal').on('hidden.bs.modal', function (e) {
+            $('#detalles-modal-content').html(auditoriaPersonaDetailsModalOriginalContent);
+        })
+
+    </script>
+}

@@ -1,0 +1,265 @@
+﻿@model IEnumerable<Arysoft.ProyectoN.Models.Sector>
+
+@using Arysoft.ProyectoN.Models;
+
+@{
+    ViewBag.Title = "Sectores";
+}
+
+<div id="detailsModal" class="modal fade" tabindex="-1" role="dialog" style="display: none;">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content" id="detalles-modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">Detalles</h4>
+            </div>
+            <div id="detalles-modal-body"></div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+<div class="container">
+
+    <h2>Sectores</h2>
+
+    @using (Html.BeginForm("Index", "Sector", FormMethod.Get))
+    {
+        <div class="row">
+            <div class="col-md-12">
+                <div class="form-inline">
+                    @if (User.IsInRole("Admin") || User.IsInRole("Editor"))
+                    { 
+                    @Html.Raw(
+                        Html.ActionLink("[replace]", "Create", null, new { @class = "btn btn-link", @title = "Nuevo sector" }).ToHtmlString()
+                            .Replace("[replace]", "<span class='glyphicon glyphicon-file glyphicon-toolbar-size' ></span>")
+                    )
+                    }
+                    <div class="form-group">
+                        <label for="buscar" class="sr-only">Buscar</label>
+                        @Html.TextBox("buscar", ViewBag.Filtro as string, htmlAttributes: new { @class = "form-control", @placeholder = "buscar..." })
+                    </div>
+                    <div class="form-group">
+                        <button type="submit" id="buscarButton" class="btn btn-link" title="Buscar">
+                            <span class="glyphicon glyphicon-search glyphicon-toolbar-size"></span>
+                        </button>
+                        @Html.Raw(
+                            @Html.ActionLink("Limpiar", "Index", null, new { @class = "btn btn-link" }).ToHtmlString()
+                            .Replace("Limpiar", "<span class='glyphicon glyphicon-remove glyphicon-toolbar-size' title='Limpiar'></span>")
+                        )
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    <div class="well well-sm" style="margin-top: 10px;">
+        Total de resultados en la consulta: @Model.Count()
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Nombre)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Descripcion)
+                    </th>
+                    <th>
+                        Responsable
+                    </th>                    
+                    <th>Brigada</th>
+                    <th>Secciones</th>                    
+                    <th>
+                        Votos seguros/meta
+                    </th>
+                    <th>
+                        Votaron /Votantes
+                    </th>
+                    @if (User.IsInRole("Admin") || User.IsInRole("Editor"))
+                    {
+                    <th class="col-md-1"></th>
+                    }
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    string classRow = "";
+                    int votosSeguros = 0;
+                    int porcentajeVotosSeguros = 0;
+                    int totalVotantes = 0;
+                    int totalVotaron = 0;
+                    int porcentajeVotaron = 0;
+
+                    switch (item.Status)
+                    {
+                        case StatusTipo.Baja:
+                            classRow = "text-muted";
+                            break;
+                        case StatusTipo.Eliminado:
+                            classRow = "text-danger";
+                            break;
+                    }
+
+                    foreach (var seccion in item.Secciones)
+                    {
+                        if (seccion.Personas != null)
+                        {
+                            votosSeguros += seccion.Personas.Where(p => p.VotanteSeguro == BoolTipo.Si && p.Status == StatusTipo.Activo).Count();
+                        }
+
+                        foreach (var casilla in seccion.Casillas)
+                        {
+                            totalVotaron += casilla.YaVotaron;
+                        }
+
+                        totalVotantes += seccion.TotalVotantes;
+                    }
+
+                    if (item.VotosMeta > 0)
+                    {
+                        porcentajeVotosSeguros = (votosSeguros * 100) / item.VotosMeta;
+                    }
+
+                    if (totalVotaron > 0)
+                    {
+                        porcentajeVotaron = (totalVotaron * 100) / totalVotantes;
+                    }
+
+                    <tr class="@classRow">
+                        <td style="cursor: pointer" onclick="getSectorDetails('@item.SectorID')">
+                            @Html.DisplayFor(modelItem => item.Nombre)
+                        </td>
+                        <td style="cursor: pointer" onclick="getSectorDetails('@item.SectorID')">
+                            @Html.DisplayFor(modelItem => item.Descripcion)
+                        </td>
+                        <td style="cursor: pointer" onclick="getSectorDetails('@item.SectorID')">
+                            @Html.DisplayFor(modelItem => item.Responsable.NombreCompleto)
+                        </td>
+                        <td class="text-right" style="cursor: pointer" onclick="getSectorDetails('@item.SectorID')">
+                            @Html.DisplayFor(modelItem => item.Personas.Count)
+                        </td>
+                        <td>
+                            @foreach (Seccion seccion in item.Secciones)
+                            {
+                                <span class="label label-primary">@seccion.Numero</span>
+                            }
+                        </td>                        
+                        <td class="text-right" style="cursor: pointer" onclick="getSectorDetails('@item.SectorID')">
+                            @votosSeguros / @Html.DisplayFor(modelItem => item.VotosMeta)
+                            <div class="progress" title="Votos seguros @porcentajeVotosSeguros%" style="margin-bottom: 0;">
+                                <div class="progress-bar progress-bar-success" style="width: @porcentajeVotosSeguros%"></div>
+                            </div>
+                        </td>
+                        <td class="text-right" style="cursor: pointer" onclick="getSectorDetails('@item.SectorID')">
+                            @totalVotaron / @totalVotantes
+                            <div class="progress" title="Ya votarón @porcentajeVotaron%" style="margin-bottom: 0;">
+                                <div class="progress-bar progress-bar-warning" style="width: @porcentajeVotaron%"></div>
+                            </div>
+                        </td>
+                        @if(User.IsInRole("Admin") || User.IsInRole("Editor"))
+                        { 
+                        <td class="text-right">
+                            @Html.Raw(
+                                @Html.ActionLink("Editar", "Edit", new { id = item.SectorID }).ToHtmlString()
+                                    .Replace("Editar", "<span class='glyphicon glyphicon-edit glyphicon-table-action-size' title='Editar'></span>")
+                            )
+
+                            @Html.Raw(
+                                @Html.ActionLink("Eliminar", "Delete", new { id = item.SectorID }).ToHtmlString()
+                                    .Replace("Eliminar", "<span class='glyphicon glyphicon-trash glyphicon-table-action-size' title='Eliminar'></span>")
+                            )
+                        </td>
+                        }
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@section scripts {
+
+<script>
+
+    var sectorDetailsModalOriginalContent = $('#detalles-modal-content').html();
+
+    function getSectorDetails(id) {
+        var url = '@Url.Action("Details", "Sector")/' + id;
+
+        $('#detailsModal').modal('show');
+
+        $.ajax({
+            cache: false,
+            async: true,
+            type: 'get',
+            url: url,
+            data: {},
+            beforeSend: function () {
+                $('#detalles-modal-body').html('<p class="text-center" style="margin: 50px;"><img src="@Url.Content("~/Images/ajax-loader.gif")" /></p>');
+            },
+            success: function (vista) {
+                switch (vista) {
+                    case "noid":
+                        alert('No se recibió un identificador de sector');
+                        $('#detailsModal').modal('hide');
+                        $('#detalles-modal-content').html(sectorDetailsModalOriginalContent);
+                        break;
+                    case "nofound":
+                        alert('No se encontró el sector solicitado');
+                        $('#detailsModal').modal('hide');
+                        $('#detalles-modal-content').html(sectorDetailsModalOriginalContent);
+                        break;
+                    default:
+                        $('#detalles-modal-content').html(vista);
+                        break;
+                }
+            },
+            error: function (xhr, status, error) {
+                alert('A ocurrido una excepción: ' + status + '\n error: ' + error);
+            }
+        });
+    } // getSectorDetails
+
+    var personaDetailsModalOriginalContent = $('#detalles-modal-content').html();
+
+    function getPersonaDetails(id) {
+        var url = '@Url.Action("Details", "Persona")/' + id;
+
+        $('#detailsModal').modal('show');
+
+            $.ajax({
+                cache: false,
+                async: true,
+                type: 'get',
+                url: url,
+                data: {},
+                beforeSend: function () {
+                    $('#detalles-modal-body').html('<p class="text-center" style="margin: 50px;"><img src="@Url.Content("~/Images/ajax-loader.gif")" /></p>');
+                },
+                success: function (vista) {
+                    switch (vista) {
+                        case "noid":
+                            alert('No se recibió un identificador de la persona');
+                            $('#detailsModal').modal('hide');
+                            $('#detalles-modal-content').html(personaDetailsModalOriginalContent);
+                            break;
+                        case "nofound":
+                            alert('No se encontró la persona solicitada');
+                            $('#detailsModal').modal('hide');
+                            $('#detalles-modal-content').html(personaDetailsModalOriginalContent);
+                            break;
+                        default:
+                            $('#detalles-modal-content').html(vista);
+                            break;
+                    }
+                },
+                error: function (xhr, status, error) {
+                    alert('A ocurrido una excepción: ' + status + '\n error: ' + error);
+                }
+            });
+    } // getPersonaDetails
+</script>
+}

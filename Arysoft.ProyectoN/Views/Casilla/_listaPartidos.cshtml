@@ -1,0 +1,174 @@
+﻿@model CasillaResultadosViewModel
+
+@using Arysoft.ProyectoN.Models;
+
+@{
+
+    int totalVotos = 0;
+
+ }
+
+<div class="table-responsive">
+    <table class="table table-hover">
+        <thead>
+            <tr>
+                <th>
+                    Nombre
+                </th>
+                <th>
+                    Siglas
+                </th>
+                <th>
+                    Candidato
+                </th>
+                <th class="col-md-1">Votos</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.Partidos)
+            {
+                <tr>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Nombre)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Siglas)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Candidato)
+                    </td>
+                    <td>
+                        @{ 
+                            int votos = 0;
+
+                            if (Model.Casilla.Resultados != null)
+                            {
+                                //foreach (var partido in Model.Casilla.Resultados)
+                                //{
+                                //    if (partido.PartidoID == item.PartidoID)
+                                //    {
+                                //        votos = partido.Total;
+                                //    }
+                                //}
+                                var partido = Model.Casilla.Resultados
+                                    .Where(r => r.PartidoID == item.PartidoID)
+                                    .FirstOrDefault();
+                                if (partido != null) { votos = partido.Total; }
+                            }
+
+                            totalVotos += votos;
+                        }
+                        <input type="text" id="@item.PartidoID" value="@votos" class="form-control input-sm text-right control-votos" data-id="@item.PartidoID" />
+                    </td>
+                </tr>
+            }            
+        </tbody>
+        <tfoot>
+            <tr>
+                <td></td>
+                <td></td>
+                <td class="text-right">Total de votos</td>
+                <td class="text-right" id="totalVotos">@totalVotos</td>
+            </tr>
+        </tfoot>
+    </table>
+</div>
+
+<script>
+
+    $(document).ready(function () {
+
+        $('.control-votos').on('focusin', function () {
+            $(this).data('val', $(this).val());
+            $(this).closest('td').removeClass('has-error has-success');
+        }); // Control-Votos.FocusIn
+
+        $('.control-votos').on('change', function () {
+            var control = $(this);
+            var PartidoID = control.data('id');
+            var CasillaID = '@Model.Casilla.CasillaID';
+            var total = control.val();
+            var prevVal = control.data('val');
+            var numeroVotantes = $('#NumeroVotantes').val();
+            var url = '@Url.Action("EditResultado", "Casilla")';
+
+            if (numeroVotantes.length == 0 || !$.isNumeric(numeroVotantes)) {
+                alert('Primero debe de llenarse el campo de Número de Votantes, para registrar los números INE.');
+                $('#NumeroVotantes').focus();
+                return false;
+            }
+            else {
+                numeroVotantes = Number(numeroVotantes);
+            }
+
+            if (total.length == 0) { total = 0; }
+
+            if ($.isNumeric(total)) {
+
+                if (total <= 0 || total > numeroVotantes) {
+                    alert('El total de votos no puede ser negativo o mayor que el número de votantes.');
+                    control.val(prevVal);
+                    control.closest('td').addClass('has-error');
+                    control.focus();
+                    return false;
+                }
+
+                control.closest('td').removeClass('has-error');
+
+                $.ajax({
+                    cache: false,
+                    async: true,
+                    type: 'post',
+                    url: url,
+                    data: {
+                        PartidoID: PartidoID,
+                        CasillaID: CasillaID,
+                        Total: total
+                    },
+                    success: function (result) {
+                        switch (result) {
+                            case 'notpartidoid':
+                                alert('Se perdió el identificador del partido.');
+                                break;
+                            case 'notcasillaid':
+                                alert('Se perdió el identificador de la casilla.');
+                                break;
+                            case 'partidonotfound':
+                                alert('No se encontró información del partido.');
+                                break;
+                            case 'casillanotfound':
+                                alert('No se encontró información de la casilla.');
+                                break;
+                            case 'success':
+                                control.closest('td').addClass('has-success');
+                                var totalVotos = 0;
+                                $('.control-votos').each(function (index) {
+                                    if ($.isNumeric($(this).val())) {
+                                        totalVotos += Number($(this).val());
+                                    }
+                                });
+                                $('#totalVotos').html(totalVotos);
+                                break;
+                            default:
+                                alert('Ha ocurrido una excepción: ' + result);
+                                break;
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        alert('A ocurrido una excepción: ' + error);
+                    }
+                });
+
+            }
+            else {
+                alert('El valor no es un número.');
+                control.val(prevVal);
+                control.closest('td').addClass('has-error');
+                control.focus();
+            }
+
+        }); // Control-Votos.Change
+
+    });
+
+</script>

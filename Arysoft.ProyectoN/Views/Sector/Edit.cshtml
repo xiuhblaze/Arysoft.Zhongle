@@ -1,0 +1,214 @@
+﻿@model Arysoft.ProyectoN.Models.Sector
+
+@using Arysoft.ProyectoN.Models;
+
+@{
+    bool esNuevo = Model.Status == StatusTipo.Ninguno;
+
+    if (esNuevo)
+    {
+        ViewBag.Title = "Nuevo Sector";
+    }
+    else
+    {
+        ViewBag.Title = "Editar Sector";
+    }
+}
+
+@section styles {
+
+    <link href="~/Content/bootstrap-chosen.css" rel="stylesheet" />
+
+}
+
+<div id="detailsModal" class="modal fade" tabindex="-1" role="dialog" style="display: none;">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content" id="detalles-modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">Detalles</h4>
+            </div>
+            <div id="detalles-modal-body"></div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+<div class="container">
+    <h2>Sector <small>@(esNuevo ? "NUEVO" : "EDITAR")</small></h2>
+
+    @using (Html.BeginForm())
+    {
+        @Html.AntiForgeryToken()
+
+        <div class="form-horizontal">
+            <hr />
+            @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+            @Html.HiddenFor(model => model.SectorID)
+            @Html.HiddenFor(model => model.Status)
+            @Html.HiddenFor(model => model.UserNameActualizacion)
+            @Html.HiddenFor(model => model.FechaActualizacion)
+
+            <div class="form-group">
+                @Html.LabelFor(model => model.Nombre, htmlAttributes: new { @class = "control-label col-md-2" })
+                <div class="col-md-10">
+                    @Html.EditorFor(model => model.Nombre, new { htmlAttributes = new { @class = "form-control" } })
+                    @Html.ValidationMessageFor(model => model.Nombre, "", new { @class = "text-danger" })
+                </div>
+            </div>
+
+            <div class="form-group">
+                @Html.LabelFor(model => model.Descripcion, htmlAttributes: new { @class = "control-label col-md-2" })
+                <div class="col-md-10">
+                    @Html.TextAreaFor(model => model.Descripcion, 4, 0, new { @class = "form-control" })
+                    @Html.ValidationMessageFor(model => model.Descripcion, "", new { @class = "text-danger" })
+                </div>
+            </div>
+
+            <div class="form-group">
+                @Html.LabelFor(model => model.ResponsableID, htmlAttributes: new { @class = "control-label col-md-2" })
+                <div class="col-md-10">
+                    @Html.DropDownList("ResponsableID", null, htmlAttributes: new { @class = "chosen-select" })
+                    @Html.ValidationMessageFor(model => model.ResponsableID, "", new { @class = "text-danger" })
+                </div>
+            </div>
+
+            <div class="form-group">
+                @Html.LabelFor(model => model.VotosMeta, htmlAttributes: new { @class = "control-label col-md-2" })
+                <div class="col-md-10">
+                    @Html.EditorFor(model => model.VotosMeta, new { htmlAttributes = new { @class = "form-control" } })
+                    @Html.ValidationMessageFor(model => model.VotosMeta, "", new { @class = "text-danger" })
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="col-md-offset-2 col-md-4">
+                    <strong>@Html.DisplayNameFor(model => model.UserNameActualizacion)</strong>
+                    @Html.DisplayFor(model => model.UserNameActualizacion)
+                    <br />
+                    <strong>@Html.DisplayNameFor(model => model.FechaActualizacion)</strong>
+                    @Html.DisplayFor(model => model.FechaActualizacion)
+                </div>
+                <div class="col-md-6 text-right">
+                    @Html.Raw(
+                                       @Html.ActionLink("Cancelar", "Index", null, new { @class = "btn btn-default" }).ToHtmlString()
+                                       .Replace("Cancelar", "<span class='glyphicon glyphicon-remove' title='Cancelar cambios'></span> Cancelar")
+                                   )
+                    <button type="submit" class="btn btn-primary">
+                        <span class="glyphicon glyphicon-floppy-disk"></span>
+                        Guardar
+                    </button>
+                </div>
+            </div>
+        </div>
+    }
+
+    <ul class="nav nav-tabs">
+        <li class="active">
+            <a href="#secciones" data-toggle="tab">
+                <span class="glyphicon glyphicon-screenshot"></span>
+                Secciones
+                <span class="badge">@Html.DisplayFor(model => model.Secciones.Count)</span>
+            </a>
+        </li>
+        <li>
+            <a href="#brigada" data-toggle="tab">
+                <span class="glyphicon glyphicon-user"></span>
+                Brigada
+                <span class="badge">@Html.DisplayFor(model => model.Personas.Count)</span>
+            </a>
+        </li>
+    </ul>
+
+    <div class="tab-content">
+        <div class="tab-pane fade in active" name="secciones" id="secciones">
+            <h4>Secciones</h4>
+
+            <p>Para añadir una sección, agregela en la opción Secciones del menú principal.</p>
+
+            <div id="listaSecciones" name="listaSecciones">
+                @Html.Partial("_listaSecciones", Model)
+            </div>
+        </div>
+
+        <div class="tab-pane fade in" name="brigada" id="brigada">
+            <h4>Brigada</h4>
+
+            @*<div class="form-horizontal">
+                    <div class="form-group">
+                        <label for="PersonasAfiliadas" class="col-md-2 control-label">Afiliado</label>
+                        <div class="col-md-8">
+                            @Html.DropDownList("PersonasAfiliadas", null, htmlAttributes: new { @class = "chosen-select" })
+                        </div>
+                        <div class="col-md-2">
+                            <button type="button" id="agregarBrigadistaButton" name="agregarBrigadistaButton" class="btn btn-default"
+                                    title="Agregar brigadista">
+                                <span class="glyphicon glyphicon-plus"></span>
+                                Agregar
+                            </button>
+                        </div>
+                    </div>
+                </div>*@
+
+            <div id="listaBrigada" name="listaBrigada">
+                @Html.Partial("_listaBrigada", Model)
+            </div>
+        </div>
+    </div>
+
+</div>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+
+    <script src="~/Scripts/chosen.jquery.min.js"></script>
+
+    <script>
+
+        $(document).ready(function () {
+
+            $('.chosen-select').chosen();
+
+        }); // document.ready
+
+        var personaDetailsModalOriginalContent = $('#detalles-modal-content').html();
+
+    function getPersonaDetails(id) {
+        var url = '@Url.Action("Details", "Persona")/' + id;
+
+        $('#detailsModal').modal('show');
+
+            $.ajax({
+                cache: false,
+                async: true,
+                type: 'get',
+                url: url,
+                data: {},
+                beforeSend: function () {
+                    $('#detalles-modal-body').html('<p class="text-center" style="margin: 50px;"><img src="@Url.Content("~/Images/ajax-loader.gif")" /></p>');
+                },
+                success: function (vista) {
+                    switch (vista) {
+                        case "noid":
+                            alert('No se recibió un identificador de la persona');
+                            $('#detailsModal').modal('hide');
+                            $('#detalles-modal-content').html(personaDetailsModalOriginalContent);
+                            break;
+                        case "nofound":
+                            alert('No se encontró la persona solicitada');
+                            $('#detailsModal').modal('hide');
+                            $('#detalles-modal-content').html(personaDetailsModalOriginalContent);
+                            break;
+                        default:
+                            $('#detalles-modal-content').html(vista);
+                            break;
+                    }
+                },
+                error: function (xhr, status, error) {
+                    alert('A ocurrido una excepción: ' + status + '\n error: ' + error);
+                }
+            });
+    } // getPersonaDetails
+
+    </script>
+
+}

@@ -1,0 +1,85 @@
+﻿@model IEnumerable<Arysoft.ProyectoN.Models.ApplicationUser>
+
+@{
+    ViewBag.Title = "Usuarios";
+}
+<div class="container">
+    <h2>@ViewBag.Title</h2>
+
+    <ul class="nav nav-pills">
+        <li>@Html.ActionLink("Nuevo usuario", "Create")</li>
+    </ul>
+
+    @using (Html.BeginForm("Index", "UsersAdmin", FormMethod.Get))
+    {
+        <div class="row" style="margin-top: 10px; margin-bottom: 10px;">
+            <div class="col-md-12">
+                <div class="form-inline">
+                    <div class="form-group">
+                        <label for="buscar" class="sr-only">Buscar</label>
+                        @Html.TextBox("buscar", ViewBag.Filtro as string, htmlAttributes: new { @class = "form-control", @placeHolder = "Buscar..." })
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">
+                        <span class="glyphicon glyphicon-search"></span>
+                        Buscar
+                    </button>
+                    @Html.Raw(
+                        @Html.ActionLink("Limpiar", "Index", null, new { @class = "btn btn-default" }).ToHtmlString()
+                        .Replace("Limpiar", "<span class=\"glyphicon glyphicon-remove\" style=\"font-size: 14px;\" title=\"Limpiar\"></span>")
+                    )
+                </div>
+            </div>            
+        </div>
+    }
+
+    <table class="table table-hover">
+        <thead>
+            <tr>
+                <th>
+                    @Html.ActionLink("Usuario", "Index", new { orden = ViewBag.OrdenUserName, filtro = ViewBag.Filtro })                    
+                </th>
+                <th>
+                    @Html.ActionLink("Nombre", "Index", new { orden = ViewBag.OrdenNombre, filtro = ViewBag.Filtro })
+                </th>
+                <th>
+                    @Html.ActionLink("CURP", "Index", new { orden = ViewBag.OrdenCURP, filtro = ViewBag.Filtro })
+                </th>
+                
+                <th class="col-md-1"></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.UserName)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.NombreCompleto)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.CURP)
+                    </td>
+                    
+                    <td class="text-right">
+                        @Html.Raw(
+                                    @Html.ActionLink("Editar", "Edit", new { id = item.Id }).ToHtmlString()
+                                    .Replace("Editar", "<span class='glyphicon glyphicon-edit' style='font-size: 18px;' title='Editar'></span>")
+                                )
+                        @Html.Raw(
+        @Html.ActionLink("Detalles", "Details", new { id = item.Id }).ToHtmlString()
+        .Replace("Detalles", "<span class=\"glyphicon glyphicon-share\" style=\"font-size: 18px;\" title=\"Detalles\"></span>")
+    )
+                        @Html.Raw(
+            @Html.ActionLink("Eliminar", "Delete", new { id = item.Id }).ToHtmlString()
+            .Replace("Eliminar", "<span class=\"glyphicon glyphicon-trash\" style=\"font-size: 18px;\" title=\"Eliminar\"></span>")
+        )
+                       
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

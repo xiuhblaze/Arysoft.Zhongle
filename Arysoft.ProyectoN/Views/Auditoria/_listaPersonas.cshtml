@@ -1,0 +1,435 @@
+﻿@model Auditoria
+
+@using Arysoft.ProyectoN.Models;
+
+@{ 
+
+    if (!Model.SoloLectura)
+    {
+        Model.SoloLectura = Model.Status == AuditoriaStatusTipo.Cancelada || Model.Status == AuditoriaStatusTipo.Cerrada;
+    }    
+}
+
+@if (Model.PersonasAuditadas == null)
+{
+    <div class="text-muted">Sin personas para auditar</div>
+}
+else
+{
+    Model.PersonasAuditadas = Model.PersonasAuditadas.OrderBy(pa => pa.Persona.NombreCompleto).ToList();
+
+    <div class="table-responsive">
+        <table class="table table-hover" id="tablePersonas">
+            <thead>
+                <tr>
+                    <th style="display: none;">
+                        Auditoria
+                    </th>
+                    @if (!Model.SoloLectura)
+                    {
+                        <th class="noExl">
+                            <input type="checkbox" id="personasMarcarTodosEdit" name="personasMarcarTodosEdit" title="Marcar todos" />
+                        </th>
+                    }
+                    <th class="noExl">
+
+                    </th>
+                    <th>
+                        Sector
+                    </th>
+                    <th id="ordenSeccion">
+                        Sección
+                    </th>
+                    <th id="ordenNombre">
+                        Nombre completo
+                    </th>
+                    <th id="columnaPromotor">Promotor</th>
+                    <th id="ordenUbicacion">
+                        Ubicación
+                    </th>                    
+                    <th>
+                        Contacto
+                    </th>
+                    <th>
+                        Afinidad
+                    </th>
+                    <th>
+                        Auditado
+                    </th>
+                    <th>
+                        Votante seguro
+                    </th>
+                    <th>
+                        Resultado
+                    </th>
+                    @if (!Model.SoloLectura)
+                    {
+                        <th class="col-md-1 noExl"></th>
+                    }
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.PersonasAuditadas)
+                {
+                    string rowClass = string.Empty;
+                    string rowTitle = string.Empty;
+
+                    string userClassColor = string.Empty;
+                    string userTitle = string.Empty;
+
+                    if (item.Persona.Status == StatusTipo.Baja)
+                    {
+                        rowClass = "class='text-muted'";
+                        rowTitle = "title='La persona está dada de baja'";
+                    }
+
+                    switch (item.Persona.Afinidad)
+                    {
+                        case AfinidadTipo.Movilizador:
+                        case AfinidadTipo.Simpatizante:
+                            userClassColor = "text-warning";
+                            break;
+                        case AfinidadTipo.PorAfiliado:
+                            userClassColor = "text-info";
+                            break;
+                        case AfinidadTipo.PorSector:
+                            userClassColor = "text-primary";
+                            break;                        
+                        default:
+                            userClassColor = "text-muted";
+                            break;
+                    }
+                    userTitle = item.Persona.Afinidad.GetDisplayName();
+
+                    <tr @Html.Raw(rowClass) @Html.Raw(rowTitle)>
+                    
+                        <td style="display: none;">
+                            @(Model.Folio.ToString().PadLeft(3, '0') + " - " + Model.Nombre)
+                        </td>
+                    @if (!Model.SoloLectura)
+                    {
+                        <td class="noExl">
+                            <input type="checkbox" name="personaSeleccionadaEdit" value="@item.AuditoriaPersonaID" title="Seleccionar persona" />
+                        </td>
+                    }
+                    <td class="noExl">
+                        @if (item.Persona.Verificada == BoolTipo.Si)
+                        {
+                            <span class="glyphicon glyphicon-ok-sign glyphicon-table-action-size text-primary" title="Datos confiables"></span>
+                        }
+                        else
+                        {
+                            <span class="glyphicon glyphicon-question-sign glyphicon-table-action-size text-muted" title="Datos no verificados"></span>
+                        }
+                        <span class="glyphicon glyphicon-user @userClassColor" title="@userTitle"></span>
+
+                        @if (item.VotanteSeguro == BoolTipo.Si)
+                        {
+                            <span class="glyphicon glyphicon-erase glyphicon-table-action-size text-success" title="Votante seguro"></span>
+                        }
+                        else
+                        {
+                            <span class="glyphicon glyphicon-erase glyphicon-table-action-size text-danger" title="Posiblemente votará por otro partido, ver historial de auditorias."></span>
+                        }
+
+                        @if (item.Persona.TieneBarda == BoolTipo.Si && item.Persona.TieneLona == BoolTipo.Si)
+                        {
+                            <span class="glyphicon glyphicon-tags glyphicon-table-action-size text-primary" title="Cuenta con barda y lona"></span>
+                        }
+                        else if (item.Persona.TieneBarda == BoolTipo.Si)
+                        {
+                            <span class="glyphicon glyphicon-tag glyphicon-table-action-size text-primary" title="Cuenta con barda"></span>
+                        }
+                        else if (item.Persona.TieneLona == BoolTipo.Si)
+                        {
+                            <span class="glyphicon glyphicon-tag glyphicon-table-action-size text-primary" title="Cuenta con lona"></span>
+                        }
+                        else
+                        {
+                            <span class="glyphicon glyphicon-tag glyphicon-table-action-size text-muted" title="Sin barda ni lona"></span>
+                        }
+
+                        @if (item.Persona.Notas.Count == 0)
+                        {
+                            <span class="glyphicon glyphicon-comment glyphicon-table-action-size text-muted" title="Sin comentarios"></span>
+                        }
+                        else
+                        {
+                            string notas = string.Empty;
+                            foreach (Nota nota in item.Persona.Notas)
+                            {
+                                notas += nota.VistaAttrbTitle + "\n";
+                            }
+                            <span class="glyphicon glyphicon-comment glyphicon-table-action-size text-info" title="@notas"></span>
+                        }
+                    </td>
+                    <td class="text-right" style="cursor: pointer" onclick="getPersonaAuditoriaDetails('@item.AuditoriaPersonaID')">
+                        @Html.DisplayFor(modelItem => item.Persona.Seccion.Sector.Nombre)
+                    </td>
+                    <td class="text-right" style="cursor: pointer" onclick="getPersonaAuditoriaDetails('@item.AuditoriaPersonaID')">
+                        @Html.DisplayFor(modelItem => item.Persona.Seccion.Numero)
+                    </td>
+                    <td style="cursor: pointer" onclick="getPersonaAuditoriaDetails('@item.AuditoriaPersonaID')">
+                        @Html.DisplayFor(modelItem => item.Persona.NombreCompleto)
+                    </td>
+                    <td style="cursor: pointer" onclick="getPersonaAuditoriaDetails('@item.AuditoriaPersonaID')">
+                        @Html.DisplayFor(modelItem => item.Persona.Promotor.NombreCompleto)
+                    </td>
+                    <td style="cursor: pointer" onclick="getPersonaAuditoriaDetails('@item.AuditoriaPersonaID')" >
+                        @if (item.Persona.UbicacionVive != null)
+                        {
+                            <span class="glyphicon glyphicon-home glyphicon-table-info-size"></span>
+                            <span>
+                                @if (item.Persona.UbicacionVive.Calle != null)
+                                {
+                                    <span>@item.Persona.UbicacionVive.Calle.Nombre</span>
+                                }
+                                @item.Persona.UbicacionVive.NumExterior
+                                @if (!string.IsNullOrEmpty(item.Persona.UbicacionVive.Letra))
+                                {
+                                    <span>@item..PersonaUbicacionVive.Letra</span>
+                                }
+                                @if (!string.IsNullOrEmpty(item.Persona.UbicacionVive.NumInterior))
+                                {
+                                    <span>@item.Persona.UbicacionVive.NumInterior</span>
+                                }
+                                @if (item.Persona.UbicacionVive.Colonia != null)
+                                {
+                                    @item.Persona.UbicacionVive.Colonia.Nombre
+                                    <span>C.P.</span> @item.Persona.UbicacionVive.Colonia.CodigoPostal
+                                }
+                                @if (!string.IsNullOrEmpty(item.Persona.UbicacionVive.Descripcion))
+                                {
+                                    <br /><span class="text-muted">@item.Persona.UbicacionVive.Descripcion</span>
+                                }
+                            </span>
+                        }
+                        @if (item.Persona.VotaEnDomicilio == BoolTipo.No)
+                        {   
+                            <br />
+                            <span class="text-warning" title="Domicilio donde vota">
+                                <span class="glyphicon glyphicon-erase glyphicon-table-info-size"></span>
+                                @if (item.Persona.UbicacionVota != null)
+                                {
+                                    <span>
+                                        @if (item.Persona.UbicacionVota.Calle != null) { <span>@item.Persona.UbicacionVota.Calle.Nombre</span> }
+                                        @item.Persona.UbicacionVota.NumExterior
+                                        @if (!string.IsNullOrEmpty(item.Persona.UbicacionVota.Letra)) { <span>item.UbicacionVota.Letra</span> }
+                                        @if (!string.IsNullOrEmpty(item.Persona.UbicacionVota.NumInterior)) { <span>item.UbicacionVota.NumInterior</span> }
+                                        @if (item.Persona.UbicacionVota.Colonia != null)
+                                        {
+                                            @item.Persona.UbicacionVota.Colonia.Nombre
+                                            <span>C.P.</span> @item.Persona.UbicacionVota.Colonia.CodigoPostal
+                                        }
+                                        @if (!string.IsNullOrEmpty(item.Persona.UbicacionVota.Descripcion)) { <br /><span class="text-muted">@item.Persona.UbicacionVota.Descripcion</span> }
+                                    </span>
+                                }
+                            </span>
+                        }
+                    </td>
+                    <td style="cursor: pointer" onclick="getPersonaAuditoriaDetails('@item.AuditoriaPersonaID')">
+                        @if (!string.IsNullOrEmpty(item.Persona.Telefono))
+                        {
+                           <span class="glyphicon glyphicon-phone-alt glyphicon-table-info-size"></span>
+                           @Html.DisplayFor(modelItem => item.Persona.Telefono) <br />
+                        }
+                        @if (!string.IsNullOrEmpty(item.Persona.Celular))
+                        {
+                            <span class="glyphicon glyphicon-phone glyphicon-table-info-size"></span>
+                            @Html.DisplayFor(modelItem => item.Persona.Celular) <br />
+                        }
+                        @if (!string.IsNullOrEmpty(item.Persona.CorreoElectronico))
+                        {
+                            <div class="cortarEMail" title="@item.Persona.CorreoElectronico">
+                                <span class="glyphicon glyphicon-envelope glyphicon-table-info-size"></span>
+                                @Html.DisplayFor(modelItem => item.Persona.CorreoElectronico)
+                            </div>
+                        }
+                    </td>
+                    <td style="cursor: pointer" onclick="getPersonaAuditoriaDetails('@item.AuditoriaPersonaID')">
+                        @item.Persona.Afinidad.GetDisplayName()
+                    </td>
+                    <td style="cursor: pointer" onclick="getPersonaAuditoriaDetails('@item.AuditoriaPersonaID')">
+                        @Html.DisplayFor(modelItem => item.FechaAuditoria)<br />
+                        @Html.DisplayFor(modelItem => item.Observaciones)
+                    </td>
+                    <td style="cursor: pointer" onclick="getPersonaAuditoriaDetails('@item.AuditoriaPersonaID')">
+                        @if (item.VotanteSeguro == BoolTipo.Si)
+                        {
+                            <span class="label label-success">@Html.DisplayFor(modelItem => item.VotanteSeguro)</span>
+                        }
+                        else
+                        {
+                            <span class="label label-danger">@Html.DisplayFor(modelItem => item.VotanteSeguro)</span>
+                        }
+                    </td>
+                    <td style="cursor: pointer" onclick="getPersonaAuditoriaDetails('@item.AuditoriaPersonaID')">                        
+                        @switch (item.ResultadoTipo)
+                        {
+                            case AuditoriaResultadoTipo.Visitada:
+                                <span class="label label-success">@item.ResultadoTipo.GetDisplayName()</span>
+                                break;
+                            case AuditoriaResultadoTipo.NoDomicilio:
+                                <span class="label label-danger">@item.ResultadoTipo.GetDisplayName()</span>
+                                break;
+                            case AuditoriaResultadoTipo.NoEncontrado:
+                                <span class="label label-info">@item.ResultadoTipo.GetDisplayName()</span>
+                                break;
+                            case AuditoriaResultadoTipo.NoViveNadie:
+                                <span class="label label-warning">@item.ResultadoTipo.GetDisplayName()</span>
+                                break;
+                        }
+                    </td>
+                    @if (!Model.SoloLectura)
+                    {
+                    <td class="text-right noExl"> 
+                        @if (Model.Status == AuditoriaStatusTipo.Realizada)
+                        {
+                            <div class="text-info actualizarPersonaEdit" style="cursor: pointer;" data-id="@item.AuditoriaPersonaID">
+                                <span class="glyphicon glyphicon-edit glyphicon-table-action-size" title="Actualizar"></span>
+                            </div>
+                        }
+
+                        @if (Model.Status != AuditoriaStatusTipo.Cancelada && Model.Status != AuditoriaStatusTipo.Cerrada)
+                        {
+                            <div class="text-info quitarPersonaEdit" style="cursor: pointer;" data-id="@item.AuditoriaPersonaID" data-nombre="@item.Persona.NombreCompleto">
+                                <span class="glyphicon glyphicon-trash glyphicon-table-action-size" title="Quitar de la auditoria"></span>
+                            </div>
+                        }
+                    </td>
+                    }
+                </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
+    <script>
+
+        $(document).ready(function () {
+
+            // Buscar - https://stackoverflow.com/questions/12433304/live-search-through-table-rows
+
+            $('#buscarPersona').on('keyup', function () {
+                var value = this.value.toLowerCase().trim();
+
+                // removeHighlighting($('tablePersonas tr em'));
+
+                $("#tablePersonas tr").each(function (index) {
+                    if (!index) return;
+                    $(this).find('td').each(function () {
+                        var id = $(this).text().toLowerCase().trim();
+                        var not_found = (id.indexOf(value) == -1);
+                        $(this).closest('tr').toggle(!not_found);
+                        // if (!not_found) { addHighlighting($(this), value); }
+                        if ($(this).closest('tr').is(':hidden')) {
+                            $(this).closest('tr').addClass('noExl');
+                        }
+                        else {
+                            $(this).closest('tr').removeClass('noExl');
+                        }
+                        return not_found;
+                    });
+                });
+            });
+
+            // Ordenar
+
+            var tablaPersonas = $('#tablePersonas');
+
+            $('#ordenSeccion, #ordenNombre, #columnaPromotor, #ordenUbicacion')
+                .wrapInner('<span title="Ordenar por esta columna" class="text-primary" style="cursor: pointer;" />')
+                .each(function () {
+                    var th = $(this);
+                    var thIndex = th.index();
+                    var inverse = false;
+
+                    th.click(function () {
+
+                        tablaPersonas.find('td').filter(function () {
+                            return $(this).index() === thIndex;
+                        }).sortElements(function (a, b) {
+                            return $.text([a]) > $.text([b]) ?
+                                inverse ? -1 : 1
+                                : inverse ? 1 : -1;
+                        }, function () {
+                            return this.parentNode;
+                        });
+                        inverse = !inverse;
+                    });
+                });
+
+            // Checkbox
+
+            $('#personasMarcarTodosEdit').on('change', function () {
+
+                if ($(this).is(':checked')) {
+                    $('input[name=personaSeleccionadaEdit]').each(function () {
+                        if (!$(this).is(':hidden')) { // Si estan ocultos los renglones (tr) por la busqueda, omitirlos
+                            $(this).prop("checked", true);
+                        }
+                    });
+                }
+                else {
+                    $('input[name=personaSeleccionadaEdit]').each(function () {
+                        $(this).prop("checked", false);
+                    });
+                }
+            });
+
+            // Botones
+
+            $('.actualizarPersonaEdit').on('click', function () {
+                
+                getPersonaAuditoriaEdit($(this).data("id"));
+            });
+
+            $('.quitarPersonaEdit').on('click', function () {                
+                var url = '@Url.Action("EliminarPersonas", "Auditoria")';
+                var IDs = $(this).data("id");
+                var id = '@Model.AuditoriaID';
+
+                if (confirm($(this).data("nombre") + " va ser removido de la auditoria.\n\n¿Esta seguro?")) {
+
+                    $.ajax({
+                        cache: false,
+                        async: true,
+                        type: 'post',
+                        url: url,
+                        data: {
+                            id: id,
+                            personas: IDs
+                        },
+                        beforeSend: function () {
+
+                        },
+                        success: function (vista) {
+                            $('#listaPersonas').html(vista); // Listado en Edit                                            
+                        },
+                        error: function (xhr, status, error) {
+                            alert('A ocurrido una excepción: ' + status + '\n error: ' + error);
+                        }
+                    });
+                }
+            });
+            
+        });
+
+        //function removeHighlighting(highlightedElements) {
+
+        //    highlightedElements.each(function () {
+        //        var element = $(this);
+        //        element.replaceWith(element.html());
+        //    });
+        //} // removeHighlighting
+
+        //function addHighlighting(element, textToHighlight) {
+        //    var text = element.text();
+        //    var highlightedText = '<em>' + textToHighlight + '</em>';
+        //    var newText = text.replace(textToHighlight, highlightedText);
+
+        //    element.html(newText);
+        //} // addHighlighting
+
+    </script>

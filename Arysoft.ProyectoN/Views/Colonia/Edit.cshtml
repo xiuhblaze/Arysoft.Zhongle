@@ -1,0 +1,274 @@
+﻿@model Arysoft.ProyectoN.Models.Colonia
+
+@using Arysoft.ProyectoN.Models;
+
+@{
+    bool esNuevo = Model.Status == StatusTipo.Ninguno;
+    string titleSmall = "EDITAR";
+    string panelClass = "panel panel-default";
+    string panelTitle = Model.Status.ToString();
+
+    if (esNuevo)
+    {
+        ViewBag.Title = "Nueva Colonia";
+        titleSmall = "NUEVA";
+        panelClass = "panel panel-primary";
+        panelTitle = "Nuevo registro";
+    }
+    else { ViewBag.Title = "Editar Colonia"; }
+
+    switch (Model.Status)
+    {
+        case StatusTipo.Activo:
+            panelClass = "panel panel-success";
+            panelTitle = "Editar registro";
+            break;
+        case StatusTipo.Baja:
+            panelClass = "panel panel-warning";
+            panelTitle = "Registro dado de baja";
+            break;
+        case StatusTipo.Eliminado:
+            panelClass = "panel panel-danger";
+            panelTitle = "Registro eliminado";
+            break;
+    }
+}
+
+@section styles {
+
+    <link href="~/Content/bootstrap-chosen.css" rel="stylesheet" />
+
+}
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            <h2>Colonia <small>@titleSmall</small></h2>
+            <hr />
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            @using (Html.BeginForm())
+            {
+                @Html.AntiForgeryToken()
+                <div class="@panelClass">
+                    <div class="panel-heading">
+                        @Html.Raw(panelTitle)
+                    </div>
+                    <div class="panel-body">
+                        <div class="form-horizontal">
+                            @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                            @Html.HiddenFor(model => model.ColoniaID)
+                            @Html.HiddenFor(model => model.UserNameActualizacion)
+                            @Html.HiddenFor(model => model.FechaActualizacion)
+                            @Html.HiddenFor(model => model.Status)
+
+                            <div class="form-group">
+                                @Html.LabelFor(model => model.PoblacionID, "Población", htmlAttributes: new { @class = "control-label col-md-2" })
+                                <div class="col-md-10">
+                                    @Html.DropDownList("PoblacionID", null, htmlAttributes: new { @class = "form-control" })
+                                    @Html.ValidationMessageFor(model => model.PoblacionID, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                @Html.LabelFor(model => model.Nombre, htmlAttributes: new { @class = "control-label col-md-2" })
+                                <div class="col-md-10">
+                                    @Html.EditorFor(model => model.Nombre, new { htmlAttributes = new { @class = "form-control" } })
+                                    @Html.ValidationMessageFor(model => model.Nombre, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                @Html.LabelFor(model => model.SeccionID, "Sección", htmlAttributes: new { @class = "control-label col-md-2" })
+                                <div class="col-md-10">
+                                    @Html.DropDownList("SeccionID", null, htmlAttributes: new { @class = "form-control" })
+                                    @Html.ValidationMessageFor(model => model.SeccionID, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                @Html.LabelFor(model => model.CodigoPostal, htmlAttributes: new { @class = "control-label col-md-2" })
+                                <div class="col-md-10">
+                                    @Html.EditorFor(model => model.CodigoPostal, new { htmlAttributes = new { @class = "form-control" } })
+                                    @Html.ValidationMessageFor(model => model.CodigoPostal, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel-footer">
+                        <div class="form-horizontal">
+                            <div class="form-group">
+                                <div class="col-md-offset-2 col-md-4">
+                                    <strong>@Html.DisplayNameFor(model => model.UserNameActualizacion)</strong>
+                                    @Html.DisplayFor(model => model.UserNameActualizacion)
+                                    <br />
+                                    <strong>@Html.DisplayNameFor(model => model.FechaActualizacion)</strong>
+                                    @Html.DisplayFor(model => model.FechaActualizacion)
+                                </div>
+                                <div class="col-md-6 text-right">
+                                    @Html.Raw(
+                                        @Html.ActionLink("Cancelar", "Index", null, new { @class = "btn btn-default" }).ToHtmlString()
+                                        .Replace("Cancelar", "<span class='glyphicon glyphicon-remove' title='Cancelar cambios'></span> Cancelar")
+                                    )
+                                    <button type="submit" class="btn btn-primary">
+                                        <span class="glyphicon glyphicon-floppy-disk"></span>
+                                        Guardar
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>    
+    <ul class="nav nav-tabs">
+        <li class="active">
+            <a href="#calles" data-toggle="tab">
+                <span class="glyphicon glyphicon-road"></span>
+                Calles
+            </a>
+        </li>
+    </ul>
+    <div class="tab-content">
+        <div class="tab-pane fade in active" name="calles" id="calles">
+            <h4>Calles</h4>
+
+            <div class="form-horizontal">
+                <div class="form-group">
+                    <label for="Calles" class="col-md-2 control-label">Calle</label>
+                    <div class="col-md-8">
+                        @Html.DropDownList("Calles", null, htmlAttributes: new { @class = "chosen-select" })
+                    </div>
+                    <div class="col-md-2">
+                        <button type="button" id="agregarCalleButton" name="agregarCalleButton" class="btn btn-default"
+                                title="Agregar calle">
+                            <span class="glyphicon glyphicon-plus"></span>
+                            Agregar
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="listaCalles" name="listaCalles">
+                @Html.Partial("_listaCalles", Model)
+            </div>
+        </div>
+
+    </div>
+
+</div> <!-- container -->
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+
+    <script src="~/Scripts/chosen.jquery.min.js"></script>
+
+    <script>
+
+        $(document).ready(function () {
+
+            $('.chosen-select').chosen();
+
+            @*MostrarListaPoblaciones('@Model.Poblacion.MunicipioID.ToString()');
+
+            $('#Municipios').on('change', function () {
+                MostrarListaPoblaciones($(this).val());
+            });*@
+
+            $('#agregarCalleButton').on('click', function () {
+                var id = $('select[name=Calles]').val();
+
+                if (id == '@Guid.Empty.ToString()') {
+                    alert('Es necesario seleccionar una calle');
+                }
+                else {
+                    var url = '@Url.Action("AgregarCalle", "Colonia")';
+                    var coloniaID = '@Model.ColoniaID.ToString()';
+
+                    $.ajax({
+                        cache: false,
+                        async: true,
+                        type: 'post',
+                        url: url,
+                        data: {
+                            id: id,
+                            coloniaID: coloniaID
+                        },
+                        success: function (vista) {
+                            if (vista.message == null) {
+                                $('#listaCalles').html(vista);
+                                $('#Calles').val('@Guid.Empty.ToString()');
+                                $('#Calles').trigger('chosen:updated'); // https://stackoverflow.com/questions/8980131/changing-selection-in-a-select-with-the-chosen-plugin
+                            }
+                            else {
+                                alert(vista.message);
+                            }
+                        },
+                        error: function (xhr, status, error) {
+                            alert('A ocurrido una excepción: ' + error);
+                        }
+                    });
+                }
+            }); // agregarCalleButton.click
+
+        }); // document.ready
+
+        @*function MostrarListaPoblaciones(id) {
+            var url = '@Url.Action("PoblacionesActivas", "Poblacion")/' + id;
+
+            $.ajax({
+                cache: false,
+                async: true,
+                type: 'get',
+                url: url,
+                success: function (datos) {
+                    var reset = true;
+
+                    $('#PoblacionID').empty();
+                    datos.forEach(function (item) {                        
+                        if ('@Model.PoblacionID.ToString()' == item.Value) {
+                            $('#PoblacionID').append(new Option(item.Text, item.Value, true, true));
+                            reset = false;
+                        }
+                        else {
+                            $('#PoblacionID').append(new Option(item.Text, item.Value));
+                        }
+                    });
+                    if (reset) { $('#PoblacionID').val('00000000-0000-0000-0000-000000000000'); }
+                },
+                error: function (xhr, status, error) {
+                    alert('A ocurrido una excepción: ' + error);
+                    console.log(error);
+                }
+            });
+        } // MostrarListaPoblaciones*@
+
+        function EliminarCalle(id) {
+            if (confirm('¿Está seguro de quitar la calle de la colonia?')) {
+                var url = '@Url.Action("EliminarCalle", "Colonia")';
+                var coloniaID = '@Model.ColoniaID.ToString()';
+
+                $.ajax({
+                    cache: false,
+                    async: true,
+                    type: 'post',
+                    url: url,
+                    data: {
+                        id: id,
+                        coloniaID: coloniaID
+                    },
+                    success: function (vista) {
+                        $('#listaCalles').html(vista);
+                    },
+                    error: function (xhr, status, error) {
+                        alert('A ocurrido una excepción: ' + error);
+                    }
+                });
+
+            }
+        } // eliminarCalle
+    </script>
+}

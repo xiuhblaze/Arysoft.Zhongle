@@ -1,0 +1,270 @@
+﻿@model PagedList.IPagedList<Colonia> 
+@* IEnumerable<Arysoft.ProyectoN.Models.Colonia>*@
+
+@using Arysoft.ProyectoN.Models;
+@using PagedList.Mvc;
+
+@{
+    ViewBag.Title = "Colonias";
+}
+
+<div id="detailsModal" class="modal fade" tabindex="-1" role="dialog" style="display: none;">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content" id="detalles-modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">Detalles</h4>
+            </div>
+            <div id="detalles-modal-body"></div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+<div class="container">
+    <h2>Colonias</h2>
+
+    @using (Html.BeginForm("Index", "Colonia", FormMethod.Get))
+    {
+        <div class="row">
+            <div class="col-md-12">
+                <div class="form-inline">
+                    @if (User.IsInRole("Admin"))
+                    {
+                        @Html.Raw(
+                            Html.ActionLink("Nuevo", "Create", null, new { @class = "btn btn-link", @title = "Nueva colonia" }).ToHtmlString()
+                                .Replace("Nuevo", "<span class='glyphicon glyphicon-file glyphicon-toolbar-size'></span>")
+                        )
+                    }
+                    <div class="form-group">
+                        <label for="buscar" class="sr-only">Buscar</label>
+                        @Html.TextBox("buscar", ViewBag.Filtro as string, htmlAttributes: new { @class = "form-control", @placeholder = "buscar..." })
+                    </div>
+                    <div class="form-group">
+                        <button type="submit" id="buscarButton" class="btn btn-link" title="Buscar">
+                            <span class="glyphicon glyphicon-search glyphicon-toolbar-size"></span>
+                        </button>
+                        @Html.Raw(
+                                @Html.ActionLink("Limpiar", "Index", null, new { @class = "btn btn-link" }).ToHtmlString()
+                                .Replace("Limpiar", "<span class='glyphicon glyphicon-remove glyphicon-toolbar-size' title='Limpiar'></span>")
+                            )
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    <div class="well well-sm" style="margin-top: 10px;">
+        Total de resultados en la consulta: @ViewBag.Count
+    </div>
+
+    @Html.PagedListPager(Model, pagina => Url.Action("Index", new
+    {
+        pagina,
+        orden = ViewBag.Orden,
+        filtro = ViewBag.Filtro
+    }))
+
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th></th>
+                    <th>
+                        @Html.ActionLink("Sección", "Index", new
+                        {
+                            orden = ViewBag.OrdenSeccion,
+                            filtro = ViewBag.Filtro,
+                            pagina = Model.PageNumber
+                        })
+                    </th>
+                    <th>
+                        @Html.ActionLink("Nombre", "Index", new
+                        {
+                            orden = ViewBag.OrdenNombre,
+                            filtro = ViewBag.Filtro,
+                            pagina = Model.PageNumber
+                        })
+                    </th>
+                    <th>
+                        Población
+                    </th>
+                    <th>
+                        @Html.ActionLink("CP", "Index", new
+                        {
+                            orden = ViewBag.OrdenCP,
+                            filtro = ViewBag.Filtro,
+                            pagina = Model.PageNumber
+                        })
+                    </th>
+                    <th>
+                        <abbr title="Calles que cruzan">
+                            Calles
+                        </abbr>
+                    </th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    string classRow = "";
+                    string classStatusIcon = "";
+
+                    switch (item.Status)
+                    {
+                        case StatusTipo.Activo:
+                            classStatusIcon = "<span class='glyphicon glyphicon-ok glyphicon-table-action-size text-success'></span>";
+                            break;
+
+                        case StatusTipo.Baja:
+                            classRow = "text-muted";
+                            classStatusIcon = "<span class='glyphicon glyphicon-save glyphicon-table-action-size text-warning'></span>";
+                            break;
+
+                        case StatusTipo.Eliminado:
+                            classRow = "text-danger danger";
+                            classStatusIcon = "<span class='glyphicon glyphicon-remove glyphicon-table-action-size text-danger'></span>";
+                            break;
+                    }
+                    <tr class="@classRow">
+                        <td>
+                            @Html.Raw(classStatusIcon)
+                        </td>
+                        <td style="cursor: pointer" onclick="getDetails('@item.ColoniaID')">
+                            @Html.DisplayFor(modelItem => item.Seccion.Numero)
+                        </td>
+                        <td style="cursor: pointer" onclick="getDetails('@item.ColoniaID')">
+                            @Html.DisplayFor(modelItem => item.Nombre)
+                        </td>
+                        <td style="cursor: pointer" onclick="getDetails('@item.ColoniaID')">
+                            @Html.DisplayFor(modelItem => item.Poblacion.Nombre)
+                        </td>
+                        <td style="cursor: pointer" onclick="getDetails('@item.ColoniaID')">
+                            @Html.DisplayFor(modelItem => item.CodigoPostal)
+                        </td>
+                        <td class="text-right" style="cursor: pointer" onclick="getDetails('@item.ColoniaID')">
+                            @Html.DisplayFor(modelItem => item.Calles.Count)
+                        </td>
+                        <td class="text-right">
+                            @if ((User.IsInRole("Admin") || User.IsInRole("Editor"))
+                                && item.Status != StatusTipo.Eliminado)
+                            {
+                                @Html.Raw(
+                                    @Html.ActionLink("Editar", "Edit", new { id = item.ColoniaID }).ToHtmlString()
+                                        .Replace("Editar", "<span class='glyphicon glyphicon-edit glyphicon-table-action-size' title='Editar'></span>")
+                                )
+                            }
+                            <a href="#" onclick="getDetails('@item.ColoniaID'); return false;">
+                                <span class='glyphicon glyphicon-new-window glyphicon-table-action-size' title='Detalles'></span>
+                            </a>
+                            @if (User.IsInRole("Admin") && item.Status != StatusTipo.Eliminado)
+                            {
+                                <a href="#" onclick="getDelete('@item.ColoniaID'); return false;" class="text-danger">
+                                    <span class='glyphicon glyphicon-trash glyphicon-table-action-size' title='Eliminar'></span>
+                                </a>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    @Html.PagedListPager(Model, pagina => Url.Action("Index", new
+    {
+        pagina,
+        orden = ViewBag.Orden,
+        filtro = ViewBag.Filtro
+    }))
+</div> <!-- container -->
+
+@section scripts {
+
+    <script>
+        var modalDetailsOriginalContent = $('#detalles-modal-content').html();
+
+        function getDetails(id) {
+            var url = '@Url.Action("Details", "Colonia")/' + id;
+
+            $('#detailsModal').modal('show');
+            $.ajax({
+                cache: false,
+                async: true,
+                type: 'get',
+                url: url,
+                data: {},
+                beforeSend: function () {
+                    $('#detalles-modal-body').html('<p class="text-center" style="margin: 50px;"><img src="@Url.Content("~/Images/ajax-loader.gif")" /></p>');
+                },
+                success: function (vista) {
+                    switch (vista) {
+                        case "notid":
+                            alert('No se recibió un identificador de la colonia');
+                            $('#detailsModal').modal('hide');
+                            $('#detalles-modal-content').html(modalDetailsOriginalContent);
+                            break;
+                        case "notfound":
+                            alert('No se encontró la colonia solicitada');
+                            $('#detailsModal').modal('hide');
+                            $('#detalles-modal-content').html(modalDetailsOriginalContent);
+                            break;
+                        default:
+                            $('#detalles-modal-content').html(vista);
+                            break;
+                    }
+                },
+                error: function (xhr, status, error) {
+                    alert('A ocurrido una excepción: ' + status + '\n error: ' + error);
+                }
+            });
+        } // getDetails
+
+        function getDelete(id) {
+            var url = '@Url.Action("Delete", "Colonia")/' + id;
+
+            $('#detailsModal').modal('show');
+            $.ajax({
+                cache: false,
+                async: true,
+                type: 'get',
+                url: url,
+                data: {},
+                beforeSend: function () {
+                    $('#detalles-modal-body').html('<p class="text-center" style="margin: 50px;"><img src="@Url.Content("~/Images/ajax-loader.gif")" /></p>');
+                },
+                success: function(vista) {
+                    switch (vista) {
+                        case "notid":
+                            alert('No se recibió un identificador de la colonia');
+                            $('#detailsModal').modal('hide');
+                            $('#detalles-modal-content').html(modalDetailsOriginalContent);
+                            break;
+                        case "notfound":
+                            alert('No se encontró la colonia solicitada');
+                            $('#detailsModal').modal('hide');
+                            $('#detalles-modal-content').html(modalDetailsOriginalContent);
+                            break;
+                        default:
+                            $('#detalles-modal-content').html(vista);
+                            break;
+                    }
+                },
+                error: function (xhr, status, error) {
+                    alert('A ocurrido una excepción: ' + status + '\n error: ' + error);
+                }
+            });
+        } // getDelete
+
+        $(document).ready(function () {
+
+            // $('.chosen-select').chosen();
+
+            $('#detailsModal').on('hidden.bs.modal', function (e) {
+
+                $('#detalles-modal-content').html(modalDetailsOriginalContent);
+            })
+
+        }); // document.ready
+
+    </script>
+}

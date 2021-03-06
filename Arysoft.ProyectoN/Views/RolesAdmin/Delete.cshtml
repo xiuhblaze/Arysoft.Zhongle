@@ -1,0 +1,45 @@
+﻿@model Arysoft.ProyectoN.Models.ApplicationRole
+
+@{
+    ViewBag.Title = "Eliminar";
+}
+
+<div class="container">
+    <h2>Rol de usuario <small class="text-danger">ELIMINAR</small></h2>
+
+    <h3 class="text-warning">¿Esta seguro de eliminar este Rol? </h3>
+    <p>Eliminando el rol, va a remover todos los usuarios del mismo, esto no va a eliminar ningún usuario.</p>
+    <div>        
+        <hr />
+        <dl class="dl-horizontal">
+            <dt>
+                @Html.DisplayNameFor(model => model.Name)
+            </dt>
+            <dd>
+                @Html.DisplayFor(model => model.Name)
+            </dd>
+            <dt>
+                @Html.DisplayNameFor(model => model.Description)
+            </dt>
+            <dd>
+                @Html.DisplayFor(model => model.Description)
+            </dd>            
+        </dl>
+
+        @using (Html.BeginForm())
+        {
+            @Html.AntiForgeryToken()
+
+            <p class="text-right">
+                @Html.Raw(
+                    @Html.ActionLink("Cancelar", "Index", null, new { @class = "btn btn-default" }).ToHtmlString()
+                        .Replace("Cancelar", "<span class=\"glyphicon glyphicon-remove\" title=\"Cancelar cambios\"></span> Cancelar")
+                )
+                <button type="submit" class="btn btn-danger">
+                    <span class="glyphicon glyphicon-trash"></span>
+                    Eliminar
+                </button>
+            </p>
+        }
+    </div>
+</div>

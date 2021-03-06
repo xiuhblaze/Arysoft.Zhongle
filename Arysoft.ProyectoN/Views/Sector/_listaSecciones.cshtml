@@ -1,0 +1,86 @@
+﻿@model Arysoft.ProyectoN.Models.Sector
+
+<div class="table-responsive">
+    <table class="table table-hover">
+        <thead>
+            <tr>                
+                <th>
+                    Número
+                </th>
+                <th>
+                    Descripción
+                </th>
+                <th>
+                    Status
+                </th>
+                <th>
+                    Casillas
+                </th>
+                <th>
+                    Colonias
+                </th>
+                <th>Votos seguros/votantes</th>
+@if (!Model.SoloLectura)
+{
+                <th class="col-md-1"></th>
+}
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.Secciones)
+            {
+                int votosSeguros = 0;
+                int porcentajeVotosSeguros = 0;
+
+                votosSeguros = item.Personas.Where(p => p.VotanteSeguro == BoolTipo.Si).Count();
+
+                if (item.TotalVotantes > 0)
+                {
+                    porcentajeVotosSeguros = (votosSeguros * 100) / item.TotalVotantes;
+                }
+
+                <tr>                    
+                    <td class="text-right">
+                        <span class="label label-primary">
+                            @Html.DisplayFor(modelItem => item.Numero)
+                        </span>
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Descripcion)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Status)
+                    </td>
+                    <td class="text-right">
+                        @Html.DisplayFor(modelItem => item.Casillas.Count)
+                    </td>
+                    <td class="text-right">
+                        @Html.DisplayFor(modelItem => item.Colonias.Count)
+                    </td>
+                    <td class="text-right">
+                        @votosSeguros / @item.TotalVotantes
+                        <div class="progress" title="Votos seguros @porcentajeVotosSeguros%" style="margin-bottom: 0;">
+                            <div class="progress-bar progress-bar-info" style="width: @porcentajeVotosSeguros%"></div>
+                        </div>
+                    </td>
+                @if (!Model.SoloLectura)
+                {
+                    <td class="text-right">
+                        
+                            @Html.Raw(
+                                @Html.ActionLink("Editar", "Edit", "Seccion", new { id = item.SeccionID }, null).ToHtmlString()
+                                    .Replace("Editar", "<span class='glyphicon glyphicon-edit glyphicon-table-action-size' title='Editar'></span>")
+                            )
+                            @Html.Raw(
+                                @Html.ActionLink("Detalles", "Details", "Seccion", new { id = item.SeccionID }, null).ToHtmlString()
+                                    .Replace("Detalles", "<span class='glyphicon glyphicon-new-window glyphicon-table-action-size' title='Detalles'></span>")
+                            )
+                        
+                        
+                    </td>
+                }
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

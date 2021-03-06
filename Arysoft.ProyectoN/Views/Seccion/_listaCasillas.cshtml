@@ -1,0 +1,82 @@
+﻿@model Arysoft.ProyectoN.Models.Seccion
+
+<div class="table-responsive">
+    <table class="table table-hover">
+        <thead>
+            <tr>
+                <th></th>
+                <th>
+                    Tipo
+                </th>
+                <th>
+                    Ubicación
+                </th>                
+                <th>
+                    Votantes
+                </th>
+                <th>
+                    Votos seguros/votantes
+                </th>
+                <th>Votaron/Votantes</th>
+                @if (!Model.SoloLectura)
+                {
+                <th class="col-md-1"></th>
+                }
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.Casillas)
+            {
+                int porcentajeVotaron = item.NumeroVotantes > 0 ? (item.YaVotaron * 100) / item.NumeroVotantes : 0;
+                <tr>
+                    <td>
+                        @switch (item.Status)
+                        {
+                            case StatusTipo.Activo:
+                                <span class="glyphicon glyphicon-ok-circle glyphicon-table-action-size text-success" title="@item.Status.GetDisplayName()"></span>
+                                break;
+                            case StatusTipo.Baja:
+                                <span class="glyphicon glyphicon-remove-circle glyphicon-table-action-size text-warning" title="@item.Status.GetDisplayName()"></span>
+                                break;
+                            case StatusTipo.Eliminado:
+                                <span class="glyphicon glyphicon-ban-circle glyphicon-table-action-size text-danger" title="@item.Status.GetDisplayName()"></span>
+                                break;
+                        }
+                    </td>
+                    <td>
+                        <span class="label label-info label-default-size">
+                            @item.Tipo.GetDisplayName()
+                        </span>
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Ubicacion.Calle.Nombre)
+                    </td>                    
+                    <td>
+                        @Html.DisplayFor(modelItem => item.NumeroVotantes)
+                    </td>
+                    <td>
+                        @item.VotosSeguros / @item.NumeroVotantes
+                        <div class="progress" title="Votos seguros @item.PorcentajeVotos%" style="margin-bottom: 0;">
+                            <div class="progress-bar progress-bar-info" style="width: @item.PorcentajeVotos%"></div>
+                        </div>
+                    </td>
+                    <td>
+                        @item.YaVotaron / @item.NumeroVotantes
+                        <div class="progress" title="Ya votarón @porcentajeVotaron%" style="margin-bottom: 0;">
+                            <div class="progress-bar progress-bar-warning" style="width: @porcentajeVotaron%"></div>
+                        </div>
+                    </td>
+                    @if (!Model.SoloLectura)
+                    {
+                    <td class="text-right">                        
+                        @Html.Raw(
+                            @Html.ActionLink("Editar", "Edit", "Casilla", new { id = item.CasillaID }, null).ToHtmlString()
+                                .Replace("Editar", "<span class='glyphicon glyphicon-edit glyphicon-table-action-size' title='Editar'></span>")
+                        )                        
+                    </td>
+                    }
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

@@ -1,0 +1,295 @@
+﻿@model Arysoft.ProyectoN.Models.CasillaEditModel
+
+<div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+    <h4 class="modal-title">
+        Casilla @Model.Seccion.Numero <small class="text-primary">@Model.Tipo.GetDisplayName().ToUpper()</small>
+    </h4>
+</div>
+
+<div class="modal-body">
+
+    <div class="row">
+        <div class="col-md-8">
+
+            <dl class="dl-horizontal">
+                <dt>
+                    Responsable
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.PersonaResponsable.NombreCompleto)
+                </dd>
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.Seccion.Descripcion)
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.Seccion.Descripcion)
+                </dd>
+
+                <dt>
+                    Ubicación
+                </dt>
+
+                <dd>
+                    @if (Model.Ubicacion != null)
+                    {
+                        <span class="glyphicon glyphicon-home glyphicon-table-info-size"></span>
+                        <span>
+                            @if (Model.Ubicacion.Calle != null)
+                            {<span>@Model.Ubicacion.Calle.Nombre</span>}
+                            @Model.Ubicacion.NumExterior
+                            @if (!string.IsNullOrEmpty(Model.Ubicacion.Letra))
+                            {<span>@Model.Ubicacion.Letra</span>}
+                            @if (!string.IsNullOrEmpty(Model.Ubicacion.NumInterior))
+                            {<span>@Model.Ubicacion.NumInterior</span>}
+                            @if (Model.Ubicacion.Colonia != null)
+                            {
+                                @Model.Ubicacion.Colonia.Nombre
+                                <span>C.P.</span> @Model.Ubicacion.Colonia.CodigoPostal
+                            }
+                            @if (!string.IsNullOrEmpty(Model.Ubicacion.Descripcion))
+                            {<br /><span class="text-muted">@Model.Ubicacion.Descripcion</span>}
+                        </span>
+                    }
+                </dd>
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.PersonaDuenno)
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.PersonaDuenno)
+                </dd>
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.NumeroVotantes)
+                </dt>
+
+                <dd>
+                    <span class="label label-primary label-default-size">
+                        @Html.DisplayFor(model => model.NumeroVotantes)
+                    </span>
+                </dd>
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.Status)
+                </dt>
+
+                <dd>
+                    @switch (Model.Status)
+                    {
+                        case StatusTipo.Activo:
+                            <span class="label label-success label-default-size">@Model.Status.GetDisplayName()</span>
+                            break;
+                        case StatusTipo.Baja:
+                            <span class="label label-warning label-default-size">@Model.Status.GetDisplayName()</span>
+                            break;
+                        case StatusTipo.Eliminado:
+                            <span class="label label-danger label-default-size">@Model.Status.GetDisplayName()</span>
+                            break;
+                    }
+                </dd>
+            </dl>
+        </div>
+        <div class="col-md-4">
+            <div class="alert alert-success">
+                <span class="info-top">Votos seguros</span>
+                <div class="info-body">@Model.VotosSeguros</div>
+                <span>@Model.PorcentajeVotos%</span>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="alert alert-info">
+                        <span class="info-top">Ya votaron</span>
+                        <div class="info-body text-center">@Model.YaVotaron</div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="alert alert-warning">
+                        <span class="info-top">Votos restantes</span>
+                        <div class="info-body text-center">@Model.VotantesRestantes</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <ul class="nav nav-tabs">
+        <li class="active">
+            <a href="#votantes" data-toggle="tab">
+                <span class="glyphicon glyphicon-user"></span>
+                Votantes
+                <span class="badge">@Html.DisplayFor(model => model.Votantes.Count)</span>
+            </a>
+        </li>
+
+        <li>
+            <a href="#representantes" data-toggle="tab">
+                <span class="glyphicon glyphicon-user"></span>
+                Representantes
+                <span class="badge">@Html.DisplayFor(model => model.Representantes.Count)</span>
+            </a>
+        </li>
+
+        <li>
+            <a href="#notas" data-toggle="tab">
+                <span class="glyphicon glyphicon-comment"></span>
+                Notas
+                <span class="badge">@Html.DisplayFor(model => model.Notas.Count)</span>
+            </a>
+        </li>
+
+        <li>
+            <a href="#bingo" data-toggle="tab">
+                <span class="glyphicon glyphicon-check"></span>
+                Bingo
+            </a>
+        </li>
+    </ul>
+
+    <div class="tab-content">
+        <div class="tab-pane fade in active" name="votantes" id="votantes">
+            <h4>Votantes <small>Personas simpatizantes</small></h4>
+
+            <div class="form-inline">
+                <div class="row">
+                    <div class="col-md-6">
+                        
+                    </div>
+                    <div class="col-md-6 text-right">
+                        <div class="form-group">
+                            <label for="buscarVotante" style="margin-right: 10px;"><span class="glyphicon glyphicon-search"></span></label>
+                            <input type="text" id="buscarVotante" placeholder="Buscar..." class="form-control" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="listaVotantes" name="listaVotantes" style="margin-top: 10px; max-height: 450px; overflow-y: scroll;">
+                @Html.Partial("_listaVotantes", Model)
+            </div>
+        </div>
+
+        <div class="tab-pane fade in" name="representantes" id="representantes">
+            <h4>Representantes</h4>
+
+            <div id="listaRepresentantes" name="listaRepresentantes">
+                @Html.Partial("_listaRepresentantes", Model)
+            </div>
+        </div>
+
+        <div class="tab-pane fade in" name="notas" id="notas">
+            <h4>Notas</h4>
+
+            <div id="listaNotas" name="listaNotas" style="margin-top: 10px;">
+                @Html.Partial("_listaNotas", Model.Notas)
+            </div>
+        </div>
+
+        <div class="tab-pane fade in" name="bingo" id="bingo">
+            <h4>Bingo</h4>
+            @if (User.IsInRole("Excel"))
+            {
+            <div class="btn-group">
+                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" data-submenu="" aria-haspopup="true" aria-expanded="false">
+                    Acciones <span class="caret"></span>
+                </button>
+                <ul class="dropdown-menu">
+                    <li>
+                        <a href="javascript:void(0);" id="imprimirBingo">
+                            <span class="glyphicon glyphicon-print"></span>
+                            Imprimir Bingo
+                        </a>
+                    </li>
+                    <li>
+                        <a href="javascript:void(0);" id="exportarExcel">
+                            <span class="glyphicon glyphicon-export"></span>
+                            Exportar a Excel
+                        </a>
+                    </li>
+                </ul>
+            </div>
+            }
+            <div id="listaBingo" name="listaBingo" style="margin-top: 10px; max-height: 650px; overflow-y: scroll;">
+                @Html.Partial("_listaBingo", Model)
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+<div class="modal-footer">
+    <div class="row">
+        <div class="col-md-8 text-left text-muted">
+            <small>
+                <strong>Actualizado por</strong> @Model.UserNameActualizacion |
+                <strong>Última actualización</strong> @Model.FechaActualizacion.ToShortDateString()
+            </small>
+        </div>
+        <div class="col-md-4 text-right">
+            <button type="button" class="btn btn-default" data-dismiss="modal">
+                <span class="glyphicon glyphicon-remove"></span>
+                Cancelar
+            </button>
+
+            @if (User.IsInRole("Admin") || User.IsInRole("Editor"))
+            { 
+                switch (Model.Status)
+                {
+                    case StatusTipo.Activo:
+                        @Html.Raw(
+                            @Html.ActionLink("Editar", "Edit", new { id = Model.CasillaID }, new { @class = "btn btn-primary" }).ToHtmlString()
+                                .Replace("Editar", "<span class='glyphicon glyphicon-edit' title='Editar'></span> Editar")
+                        )
+                        break;
+                    case StatusTipo.Baja:
+                        @Html.Raw(
+                            @Html.ActionLink("[activar]", "Activar", new { id = Model.CasillaID }, new { @class = "btn btn-success" }).ToHtmlString()
+                                .Replace("[activar]", "<span class='glyphicon glyphicon-ok' title='Reactivar casilla'></span> Reactivar")
+                        )
+                        break;
+                }
+            }
+        </div>
+    </div>
+
+</div>
+
+<script>
+    
+    $(document).ready(function () {
+
+        $('#exportarExcel').on('click', function () {
+            var filename = 'Bingo';
+            var tempTable = $('#tableBingo').clone();
+
+            tempTable.table2excel({
+                name: filename,
+                filename: filename
+            });
+        });
+
+        $('#imprimirBingo').on('click', function () {
+            var contenido = document.getElementById('listaBingo').innerHTML;
+            //var contenidoOriginal = document.body.innerHTML;
+
+            var windowModalPrint = window.open('', '', 'width=800, height=900');
+            var windowDocument = windowModalPrint.document;
+
+            windowDocument.open();
+            windowDocument.write(contenido);
+            windowDocument.close();
+
+            windowModalPrint.focus();
+            windowModalPrint.print();
+            windowModalPrint.close();
+        });
+
+    });
+
+</script>

@@ -1,0 +1,513 @@
+﻿@model CasillaEditModel
+
+@using Arysoft.ProyectoN.Models;
+
+@{
+    var votantes = Model.Votantes.Where(v => v.Persona != null).ToList();
+
+    if (votantes != null)
+    {
+        votantes = votantes
+            .OrderBy(v => v.Persona.ApellidoPaterno)
+            .ThenBy(v => v.Persona.ApellidoMaterno).ToList();
+    }
+}
+
+@if (Model.Votantes == null)
+{
+    <div class="text-muted">Sin personas asociadas</div>
+}
+else
+{
+    <style>
+
+        .control-ine {
+            /* border: 1px hidden #fff !important;
+            -webkit-box-shadow: none !important;
+            box-shadow: none !important; */
+        }
+
+    </style>
+
+
+    <div class="table-responsive">
+        <table class="table table-hover" id="tableVotantes">
+            <thead>
+                <tr>
+                    <th>
+
+                    </th>
+                    <th>
+                        Sección
+                    </th>
+                    <th id="colINE">INE</th>
+                    <th id="colNombreCompleto">
+                        Nombre completo
+                    </th>
+
+                    <th>
+                        Brigada
+                    </th>
+                    <th id="colUbicacion">
+                        Ubicación
+                    </th>
+                    <th>
+                        (vota)
+                    </th>
+                    <th>
+                        Contacto
+                    </th>
+                    <th>
+                        Afinidad
+                    </th>
+                    <th style="min-width: 100px;">
+                        Voto
+                    </th>
+                    @if (!Model.SoloLectura)
+                    {
+                        <th></th>
+                    }
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in votantes)
+                {
+                    string rowClass = string.Empty;
+                    string rowTitle = string.Empty;
+
+                    string userClassColor = string.Empty;
+                    string userTitle = string.Empty;
+
+                    if (item.Persona.Status == StatusTipo.Baja)
+                    {
+                        rowClass = "class='text-muted'";
+                        rowTitle = "title='La persona está dada de baja'";
+                    }
+
+                    switch (item.Persona.Afinidad)
+                    {
+                        case AfinidadTipo.Movilizador:
+                        case AfinidadTipo.Simpatizante:
+                            userClassColor = "text-warning";
+                            break;
+                        case AfinidadTipo.PorAfiliado:
+                            userClassColor = "text-info";
+                            break;
+                        case AfinidadTipo.PorSector:
+                            userClassColor = "text-primary";
+                            break;
+                        default:
+                            userClassColor = "text-muted";
+                            break;
+                    }
+                    userTitle = item.Persona.Afinidad.GetDisplayName();
+
+                    <tr @Html.Raw(rowClass) @Html.Raw(rowTitle)>
+                        <td>
+                            @if (item.Persona.Verificada == BoolTipo.Si)
+                            {
+                                <span class="glyphicon glyphicon-ok-sign glyphicon-table-action-size text-primary" title="Datos confiables"></span>
+                            }
+                            else
+                            {
+                                <span class="glyphicon glyphicon-question-sign glyphicon-table-action-size text-muted" title="Datos no verificados"></span>
+                            }
+
+                            <span class="glyphicon glyphicon-user @userClassColor" title="@userTitle"></span>
+
+                            @if (item.Persona.VotanteSeguro == BoolTipo.Si)
+                            {
+                                <span class="glyphicon glyphicon-erase glyphicon-table-action-size text-success" title="Votante seguro"></span>
+                            }
+                            else
+                            {
+                                <span class="glyphicon glyphicon-erase glyphicon-table-action-size text-danger" title="Posiblemente votará por otro partido, ver historial de auditorias."></span>
+                            }
+
+                            @if (item.Persona.TieneBarda == BoolTipo.Si && item.Persona.TieneLona == BoolTipo.Si)
+                            {
+                                <span class="glyphicon glyphicon-tags glyphicon-table-action-size text-primary" title="Cuenta con barda y lona"></span>
+                            }
+                            else if (item.Persona.TieneBarda == BoolTipo.Si)
+                            {
+                                <span class="glyphicon glyphicon-tag glyphicon-table-action-size text-primary" title="Cuenta con barda"></span>
+                            }
+                            else if (item.Persona.TieneLona == BoolTipo.Si)
+                            {
+                                <span class="glyphicon glyphicon-tag glyphicon-table-action-size text-primary" title="Cuenta con lona"></span>
+                            }
+                            else
+                            {
+                                <span class="glyphicon glyphicon-tag glyphicon-table-action-size text-muted" title="Sin barda ni lona"></span>
+                            }
+
+                            @if (item.Persona.Notas.Count == 0)
+                            {
+                                <span class="glyphicon glyphicon-comment glyphicon-table-action-size text-muted" title="Sin comentarios"></span>
+                            }
+                            else
+                            {
+                                string notas = string.Empty;
+                                foreach (Nota nota in item.Persona.Notas)
+                                {
+                                    notas += nota.VistaAttrbTitle + "\n";
+                                }
+                                <span class="glyphicon glyphicon-comment glyphicon-table-action-size text-info" title="@notas"></span>
+                            }
+                        </td>
+                        <td class="text-right" style="cursor: pointer" onclick="getVotanteDetails('@item.Persona.PersonaID')">
+                            @Html.DisplayFor(modelItem => item.Persona.Seccion.Numero)
+                        </td>                        
+                        @if (Model.SoloLectura)
+                        {
+                            <td class="text-right" style="cursor: pointer" onclick="getVotanteDetails('@item.Persona.PersonaID')">
+                                @Html.DisplayFor(modelItem => item.NumeroINE)
+                            </td>
+                        }
+                        else
+                        {
+                            <td>
+                                <input type="text" id="@item.VotoID" value="@item.NumeroINE" class="form-control input-sm text-right control-ine" data-id="@item.Persona.PersonaID" />
+                            </td>
+                        }                        
+                        <td style="cursor: pointer" onclick="getVotanteDetails('@item.Persona.PersonaID')">                            
+                            @Html.DisplayFor(modelItem => item.Persona.NombreCompleto)
+                            @if (item.Persona.Afinidad == AfinidadTipo.PorAfiliado || item.Persona.Afinidad == AfinidadTipo.PorSector)
+                            {
+                                <br />
+                                <small class="text-muted" title="Promotor (invitado por)">
+                                    @Html.DisplayFor(modelItem => item.Persona.Promotor.NombreCompleto)
+                                </small>
+                            }
+                        </td>
+                        <td style="cursor: pointer" onclick="getVotanteDetails('@item.Persona.PersonaID')">
+                            @Html.DisplayFor(modelItem => item.Persona.Sector.Nombre)
+                        </td>
+                        <td style="cursor: pointer" onclick="getVotanteDetails('@item.Persona.PersonaID')" @Html.Raw(item.Persona.VotaEnDomicilio == BoolTipo.Si ? "colspan='2'" : "")>
+                            <span class="glyphicon glyphicon-home glyphicon-table-info-size"></span>
+                            @if (item.Persona.UbicacionVive != null)
+                            {
+                                <span>
+                                    @if (item.Persona.UbicacionVive.Calle != null)
+                                    {<span>@item.Persona.UbicacionVive.Calle.Nombre</span>}
+                                    @item.Persona.UbicacionVive.NumExterior
+                                    @if (!string.IsNullOrEmpty(item.Persona.UbicacionVive.Letra))
+                                    {<span>@item.Persona.UbicacionVive.Letra</span>}
+                                    @if (!string.IsNullOrEmpty(item.Persona.UbicacionVive.NumInterior))
+                                    {<span>@item.Persona.UbicacionVive.NumInterior</span>}
+                                    @if (item.Persona.UbicacionVive.Colonia != null)
+                                    {
+                                        @item.Persona.UbicacionVive.Colonia.Nombre
+                                        <span>C.P.</span> @item.Persona.UbicacionVive.Colonia.CodigoPostal
+                                    }
+                                    @if (!string.IsNullOrEmpty(item.Persona.UbicacionVive.Descripcion))
+                                    {<br /><span class="text-muted">@item.Persona.UbicacionVive.Descripcion</span>}
+                                </span>
+                            }
+                        </td>
+                        @if (item.Persona.VotaEnDomicilio == BoolTipo.No)
+                        {
+                            <td style="cursor: pointer" onclick="getVotanteDetails('@item.Persona.PersonaID')">
+                                <span class="text-warning" title="Domicilio donde vota">
+                                    <span class="glyphicon glyphicon-erase glyphicon-table-info-size"></span>
+                                    @if (item.Persona.UbicacionVota != null)
+                                    {
+                                        <span>
+                                            @if (item.Persona.UbicacionVota.Calle != null)
+                                            {<span>@item.Persona.UbicacionVota.Calle.Nombre</span>}
+                                            @item.Persona.UbicacionVota.NumExterior
+                                            @if (!string.IsNullOrEmpty(item.Persona.UbicacionVota.Letra))
+                                            {<span>@item.Persona.UbicacionVota.Letra</span>}
+                                            @if (!string.IsNullOrEmpty(item.Persona.UbicacionVota.NumInterior))
+                                            {<span>@item.Persona.UbicacionVota.NumInterior</span>}
+                                            @if (item.Persona.UbicacionVota.Colonia != null)
+                                            {
+                                                @item.Persona.UbicacionVota.Colonia.Nombre
+                                                <span>C.P.</span> @item.Persona.UbicacionVota.Colonia.CodigoPostal
+                                            }
+                                            @if (!string.IsNullOrEmpty(item.Persona.UbicacionVota.Descripcion))
+                                            {<br /><span class="text-muted">@item.Persona.UbicacionVota.Descripcion</span>}
+                                        </span>
+                                    }
+                                </span>
+                            </td>
+                        }
+
+                        <td style="cursor: pointer" onclick="getVotanteDetails('@item.Persona.PersonaID')">
+                            <span class="glyphicon glyphicon-phone-alt glyphicon-table-info-size"></span>
+                            @Html.DisplayFor(modelItem => item.Persona.Telefono) <br />
+                            <span class="glyphicon glyphicon-phone glyphicon-table-info-size"></span>
+                            @Html.DisplayFor(modelItem => item.Persona.Celular) <br />
+                            <div class="cortarEMail" title="@item.Persona.CorreoElectronico">
+                                <span class="glyphicon glyphicon-envelope glyphicon-table-info-size"></span>
+                                @Html.DisplayFor(modelItem => item.Persona.CorreoElectronico)
+                            </div>
+                        </td>
+                        <td style="cursor: pointer" onclick="getVotanteDetails('@item.Persona.PersonaID')">
+                            @item.Persona.Afinidad.GetDisplayName()
+                            @if (item.Persona.Afinidad == AfinidadTipo.Movilizador || item.Persona.Afinidad == AfinidadTipo.Simpatizante)
+                            {
+                                int porSector = item.Persona.PersonasAfines.Where(p => p.Afinidad == AfinidadTipo.PorSector).Count();
+                                int porAfiliado = item.Persona.PersonasAfines.Where(p => p.Afinidad == AfinidadTipo.PorAfiliado).Count();
+                                <br />
+                                <span class="badge" title="@AfinidadTipo.PorSector.GetDisplayName()">@porSector</span>
+                                <span class="badge" title="@AfinidadTipo.PorAfiliado.GetDisplayName()">@porAfiliado</span>
+                            }
+                        </td>
+                        <td>
+                            @if (Model.SoloLectura)
+                            {
+                                if (item.YaVoto == BoolTipo.Si)
+                                {
+                                    <span class="label label-success">Ya votó</span>
+                                }
+                                else
+                                {
+                                    <span class="label label-default">No ha votado</span>
+                                }
+                            }
+                            else
+                            {
+                                if (item.YaVoto == BoolTipo.Si)
+                                {
+                                    <input type="checkbox" value="SI" class="yaVotoCheckbox" checked data-id="@item.Persona.PersonaID" data-group-cls="btn-group-sm" />
+                                }
+                                else
+                                {
+                                    <input type="checkbox" value="NO" class="yaVotoCheckbox" data-id="@item.Persona.PersonaID" data-group-cls="btn-group-sm" />
+                                }
+                            }
+                        </td>
+                        @if (!Model.SoloLectura)
+                        {
+                            <td class="text-right">
+                                @if (item.Persona.Status == StatusTipo.Activo)
+                                {
+                                    @Html.Raw(
+                                        @Html.ActionLink("Editar", "Edit", "Persona", new { id = item.Persona.PersonaID }, null).ToHtmlString()
+                                            .Replace("Editar", "<span class='glyphicon glyphicon-edit glyphicon-table-action-size' title='Editar'></span>")
+                                    )
+                                }
+                                <a href="javascript:void(0);" onclick="removeVotante('@item.Persona.PersonaID')" title="Quitar de la casilla">
+                                    <span class="glyphicon glyphicon-trash glyphicon-table-action-size"></span>
+                                </a>
+                            </td>
+                        }
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
+<script>
+
+    $(document).ready(function () {
+
+        // Buscar - https://stackoverflow.com/questions/12433304/live-search-through-table-rows
+
+        $('#buscarVotante').on('keyup', function () {
+            var value = this.value.toLowerCase().trim();
+
+            $('#tableVotantes tr').each(function (index) {
+                if (!index) return;
+                $(this).find('td').each(function () {
+                    var id = $(this).text().toLowerCase().trim();
+                    var not_found = (id.indexOf(value) == -1);
+                    $(this).closest('tr').toggle(!not_found);
+                    //if ($(this).closest('tr').is(':hidden')) { // Para omitirlos en la exportación de excel
+                    //    $(this).closest('tr').addClass('noExl');
+                    //}
+                    //else {
+                    //    $(this).closest('tr').removeClass('noExl');
+                    //}
+                    return not_found;
+                });
+            });
+        });
+
+        // Ordenar
+
+        var tablaVotantes = $('#tableVotantes');
+
+        $('#colINE, #colNombreCompleto, #colUbicacion')
+            .wrapInner('<span title="Ordenar por esta columna" class="text-primary" style="cursor: pointer;" />')
+            .each(function () {
+                var th = $(this);
+                var thIndex = th.index();
+                var inverse = false;
+
+                th.click(function () {
+
+                    tablaVotantes.find('td').filter(function () {
+                        return $(this).index() === thIndex;
+                    }).sortElements(function (a, b) {
+                        return $.text([a]) > $.text([b]) ?
+                            inverse ? -1 : 1
+                            : inverse ? 1 : -1;
+                    }, function () {
+                        return this.parentNode;
+                    });
+                    inverse = !inverse;
+                });
+            });
+
+        // Editar INE
+
+        $('.control-ine').on('focusin', function () { // https://stackoverflow.com/questions/29118178/input-jquery-get-old-value-before-onchange-and-get-value-after-on-change
+            $(this).data('val', $(this).val());
+            $(this).closest('td').removeClass('has-error has-success');
+        }); // Control-INE.FocusIn
+
+        $('.control-ine').on('change', function () {
+            var control = $(this);
+            var personaID = control.data('id');
+            var numeroINE = control.val();
+            var prevVal = control.data('val');
+            var numeroVotantes = $('#NumeroVotantes').val();
+            var url = '@Url.Action("EditINE", "Casilla")';
+            var estaRepetido = false;
+
+            if (numeroVotantes.length == 0 || !$.isNumeric(numeroVotantes)) {
+                alert('Primero debe de llenarse el campo de Número de Votantes, para registrar los números INE.');
+                $('#NumeroVotantes').focus();
+                return false;
+            }
+            else {
+                numeroVotantes = Number(numeroVotantes);
+            }
+
+            if (numeroINE.length == 0) { numeroINE = 0; }
+
+            // Si es número, guardarlo en la persona
+            if ($.isNumeric(numeroINE)) {
+                
+                // Validar rango
+                if (numeroINE < 0 || numeroINE > numeroVotantes)
+                {
+                    alert('El valor está fuera del rango del número de votantes [0 - ' + numeroVotantes + ']');
+                    control.val(prevVal);
+                    control.closest('td').addClass('has-error');                    
+                    control.focus();
+                    return false;
+                }
+
+                if (numeroINE > 0)
+                {
+                    // Validar que el número no esté siendo utilizado por otra persona
+                    $('.control-ine').each(function (i) {
+                        var control_each = $(this);
+                        var data_id = $(this).data('id');
+
+                        if (control_each.val() == numeroINE && personaID != data_id) {
+                            estaRepetido = true;
+                            return false;
+                        }
+                    });
+
+                    if (estaRepetido) {
+                        alert('El valor ya está siendo utilizado por otra persona.');
+                        control.val(prevVal);
+                        control.closest('td').addClass('has-error');                        
+                        control.focus();
+                        return false;
+                    }
+
+                    control.closest('td').removeClass('has-error');
+                    
+                    // Registrando el número INE a la persona
+                    $.ajax({
+                        cache: false,
+                        async: true,
+                        type: 'post',
+                        url: url,
+                        data: {
+                            PersonaID: personaID,
+                            NumeroINE: numeroINE
+                        },
+                        success: function (result) {
+                            switch (result) {
+                                case 'notid':
+                                    alert('Se perdió el identificador del votante.');
+                                    break;
+                                case 'notfound':
+                                    alert('No se encontró información del votante.');
+                                    break;
+                                case 'numINEexist':
+                                    alert('El valor ya está siendo utilizado por otra persona.');
+                                    break;
+                                default: 
+                                    control.closest('td').addClass('has-success');
+
+                            }
+                        },
+                        error: function (xhr, status, error) {
+                            alert('A ocurrido una excepción: ' + error);
+                        }
+                    });
+
+                }
+                
+            }
+            else { 
+                alert('El valor no es un número');  
+                control.val(prevVal);
+                control.closest('td').addClass('has-error');                
+                control.focus();
+            }
+            
+        }); // Control-INE.OnChange
+
+        // YA VOTO
+
+        $('.yaVotoCheckbox').checkboxpicker({
+            html: true,
+            offLabel: '<span class="glyphicon glyphicon-unchecked"></span>',
+            onLabel: '<span class="glyphicon glyphicon-check"></span>'
+        });
+
+        $('.yaVotoCheckbox').on('change', function () {
+            var url = '@Url.Action("EditVoto","Casilla")';
+            var control = $(this);
+            var personaID = control.data('id');
+            var value = '';
+            var hora = '@VotoHoraTipo.OnceDoce'; // CAMBIAR HORA!!!
+
+            if (control.is(':checked')) {
+                value = '@BoolTipo.Si';
+            }
+            else {
+                value = '@BoolTipo.No';
+            }
+
+            $.ajax({
+                cache: false,
+                async: true,
+                type: 'post',
+                url: url,
+                data: {
+                    PersonaID: personaID,
+                    YaVoto: value,
+                    Hora: hora
+                },
+                success: function (result) {
+                    switch (result) {
+                        case 'notid':
+                            alert('Se perdió el identificador del votante.');
+                            control.checked = !control.is(':checked');
+                            break;
+                        case 'notfound':
+                            alert('No se encontró información del votante.');
+                            control.checked = !control.is(':checked');
+                            break;
+                    }
+                },
+                error: function (xhr, status, error) {
+                    alert('A ocurrido una excepción: ' + error);
+                }
+            });
+
+        }); // yaVotoCheckbox.OnChange
+    });
+
+</script>

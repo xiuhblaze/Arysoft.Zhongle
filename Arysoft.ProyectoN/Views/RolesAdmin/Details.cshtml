@@ -1,0 +1,64 @@
+﻿@model Arysoft.ProyectoN.Models.ApplicationRole 
+
+@{
+    //Microsoft.AspNet.Identity.EntityFramework.IdentityRole
+
+    ViewBag.Title = "Detalles";
+}
+
+<div class="container">
+    <h2>Detalles <small>ROL DE USUARIO</small></h2>
+
+    <div>
+        <hr />
+        <dl class="dl-horizontal">
+            <dt>
+                @Html.DisplayNameFor(model => model.Name)
+            </dt>
+            <dd>
+                @Html.DisplayFor(model => model.Name)
+            </dd>
+            
+            <dt>
+                @Html.DisplayNameFor(model => model.Description)
+            </dt>
+            <dd>
+                @Html.DisplayFor(model => model.Description)
+            </dd>
+        </dl>
+    </div>
+
+    <div class="panel panel-default" style="margin-top: 20px;">
+        <div class="panel-heading">Lista de usuarios en este rol</div>
+        <div class="panel-body">
+            @if (ViewBag.UserCount == 0)
+            {                
+                <p>No hay usuarios en este rol.</p>
+            }
+
+            <table class="table table-hover" style="margin-bottom: 0;">
+
+                @foreach (var item in ViewBag.Users)
+                {
+                    <tr>
+                        <td>
+                            @item.UserName
+                        </td>
+                    </tr>
+                }
+            </table>
+        </div>
+    </div>
+
+    <p class="text-right">
+        @Html.Raw(
+            @Html.ActionLink("Cancelar", "Index", null, new { @class = "btn btn-default" }).ToHtmlString()
+                .Replace("Cancelar", "<span class=\"glyphicon glyphicon-remove\" title=\"Cancelar cambios\"></span> Cancelar")
+        )
+        @Html.Raw(
+            @Html.ActionLink("Editar", "Edit", new { id = Model.Id }, new { @class = "btn btn-primary" }).ToHtmlString()
+                .Replace("Editar", "<span class=\"glyphicon glyphicon-edit\" title=\"Cancelar cambios\"></span> Editar")
+        )
+    </p>
+
+</div>

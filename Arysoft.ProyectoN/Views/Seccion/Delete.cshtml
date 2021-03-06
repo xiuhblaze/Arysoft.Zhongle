@@ -1,0 +1,119 @@
+﻿@model Arysoft.ProyectoN.Models.Seccion
+
+@{
+    bool sePuedeEliminar = true;
+
+    if (Model.Casillas != null && Model.Casillas.Count > 0) { sePuedeEliminar = false; }
+    if (Model.Colonias != null && Model.Colonias.Count > 0) { sePuedeEliminar = false; }
+
+    ViewBag.Title = "Eliminar sección";
+}
+
+<div class="container">
+    <h2>Sección <small>ELIMINAR</small></h2>
+
+    <h3>¿Esta seguro de eliminar esto?</h3>
+
+    @if (!sePuedeEliminar)
+    {
+        <div class="alert alert-warning">
+            <strong>No es posible eliminar la sección</strong>, pues tiene asociadas casillas y/o colonias.
+        </div>
+    }
+
+    <div>
+        
+        <hr />
+        <dl class="dl-horizontal">
+
+            <dt>
+                Sector
+            </dt>
+
+            <dd>
+                @Html.DisplayFor(model => model.Sector.Nombre)
+            </dd>
+
+            <dt>
+                @Html.DisplayNameFor(model => model.Numero)
+            </dt>
+
+            <dd>
+                @Html.DisplayFor(model => model.Numero)
+            </dd>
+
+            <dt>
+                @Html.DisplayNameFor(model => model.Descripcion)
+            </dt>
+
+            <dd>
+                @Html.DisplayFor(model => model.Descripcion)
+            </dd>
+
+            <dt>
+                @Html.DisplayNameFor(model => model.Status)
+            </dt>
+
+            <dd>
+                @Html.DisplayFor(model => model.Status)
+            </dd>
+
+            <dt>
+                Casillas
+            </dt>
+
+            <dd>
+                @Html.DisplayFor(model => model.Casillas.Count)
+            </dd>
+
+            <dt>
+                Colonas
+            </dt>
+
+            <dd>
+                @Html.DisplayFor(model => model.Colonias.Count)
+            </dd>    
+
+        </dl>
+
+        <div class="row">
+            <div class="col-md-6 text-muted">
+                <strong>@Html.DisplayNameFor(model => model.UserNameActualizacion)</strong>
+                @Html.DisplayFor(model => model.UserNameActualizacion)
+                <br />
+                <strong>@Html.DisplayNameFor(model => model.FechaActualizacion)</strong>
+                @Html.DisplayFor(model => model.FechaActualizacion)
+            </div>
+            <div class="col-md-6 text-right">
+                @using (Html.BeginForm())
+                {
+                    @Html.AntiForgeryToken()
+
+                    <div class="form-actions no-color">
+                        @Html.Raw(
+                        @Html.ActionLink("[Cancelar]", "Index", null, new { @class = "btn btn-default" }).ToHtmlString()
+                        .Replace("[Cancelar]", "<span class='glyphicon glyphicon-remove' title='Cancelar cambios'></span> Cancelar")
+                    )
+
+                        @if (!sePuedeEliminar)
+                        {
+                            <button type="submit" class="btn btn-danger" disabled title="No se puede eliminar la sección, pues tiene colonias y/o casillas asociadas.">
+                                <span class="glyphicon glyphicon-trash"></span>
+                                Eliminar
+                            </button>
+                        }
+                        else
+                        {
+                            <button type="submit" class="btn btn-danger">
+                                <span class="glyphicon glyphicon-trash"></span>
+                                Eliminar
+                            </button>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+
+        
+    </div>
+</div>

@@ -1,0 +1,483 @@
+﻿@model PagedList.IPagedList<Casilla>
+
+@using Arysoft.ProyectoN.Models;
+@using PagedList.Mvc;
+
+@{
+    ViewBag.Title = "Casillas";
+
+    var tipoList = Enum.GetValues(typeof(CasillaTipo))
+        .Cast<CasillaTipo>()
+        .Select(e => new SelectListItem
+        {
+            Value = e.ToString(),
+            Text = e == CasillaTipo.Ninguno ? "(tipo)" : e.GetDisplayName(),
+            Selected = ViewBag.Tipo == e.ToString()
+        });
+
+    var statusList = Enum.GetValues(typeof(StatusTipo))
+        .Cast<StatusTipo>().Where(e => e != StatusTipo.Eliminado)
+        .Select(e => new SelectListItem
+        {
+            Value = e.ToString(),
+            Text = e == StatusTipo.Ninguno ? "(status)" : e.GetDisplayName(),
+            Selected = ViewBag.Status == e.ToString()
+        });
+}
+
+@section styles {
+
+    <link href="~/Content/bootstrap-chosen.css" rel="stylesheet" />
+
+}
+
+<div id="detailsModal" class="modal fade" tabindex="-1" role="dialog" style="display: none;">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content" id="detalles-modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">Detalles</h4>
+            </div>
+            <div id="detalles-modal-body"></div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+<div id="defaultModal" class="modal fade" tabindex="-1" role="dialog" style="display: none;">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content" id="default-modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">Casilla</h4>
+            </div>
+            <div id="default-modal-body"></div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+<div class="container">
+    <h2>Casillas</h2>
+
+    @using (Html.BeginForm("Index", "Casilla", FormMethod.Get))
+    {
+        <div class="row">
+            <div class="col-md-12">
+                <div class="form-inline">
+                    @if (User.IsInRole("Admin") || User.IsInRole("Editor"))
+                    { 
+                    @Html.Raw(
+                        Html.ActionLink("[replace]", "Create", null, new { @class = "btn btn-link", @title = "Nueva casilla" }).ToHtmlString()
+                            .Replace("[replace]", "<span class='glyphicon glyphicon-file glyphicon-toolbar-size'></span>")
+                    )
+                    }
+                    <div class="form-group">
+                        <label for="buscar" class="sr-only">Buscar</label>
+                        @Html.TextBox("buscar", ViewBag.Filtro as string, htmlAttributes: new { @class = "form-control", @placeholder = "buscar..." })
+                    </div>
+
+                    <div class="form-group search-bar-control">
+                        <label for="idarea" class="sr-only">Sección</label>
+                        @Html.DropDownList("SeccionID", null, htmlAttributes: new { @class = "chosen-select", style = "width: 100px;" })
+                    </div>
+
+                    <div class="form-group search-bar-control">
+                        <label for="tipo" class="sr-only">Tipo</label>
+                        @Html.DropDownList("tipo", tipoList, htmlAttributes: new { @class = "form-control" })
+                    </div>
+
+                    <div class="form-group search-bar-control">
+                        <label for="status" class="sr-only">Status</label>
+                        @Html.DropDownList("status", statusList, htmlAttributes: new { @class = "form-control" })
+                    </div>
+
+                    <div class="form-group">
+                        <button type="submit" id="buscarButton" class="btn btn-link" title="Buscar">
+                            <span class="glyphicon glyphicon-search glyphicon-toolbar-size"></span>
+                        </button>
+                        @Html.Raw(
+                            @Html.ActionLink("Limpiar", "Index", null, new { @class = "btn btn-link" }).ToHtmlString()
+                            .Replace("Limpiar", "<span class='glyphicon glyphicon-remove glyphicon-toolbar-size' title='Limpiar'></span>")
+                        )
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    <div class="well well-sm" style="margin-top: 10px;">
+        Total de resultados en la consulta: @ViewBag.Count
+    </div>
+
+    @Html.PagedListPager(Model, pagina => Url.Action("Index", new
+    {
+        pagina,
+        orden = ViewBag.Orden,
+        filtro = ViewBag.Filtro,
+        SeccionID = ViewBag.SeccionIDSelected,
+        tipo = ViewBag.Tipo,
+        busquedaAvanzada = ViewBag.BusquedaAvanzada
+    }))
+
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th></th>
+                    <th>
+                        @Html.ActionLink("Sección", "Index", new
+                        {
+                            orden = ViewBag.OrdenSeccion,
+                            filtro = ViewBag.Filtro,
+                            SeccionID = ViewBag.SeccionIDSelected,
+                            tipo = ViewBag.Tipo,
+                            pagina = Model.PageNumber
+                        })
+                    </th>
+                    <th>
+                        @Html.ActionLink("Tipo", "Index", new
+                        {
+                            orden = ViewBag.OrdenTipo,
+                            filtro = ViewBag.Filtro,
+                            SeccionID = ViewBag.SeccionIDSelected,
+                            tipo = ViewBag.Tipo,
+                            pagina = Model.PageNumber
+                        })
+                    </th>
+                    <th>
+                        Ubicación
+                    </th>
+                    <th>
+                        @Html.ActionLink("Votos seguros", "Index", new
+                        {
+                            orden = ViewBag.OrdenVotoSeguro,
+                            filtro = ViewBag.Filtro,
+                            SeccionID = ViewBag.SeccionIDSelected,
+                            tipo = ViewBag.Tipo,
+                            pagina = Model.PageNumber
+                        })/@Html.ActionLink("votantes", "Index", new
+                            {
+                                orden = ViewBag.OrdenVotantes,
+                                filtro = ViewBag.Filtro,
+                                SeccionID = ViewBag.SeccionIDSelected,
+                                tipo = ViewBag.Tipo,
+                                pagina = Model.PageNumber
+                            })
+                    </th>
+                    <th>@Html.ActionLink("Ya Votaron", "Index", new
+                        {
+                            orden = ViewBag.OrdenYaVotaron,
+                            filtro = ViewBag.Filtro,
+                            SeccionID = ViewBag.SeccionIDSelected,
+                            tipo = ViewBag.Tipo,
+                            pagina = Model.PageNumber
+                        })/@Html.ActionLink("Votantes", "Index", new
+                            {
+                                orden = ViewBag.OrdenVotantes,
+                                filtro = ViewBag.Filtro,
+                                SeccionID = ViewBag.SeccionIDSelected,
+                                tipo = ViewBag.Tipo,
+                                pagina = Model.PageNumber
+                            })
+                    </th>
+                    <th>Resultados</th>
+                    @if (User.IsInRole("Admin") || User.IsInRole("Editor"))
+                    {
+                    <th class="col-md-1"></th>
+                    }
+                </tr>
+            </thead>
+
+            <tbody>
+
+                @foreach (var item in Model)
+                {
+                    string rowClass = string.Empty;
+                    int porcentajeVotaron = item.NumeroVotantes > 0 ? (item.YaVotaron * 100) / item.NumeroVotantes : 0;
+
+                    if (item.Status == StatusTipo.Baja)
+                    {
+                        rowClass = "text-muted";
+                    }
+
+                    <tr class="@rowClass">
+                        <td>
+                            @switch (item.Status)
+                            {
+                                case StatusTipo.Activo:
+                                    <span class="glyphicon glyphicon-ok-circle glyphicon-table-action-size text-success" title="@item.Status.GetDisplayName()"></span>
+                                    break;
+                                case StatusTipo.Baja:
+                                    <span class="glyphicon glyphicon-remove-circle glyphicon-table-action-size text-warning" title="@item.Status.GetDisplayName()"></span>
+                                    break;
+                                case StatusTipo.Eliminado:
+                                    <span class="glyphicon glyphicon-ban-circle glyphicon-table-action-size text-danger" title="@item.Status.GetDisplayName()"></span>
+                                    break;
+                            }
+
+                            @if (item.Notas.Count == 0)
+                            {
+                                <span class="glyphicon glyphicon-comment glyphicon-table-action-size text-muted" title="Sin comentarios"></span>
+                            }
+                            else
+                            {
+                                string notas = string.Empty;
+                                foreach (Nota nota in item.Notas)
+                                {
+                                    notas += nota.VistaAttrbTitle + "\n";
+                                }
+                                <span class="glyphicon glyphicon-comment glyphicon-table-action-size text-info" title="@notas"></span>
+                            }
+                        </td>
+                        <td class="text-right" style="cursor: pointer" onclick="getDetails('@item.CasillaID')">
+                            @Html.DisplayFor(modelItem => item.Seccion.Numero)
+                        </td>
+                        <td style="cursor: pointer" onclick="getDetails('@item.CasillaID')">
+                            @item.Tipo.GetDisplayName()
+                        </td>
+                        <td style="cursor: pointer" onclick="getDetails('@item.CasillaID')">
+                            @if (item.Ubicacion != null)
+                            {
+                                <span>
+                                    <span class="glyphicon glyphicon-home glyphicon-table-info-size"></span>
+                                    @if (item.Ubicacion.Calle != null)
+                                    {<span>@item.Ubicacion.Calle.Nombre</span>}
+                                    @item.Ubicacion.NumExterior
+                                    @if (!string.IsNullOrEmpty(item.Ubicacion.Letra))
+                                    {<span>@item.Ubicacion.Letra</span>}
+                                    @if (!string.IsNullOrEmpty(item.Ubicacion.NumInterior))
+                                    {<span>@item.Ubicacion.NumInterior</span>}
+                                    @if (item.Ubicacion.Colonia != null)
+                                    {
+                                        @item.Ubicacion.Colonia.Nombre
+                                        <span>C.P.</span> @item.Ubicacion.Colonia.CodigoPostal
+                                    }
+                                    @if (!string.IsNullOrEmpty(item.Ubicacion.Descripcion))
+                                    {<br /><span class="text-muted">@item.Ubicacion.Descripcion</span>}
+                                </span>
+                            }
+                            @if (!string.IsNullOrEmpty(item.PersonaDuenno))
+                            {
+                                <br />
+                                <span class="glyphicon glyphicon-user" title="Propietario del domicilio"></span>
+                                @item.PersonaDuenno
+                            }
+                        </td>
+                        @*<td style="cursor: pointer" onclick="getDetails('@item.CasillaID')">
+                            @if (item.PersonaResponsable != null)
+                            {
+                                <span class="glyphicon glyphicon-user" title="Responsable de casilla"></span>
+                            }
+                            @Html.DisplayFor(modelItem => item.PersonaResponsable.NombreCompleto)
+                        </td>
+                        <td style="cursor: pointer" onclick="getDetails('@item.CasillaID')">
+                            @if (item.Representantes != null)
+                            {
+                                foreach (Persona persona in item.Representantes)
+                                {
+                                    <span title="@(persona.RepresentanteTipo.GetDisplayName())">
+                                        <span class="glyphicon glyphicon-user glyphicon-table-info-size @(persona.RepresentanteTipo == RepresentanteTipo.Principal ? "text-primary" : "")"></span>
+                                        @persona.NombreCompleto
+                                    </span>
+                                    <br />
+                                }
+                            }
+                        </td>*@
+                        <td style="cursor: pointer" onclick="getDetails('@item.CasillaID')">
+                        @item.VotosSeguros / @item.NumeroVotantes
+                        <div class="progress" title="Votos seguros @item.PorcentajeVotos%" style="margin-bottom: 0;">
+                            <div class="progress-bar progress-bar-info" style="width: @item.PorcentajeVotos%"></div>
+                        </div>
+                    </td>
+                    <td style="cursor: pointer" onclick="getDetails('@item.CasillaID')">
+                        @item.YaVotaron / @item.NumeroVotantes
+                        <div class="progress" title="Ya votarón @porcentajeVotaron%" style="margin-bottom: 0;">
+                            <div class="progress-bar progress-bar-warning" style="width: @porcentajeVotaron%"></div>
+                        </div>
+                    </td>
+                    <td>
+                        @if (item.Resultados != null)
+                        {
+                            foreach (var resultado in item.Resultados)
+                            {
+                                string classColor = "label-default";
+                                string title = string.Format("{0}: {1}", resultado.Partido.Siglas, resultado.Partido.Candidato);
+
+                                switch (resultado.Partido.Siglas) {
+                                    case "MC":
+                                        classColor = "label-warning";
+                                        break;
+                                    case "PAN":
+                                        classColor = "label-primary";
+                                        break;
+                                    case "PRI":
+                                        classColor = "label-success";
+                                        break;
+                                    case "IND":
+                                        classColor = "label-info";
+                                        break;
+                                    case "Morena":
+                                        classColor = "label-danger";
+                                        break;
+                                }
+
+                                <span class="label @classColor" title="@title">@resultado.Total</span>
+                            }
+                        }
+                    </td>
+                        @if (User.IsInRole("Admin") || User.IsInRole("Editor"))
+                        { 
+                        <td class="text-right">
+                            @Html.Raw(
+                                @Html.ActionLink("Editar", "Edit", new { id = item.CasillaID }).ToHtmlString()
+                                    .Replace("Editar", "<span class='glyphicon glyphicon-edit glyphicon-table-action-size' title='Editar'></span>")
+                            )
+
+                            @Html.Raw(
+                                @Html.ActionLink("Eliminar", "Delete", new { id = item.CasillaID }).ToHtmlString()
+                                    .Replace("Eliminar", "<span class='glyphicon glyphicon-trash glyphicon-table-action-size' title='Baja/Eliminar'></span>")
+                            )
+                        </td>
+                        }
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@section scripts {
+
+    <script src="~/Scripts/jquery.table2excel.js"></script>
+    <script src="~/Scripts/chosen.jquery.min.js"></script>
+    <script src="~/Scripts/bootstrap-checkbox.js"></script>
+    <script src="~/Scripts/jquery.sortElements.js"></script>
+
+    <script>
+
+    var modalDetailsOriginalContent = $('#detalles-modal-content').html();
+
+    function getDetails(id) {
+        var url = '@Url.Action("Details", "Casilla")/' + id;
+
+        $('#detailsModal').modal('show');
+
+            $.ajax({
+                cache: false,
+                async: true,
+                type: 'get',
+                url: url,
+                data: {},
+                beforeSend: function () {
+                    $('#detalles-modal-body').html('<p class="text-center" style="margin: 50px;"><img src="@Url.Content("~/Images/ajax-loader.gif")" /></p>');
+                },
+                success: function (vista) {
+                    switch (vista) {
+                        case "notid":
+                            alert('No se recibió un identificador de la casilla');
+                            $('#detailsModal').modal('hide');
+                            $('#detalles-modal-content').html(modalDetailsOriginalContent);
+                            break;
+                        case "notfound":
+                            alert('No se encontró la casilla solicitada');
+                            $('#detailsModal').modal('hide');
+                            $('#detalles-modal-content').html(modalDetailsOriginalContent);
+                            break;
+                        default:
+                            $('#detalles-modal-content').html(vista);
+                            break;
+                    }
+                },
+                error: function (xhr, status, error) {
+                    alert('A ocurrido una excepción: ' + status + '\n error: ' + error);
+                }
+            });
+    } // getDetails
+
+    function getVotanteDetails(id) {
+        var url = '@Url.Action("Details", "Persona")/' + id;
+
+        $('#defaultModal').modal('show');
+
+        $.ajax({
+            cache: false,
+            async: true,
+            type: 'get',
+            url: url,
+            data: {},
+            beforeSend: function () {
+                $('#default-modal-body').html('<p class="text-center" style="margin: 50px;"><img src="@Url.Content("~/Images/ajax-loader.gif")" /></p>');
+            },
+            success: function (vista) {
+                switch (vista) {
+                    case "noid":
+                        alert('No se recibió un identificador de la persona');
+                        $('#defaultModal').modal('hide');
+                        $('#default-modal-content').html(modalDetailsOriginalContent);
+                        break;
+                    case "nofound":
+                        alert('No se encontró la persona solicitada');
+                        $('#defaultModal').modal('hide');
+                        $('#default-modal-content').html(modalDetailsOriginalContent);
+                        break;
+                    default:
+                        $('#default-modal-content').html(vista);
+                        break;
+                }
+            },
+            error: function (xhr, status, error) {
+                alert('A ocurrido una excepción: ' + error);
+            }
+        });
+    } // getVotanteDetails
+
+    function getRepresentanteDetails(id) {
+        var url = '@Url.Action("Details", "Persona")/' + id;
+
+        $('#defaultModal').modal('show');
+
+        $.ajax({
+            cache: false,
+            async: true,
+            type: 'get',
+            url: url,
+            data: {},
+            beforeSend: function () {
+                $('#default-modal-body').html('<p class="text-center" style="margin: 50px;"><img src="@Url.Content("~/Images/ajax-loader.gif")" /></p>');
+            },
+            success: function (vista) {
+                switch (vista) {
+                    case "noid":
+                        alert('No se recibió un identificador de la persona');
+                        $('#defaultModal').modal('hide');
+                        $('#default-modal-content').html(modalDetailsOriginalContent);
+                        break;
+                    case "nofound":
+                        alert('No se encontró la persona solicitada');
+                        $('#defaultModal').modal('hide');
+                        $('#default-modal-content').html(modalDetailsOriginalContent);
+                        break;
+                    default:
+                        $('#default-modal-content').html(vista);
+                        break;
+                }
+            },
+            error: function (xhr, status, error) {
+                alert('A ocurrido una excepción: ' + error);
+            }
+        });
+        } // getRepresentanteDetails
+
+    $(document).ready(function () {
+
+        $('.chosen-select').chosen();
+
+        $('#detailsModal').on('hidden.bs.modal', function (e) {
+
+            $('#detalles-modal-content').html(modalDetailsOriginalContent);
+        })
+
+    }); // document.ready
+
+    </script>
+
+}
