@@ -366,6 +366,9 @@ namespace Arysoft.ProyectoN.Controllers
             persona.TieneBarda = BoolTipo.Ninguno;
             persona.TieneLona = BoolTipo.Ninguno;
 
+            persona.EstadoCivil = EstadoCivilTipo.Ninguno;
+            persona.Whatsapp = BoolTipo.Ninguno;
+
             persona.FechaAlta = DateTime.Now;
             persona.Verificada = BoolTipo.Ninguno;
             persona.Status = StatusTipo.Ninguno;
@@ -497,7 +500,7 @@ namespace Arysoft.ProyectoN.Controllers
         [Authorize(Roles = "Admin, Editor")]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> Edit([Bind(Include = "PersonaID,SectorBrigadaID,SeccionID,PersonaPromotorID,CasillaID,Nombres,ApellidoPaterno,ApellidoMaterno,VotaEnDomicilio,Telefono,Celular,CorreoElectronico,Afinidad,VotanteSeguro,TieneBarda,TieneLona,RepresentanteTipo,RepresentanteAsistencia,RepresentanteCapacitacion,FechaAlta,Verificada,Status,UserNameActualizacion,FechaActualizacion,CalleID,ColoniaID,NumExterior,NumInterior,Descripcion,Latitud,Longitud,VotaCalleID,VotaColoniaID,VotaNumExterior,VotaNumInterior,VotaDescripcion,VotaLatitud,VotaLongitud")] PersonaEditViewModel persona, string notaCheckbox, string submitButton)
+        public async Task<ActionResult> Edit([Bind(Include = "PersonaID,SectorBrigadaID,SeccionID,PersonaPromotorID,CasillaID,Nombres,ApellidoPaterno,ApellidoMaterno,VotaEnDomicilio,Telefono,Celular,CorreoElectronico,Afinidad,VotanteSeguro,TieneBarda,TieneLona,RepresentanteTipo,RepresentanteAsistencia,RepresentanteCapacitacion,FechaAlta,Verificada,FechaNacimiento,Facebook,Twitter,Instagram,Whatsapp,ArchivoIdentificacion,Ocupacion,Status,UserNameActualizacion,FechaActualizacion,CalleID,ColoniaID,NumExterior,NumInterior,Descripcion,Latitud,Longitud,VotaCalleID,VotaColoniaID,VotaNumExterior,VotaNumInterior,VotaDescripcion,VotaLatitud,VotaLongitud")] PersonaEditViewModel persona, string notaCheckbox, string submitButton)
         {
             bool esNuevo = persona.Status == StatusTipo.Ninguno;
             Guid CalleID, ColoniaID, VotaCalleID, VotaColoniaID, ubicacionID, votaUbicacionID;

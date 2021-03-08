@@ -51,128 +51,178 @@
 
             <dl class="dl-horizontal">
 
-                    @if (Model.Afinidad == AfinidadTipo.PorSector || Model.Afinidad == AfinidadTipo.PorAfiliado)
-                    {
-                        <dt>
-                            Promotor
-                        </dt>
-                        <dd>
-                            @if (Model.Promotor != null)
-                            {
-                                <span class="text-primary" style="cursor: pointer" onclick="getPersonaDetails('@Model.PersonaPromotorID')">@Model.Promotor.NombreCompleto</span>
-                            }
-                        </dd>
-                    }
-                    else if (Model.Afinidad == AfinidadTipo.Movilizador || Model.Afinidad == AfinidadTipo.Simpatizante)
-                    {
-                        <dt>
-                            Sector
-                        </dt>
-                        <dd>
-                            @if (Model.Sector != null)
-                            {
-                                <span>@Model.Sector.Nombre @Html.Raw(Model.EsResponsableSector ? " - <span class='text-primary'>RESPONSABLE DEL SECTOR</span>" : "")</span>
-                            }
-                        </dd>                        
-                    }
-
+                @if (Model.Afinidad == AfinidadTipo.PorSector || Model.Afinidad == AfinidadTipo.PorAfiliado)
+                {
                     <dt>
-                        Contacto
+                        Promotor
                     </dt>
-
                     <dd>
-                        @if (!string.IsNullOrEmpty(Model.Telefono))
+                        @if (Model.Promotor != null)
                         {
-                            <span class="glyphicon glyphicon-phone-alt glyphicon-table-info-size"></span>
-                            @Html.DisplayFor(model => model.Telefono)
+                            <span class="text-primary" style="cursor: pointer" onclick="getPersonaDetails('@Model.PersonaPromotorID')">@Model.Promotor.NombreCompleto</span>
                         }
-                        @if (!string.IsNullOrEmpty(Model.Celular))
+                    </dd>
+                }
+                else if (Model.Afinidad == AfinidadTipo.Movilizador || Model.Afinidad == AfinidadTipo.Simpatizante)
+                {
+                    <dt>
+                        Sector
+                    </dt>
+                    <dd>
+                        @if (Model.Sector != null)
                         {
-                            <span class="glyphicon glyphicon-phone glyphicon-table-info-size"></span>
+                            <span>@Model.Sector.Nombre @Html.Raw(Model.EsResponsableSector ? " - <span class='text-primary'>RESPONSABLE DEL SECTOR</span>" : "")</span>
+                        }
+                    </dd>
+
+                }
+
+                <dt>
+                    Contacto
+                </dt>
+
+                <dd>
+                    @if (!string.IsNullOrEmpty(Model.Telefono))
+                    {
+                        <span class="glyphicon glyphicon-phone-alt glyphicon-table-info-size"></span>
+                        @Html.DisplayFor(model => model.Telefono)
+                    }
+                    @if (!string.IsNullOrEmpty(Model.Celular))
+                    {
+                        <span class="glyphicon glyphicon-phone glyphicon-table-info-size"></span>
+                        if (Model.Whatsapp == BoolTipo.Si)
+                        {
+                            <a href="https://wa.me/52">@Html.DisplayFor(model => model.Celular)</a>
+                        }
+                        else
+                        {
                             @Html.DisplayFor(model => model.Celular)
                         }
-                        @if (!string.IsNullOrEmpty(Model.CorreoElectronico))
-                        {
-                            <span class="glyphicon glyphicon-envelope glyphicon-table-info-size"></span>
-                            @Html.DisplayFor(model => model.CorreoElectronico)
-                        }
-                    </dd>
+                    }
+                    @if (!string.IsNullOrEmpty(Model.CorreoElectronico))
+                    {
+                        <span class="glyphicon glyphicon-envelope glyphicon-table-info-size"></span>
+                        @Html.DisplayFor(model => model.CorreoElectronico)
+                    }
+                </dd>
 
-                    <dt>Ubicación</dt>
-                    <dd>
-                        <span class="glyphicon glyphicon-home glyphicon-table-info-size"></span>
-                        <span>
-                            @if (Model.UbicacionVive.Calle != null)
-                            {<span>@Model.UbicacionVive.Calle.Nombre</span>}
-                            @Model.UbicacionVive.NumExterior
-                            @if (!string.IsNullOrEmpty(Model.UbicacionVive.Letra))
-                            {<span>@Model.UbicacionVive.Letra</span>}
-                            @if (!string.IsNullOrEmpty(Model.UbicacionVive.NumInterior))
-                            {<span>@Model.UbicacionVive.NumInterior</span>}
-                            @if (Model.UbicacionVive.Colonia != null)
+                <dt>Ubicación</dt>
+                <dd>
+                    <span class="glyphicon glyphicon-home glyphicon-table-info-size"></span>
+                    <span>
+                        @if (Model.UbicacionVive.Calle != null)
+                        {<span>@Model.UbicacionVive.Calle.Nombre</span>}
+                        @Model.UbicacionVive.NumExterior
+                        @if (!string.IsNullOrEmpty(Model.UbicacionVive.Letra))
+                        {<span>@Model.UbicacionVive.Letra</span>}
+                        @if (!string.IsNullOrEmpty(Model.UbicacionVive.NumInterior))
+                        {<span>@Model.UbicacionVive.NumInterior</span>}
+                        @if (Model.UbicacionVive.Colonia != null)
+                        {
+                            @Model.UbicacionVive.Colonia.Nombre
+                            <span>C.P.</span> @Model.UbicacionVive.Colonia.CodigoPostal
+                        }
+                        @if (!string.IsNullOrEmpty(Model.UbicacionVive.Descripcion))
+                        {<br /><span class="text-muted">@Model.UbicacionVive.Descripcion</span>}
+                    </span>
+                    @if (Model.VotaEnDomicilio == BoolTipo.No)
+                    {
+                        <br />
+                        <span class="text-warning" title="Domicilio donde vota">
+                            <span class="glyphicon glyphicon-erase glyphicon-table-info-size"></span>
+                            @if (Model.UbicacionVota != null)
                             {
-                                @Model.UbicacionVive.Colonia.Nombre
-                                <span>C.P.</span> @Model.UbicacionVive.Colonia.CodigoPostal
+                                <span>
+                                    @if (Model.UbicacionVota.Calle != null)
+                                    {<span>@Model.UbicacionVota.Calle.Nombre</span>}
+                                    @Model.UbicacionVota.NumExterior
+                                    @if (!string.IsNullOrEmpty(Model.UbicacionVota.Letra))
+                                    {<span>item.UbicacionVota.Letra</span>}
+                                    @if (!string.IsNullOrEmpty(Model.UbicacionVota.NumInterior))
+                                    {<span>item.UbicacionVota.NumInterior</span>}
+                                    @if (Model.UbicacionVota.Colonia != null)
+                                    {
+                                        @Model.UbicacionVota.Colonia.Nombre
+                                        <span>C.P.</span> @Model.UbicacionVota.Colonia.CodigoPostal
+                                    }
+                                    @if (!string.IsNullOrEmpty(Model.UbicacionVota.Descripcion))
+                                    {<br /><span class="text-muted">@Model.UbicacionVota.Descripcion</span>}
+                                </span>
                             }
-                            @if (!string.IsNullOrEmpty(Model.UbicacionVive.Descripcion))
-                            {<br /><span class="text-muted">@Model.UbicacionVive.Descripcion</span>}
                         </span>
-                        @if (Model.VotaEnDomicilio == BoolTipo.No)
-                        {
-                            <br />
-                            <span class="text-warning" title="Domicilio donde vota">
-                                <span class="glyphicon glyphicon-erase glyphicon-table-info-size"></span>
-                                @if (Model.UbicacionVota != null)
-                                {
-                                    <span>
-                                        @if (Model.UbicacionVota.Calle != null)
-                                        {<span>@Model.UbicacionVota.Calle.Nombre</span>}
-                                        @Model.UbicacionVota.NumExterior
-                                        @if (!string.IsNullOrEmpty(Model.UbicacionVota.Letra))
-                                        {<span>item.UbicacionVota.Letra</span>}
-                                        @if (!string.IsNullOrEmpty(Model.UbicacionVota.NumInterior))
-                                        {<span>item.UbicacionVota.NumInterior</span>}
-                                        @if (Model.UbicacionVota.Colonia != null)
-                                        {
-                                            @Model.UbicacionVota.Colonia.Nombre
-                                            <span>C.P.</span> @Model.UbicacionVota.Colonia.CodigoPostal
-                                        }
-                                        @if (!string.IsNullOrEmpty(Model.UbicacionVota.Descripcion))
-                                        {<br /><span class="text-muted">@Model.UbicacionVota.Descripcion</span>}
-                                    </span>
-                                }
+                    }
+                </dd>
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.FechaNacimiento)
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.FechaNacimiento)
+                </dd>
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.EstadoCivil)
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.EstadoCivil)
+                </dd>
+
+                <dt>
+                    Redes sociales
+                </dt>
+
+                <dd>
+                    <a href="#" class="btn btn-link" title="Facebook" target="_blank">
+                        <i class="fa fa-facebook-official fa-lg"></i>
+                    </a>
+                    <a href="#" class="btn btn-link" title="Twitter" target="_blank">
+                        <i class="fa fa-twitter fa-lg"></i>
+                    </a>
+                    <a href="#" class="btn btn-link" title="Instagram" target="_blank">
+                        <i class="fa fa-instagram fa-lg"></i>
+                    </a>
+                </dd>
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.Ocupacion)
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.Ocupacion)
+                </dd>
+
+                <hr />
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.Status)
+                </dt>
+
+                <dd>
+                    @switch (Model.Status)
+                    {
+                        case StatusTipo.Activo:
+                            <span class="label label-primary">
+                                @Html.DisplayFor(model => model.Status)
                             </span>
-                        }
-                    </dd>
-
-                    <dt>
-                        @Html.DisplayNameFor(model => model.Status)
-                    </dt>
-
-                    <dd>
-                        @switch (Model.Status)
-                        {
-                            case StatusTipo.Activo:
-                                <span class="label label-primary">
-                                    @Html.DisplayFor(model => model.Status)
-                                </span>
-                                break;
-                            case StatusTipo.Baja:
-                                <span class="label label-warning">
-                                    @Html.DisplayFor(model => model.Status)
-                                </span>
-                                break;
-                            case StatusTipo.Eliminado:
-                                <span class="label label-danger">
-                                    @Html.DisplayFor(model => model.Status)
-                                </span>
                             break;
-                        }                        
-                    </dd>
+                        case StatusTipo.Baja:
+                            <span class="label label-warning">
+                                @Html.DisplayFor(model => model.Status)
+                            </span>
+                            break;
+                        case StatusTipo.Eliminado:
+                            <span class="label label-danger">
+                                @Html.DisplayFor(model => model.Status)
+                            </span>
+                            break;
+                    }
+                </dd>
                 <dt>Registro</dt>
                 <dd>@Html.DisplayFor(model => model.FechaAlta)</dd>
 
-                </dl>
+            </dl>
 
         </div>
         <div class="col-md-4">
@@ -191,30 +241,39 @@
                 </div>
             }
 
-        <div class="row">
-            <div class="col-md-6">
-                @if (Model.TieneBarda == BoolTipo.Si)
-{
+            <div class="row">
+                <div class="col-md-6">
+                    @if (Model.TieneBarda == BoolTipo.Si)
+                    {
+                        <div class="alert alert-info text-center">
+                            <span class="glyphicon glyphicon-ok"></span>
+                            TIENE BARDA
+                        </div>
+                    }
+                </div>
+                <div class="col-md-6">
+                    @if (Model.TieneLona == BoolTipo.Si)
+                    {
                     <div class="alert alert-info text-center">
                         <span class="glyphicon glyphicon-ok"></span>
-                        TIENE BARDA
+                        TIENE LONA
                     </div>
-                }
-            </div>
-            <div class="col-md-6">
-                @if (Model.TieneLona == BoolTipo.Si)
-{
-                <div class="alert alert-info text-center">
-                    <span class="glyphicon glyphicon-ok"></span>
-                    TIENE LONA
+                    }
                 </div>
-                }
             </div>
-        </div>
+
+            @if (!string.IsNullOrEmpty(Model.ArchivoIdentificacion))
+            {
+                <div class="row">
+                    <div class="col-md-12">
+                        <a href="#" target="_blank">
+                            <img src="#" class="img-thumbnail img-responsive" />
+                        </a>
+                    </div>
+                </div>
+            }
         </div>
     </div>
-
-    
 
     <ul class="nav nav-tabs">
         @if (Model.Afinidad == AfinidadTipo.Movilizador || Model.Afinidad == AfinidadTipo.Simpatizante)
@@ -238,13 +297,13 @@
             </a>
         </li>
 
-        <li>
+        @*<li>
             <a href="#auditorias" data-toggle="tab">
                 <span class="glyphicon glyphicon-eye-open"></span>
                 Auditorias
                 <span class="badge">@Html.DisplayFor(model => model.AuditoriasRealizadas.Count)</span>
             </a>
-        </li>
+        </li>*@
 
     </ul>
 
@@ -268,13 +327,13 @@
             </div>
         </div>
 
-        <div class="tab-pane fade in" name="auditorias" id="auditorias">
+        @*<div class="tab-pane fade in" name="auditorias" id="auditorias">
             <h4>Auditorias</h4>
 
             <div id="listaAuditorias" name="listaAuditorias" style="max-height: 400px; overflow-y: scroll;">
                 @Html.Partial("_listaAuditorias", Model)
             </div>
-        </div>
+        </div>*@
 
     </div>
 </div>

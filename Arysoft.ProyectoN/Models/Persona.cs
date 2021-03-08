@@ -110,15 +110,46 @@ namespace Arysoft.ProyectoN.Models
 
         // General 
 
-        [Display(Name = "Alta")]
-        [DataType(DataType.DateTime)]
-        [DisplayFormat(DataFormatString = "{0:d}")]
-        public DateTime FechaAlta { get; set; }
-
         /// <summary>
         /// Obtiene o establece si los datos de la persona ya fueron verificados
         /// </summary>
         public BoolTipo Verificada { get; set; }
+
+        // Nuevos campos
+
+        [Display(Name = "Fecha de nacimiento")]
+        [DataType(DataType.DateTime)]
+        [DisplayFormat(DataFormatString = "{0:d}")]
+        public DateTime? FechaNacimiento { get; set; }
+
+        [Display(Name = "Estado civil")]
+        public EstadoCivilTipo EstadoCivil { get; set; }
+
+        [StringLength(500)]
+        public string Facebook { get; set; }
+
+        [StringLength(100)]
+        public string Twitter { get; set; }
+
+        [StringLength(100)]
+        public string Instagram { get; set; }
+
+        public BoolTipo Whatsapp { get; set; }
+
+        [Display(Name = "Identificación")]
+        [StringLength(255)]
+        public string ArchivoIdentificacion { get; set; }
+
+        [Display(Name = "Ocupación")]
+        [StringLength(100)]
+        public string Ocupacion { get; set; }
+
+        // End Nuevos campos
+
+        [Display(Name = "Alta")]
+        [DataType(DataType.DateTime)]
+        [DisplayFormat(DataFormatString = "{0:d}")]
+        public DateTime FechaAlta { get; set; }
 
         [Display(Name = "Status")]
         public StatusTipo Status { get; set; }

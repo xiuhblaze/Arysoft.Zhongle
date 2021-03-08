@@ -39,9 +39,20 @@ public static class Comun
         persona.TieneLona= personaViewModel.TieneLona;
         persona.RepresentanteAsistencia = personaViewModel.RepresentanteAsistencia;
         persona.RepresentanteTipo = personaViewModel.RepresentanteTipo;
-        persona.RepresentanteCapacitacion = personaViewModel.RepresentanteCapacitacion;
-        persona.FechaAlta = personaViewModel.FechaAlta;
+        persona.RepresentanteCapacitacion = personaViewModel.RepresentanteCapacitacion;        
         persona.Verificada = personaViewModel.Verificada;
+
+        // Campos agregados para 2021
+        persona.FechaNacimiento = personaViewModel.FechaNacimiento;
+        persona.EstadoCivil = personaViewModel.EstadoCivil;
+        persona.Facebook = personaViewModel.Facebook;
+        persona.Twitter = personaViewModel.Twitter;
+        persona.Instagram = personaViewModel.Instagram;
+        persona.Whatsapp = personaViewModel.Whatsapp;
+        persona.ArchivoIdentificacion = personaViewModel.ArchivoIdentificacion;
+        persona.Ocupacion = personaViewModel.Ocupacion;
+
+        persona.FechaAlta = personaViewModel.FechaAlta;
         persona.Status= personaViewModel.Status;
         persona.FechaActualizacion = personaViewModel.FechaActualizacion;
         persona.UserNameActualizacion = personaViewModel.UserNameActualizacion;
@@ -88,8 +99,19 @@ public static class Comun
         p.RepresentanteTipo = persona.RepresentanteTipo;
         p.RepresentanteAsistencia = persona.RepresentanteAsistencia;
         p.RepresentanteCapacitacion = persona.RepresentanteCapacitacion;
-        p.FechaAlta = persona.FechaAlta;
         p.Verificada = persona.Verificada;
+
+        // Campos agregados para 2021
+        p.FechaNacimiento = persona.FechaNacimiento;
+        p.EstadoCivil = persona.EstadoCivil;
+        p.Facebook = persona.Facebook;
+        p.Twitter = persona.Twitter;
+        p.Instagram = persona.Instagram;
+        p.Whatsapp = persona.Whatsapp;
+        p.ArchivoIdentificacion = persona.ArchivoIdentificacion;
+        p.Ocupacion = persona.Ocupacion;
+
+        p.FechaAlta = persona.FechaAlta;
         p.Status = persona.Status;
         p.FechaActualizacion = persona.FechaActualizacion;
         p.UserNameActualizacion = persona.UserNameActualizacion;

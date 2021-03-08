@@ -175,3 +175,19 @@ public enum PersonasFiltroEspecificoTipo
     [Display(Name = "Sin número INE")]
     SinNumeroINE
 }
+
+/// <summary>
+/// Indica el estado civil que puede ser asignado a una persona en México
+/// </summary>
+public enum EstadoCivilTipo
+{
+    [Display(Name = "(seleccionar estado civil)")]
+    Ninguno,
+    Soltero,
+    Casado,
+    Divorciado,
+    [Display(Name = "Separación en proceso judicial")]
+    Complicado,
+    Viudo,
+    Concubinato
+} // EstadoCivilTipo
