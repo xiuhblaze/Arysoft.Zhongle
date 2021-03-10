@@ -86,302 +86,348 @@
     {
         @Html.AntiForgeryToken()
 
-    <div class="form-horizontal">
-        <hr />
-        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
-        @Html.HiddenFor(model => model.PersonaID)        
-        @Html.HiddenFor(model => model.CasillaID)
-        @Html.HiddenFor(model => model.VotaEnDomicilio)
-        @Html.HiddenFor(model => model.VotanteSeguro)
-        @Html.HiddenFor(model => model.TieneBarda)
-        @Html.HiddenFor(model => model.TieneLona)
-        @Html.HiddenFor(model => model.RepresentanteTipo)
-        @Html.HiddenFor(model => model.RepresentanteAsistencia)
-        @Html.HiddenFor(model => model.RepresentanteCapacitacion)
-        @Html.HiddenFor(model => model.FechaAlta)
-        @Html.HiddenFor(model => model.Verificada)
-        @Html.HiddenFor(model => model.Status)
-        @Html.HiddenFor(model => model.UserNameActualizacion)
-        @Html.HiddenFor(model => model.FechaActualizacion)
-        <fieldset>
-            <legend>Datos personales</legend>
-            <div class="form-group">
-                @Html.LabelFor(model => model.Nombres, htmlAttributes: new { @class = "control-label col-md-2 text-primary" })
-                <div class="col-md-2">
-                    @Html.EditorFor(model => model.Nombres, new { htmlAttributes = new { @class = "form-control toUpperCase" } })
-                    @Html.ValidationMessageFor(model => model.Nombres, "", new { @class = "text-danger" })
-                </div>
-                @Html.LabelFor(model => model.ApellidoPaterno, htmlAttributes: new { @class = "control-label col-md-2" })
-                <div class="col-md-2">
-                    @Html.EditorFor(model => model.ApellidoPaterno, new { htmlAttributes = new { @class = "form-control toUpperCase" } })
-                    @Html.ValidationMessageFor(model => model.ApellidoPaterno, "", new { @class = "text-danger" })
-                </div>
+        <div class="form-horizontal">
+            <hr />
+            @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+            @Html.HiddenFor(model => model.PersonaID)
+            @Html.HiddenFor(model => model.CasillaID)
+            @Html.HiddenFor(model => model.VotaEnDomicilio)
+            @Html.HiddenFor(model => model.VotanteSeguro)
+            @Html.HiddenFor(model => model.TieneBarda)
+            @Html.HiddenFor(model => model.TieneLona)
+            @Html.HiddenFor(model => model.RepresentanteTipo)
+            @Html.HiddenFor(model => model.RepresentanteAsistencia)
+            @Html.HiddenFor(model => model.RepresentanteCapacitacion)
+            @Html.HiddenFor(model => model.FechaAlta)
+            @Html.HiddenFor(model => model.Verificada)
+            @Html.HiddenFor(model => model.Status)
+            @Html.HiddenFor(model => model.UserNameActualizacion)
+            @Html.HiddenFor(model => model.FechaActualizacion)
+            <fieldset>
+                <legend>Datos personales</legend>
+                <div class="form-group">
+                    @Html.LabelFor(model => model.Nombres, htmlAttributes: new { @class = "control-label col-md-2 text-primary" })
+                    <div class="col-md-2">
+                        @Html.EditorFor(model => model.Nombres, new { htmlAttributes = new { @class = "form-control toUpperCase" } })
+                        @Html.ValidationMessageFor(model => model.Nombres, "", new { @class = "text-danger" })
+                    </div>
+                    @Html.LabelFor(model => model.ApellidoPaterno, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-2">
+                        @Html.EditorFor(model => model.ApellidoPaterno, new { htmlAttributes = new { @class = "form-control toUpperCase" } })
+                        @Html.ValidationMessageFor(model => model.ApellidoPaterno, "", new { @class = "text-danger" })
+                    </div>
+                    @Html.LabelFor(model => model.ApellidoMaterno, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-2">
+                        @Html.EditorFor(model => model.ApellidoMaterno, new { htmlAttributes = new { @class = "form-control toUpperCase" } })
+                        @Html.ValidationMessageFor(model => model.ApellidoMaterno, "", new { @class = "text-danger" })
+                    </div>
 
-                @Html.LabelFor(model => model.ApellidoMaterno, htmlAttributes: new { @class = "control-label col-md-2" })
-                <div class="col-md-2">
-                    @Html.EditorFor(model => model.ApellidoMaterno, new { htmlAttributes = new { @class = "form-control toUpperCase" } })
-                    @Html.ValidationMessageFor(model => model.ApellidoMaterno, "", new { @class = "text-danger" })
-                </div>
-
-                <div class="col-md-offset-2 col-md-10" id="resultadosPersonas" style="display: none;">
-                    <span id="nombreResult"></span>
-                </div>
-            </div>
-
-            <div class="form-group">
-                @Html.LabelFor(model => model.SeccionID, "Sección donde vota", htmlAttributes: new { @class = "control-label col-md-2 text-primary" })
-                <div class="col-md-10">
-                    @Html.DropDownList("SeccionID", null, htmlAttributes: new { @class = "chosen-select" })
-                    @Html.ValidationMessageFor(model => model.SeccionID, "", new { @class = "text-danger" })
-                </div>
-            </div>
-
-            <div class="form-group">
-                @Html.LabelFor(model => model.Telefono, htmlAttributes: new { @class = "control-label col-md-2" })
-                <div class="col-md-2">
-                    @Html.EditorFor(model => model.Telefono, new { htmlAttributes = new { @class = "form-control", @placeholder = "1234567890|123-456-7890|123 456 7890|000.000.0000" } })
-                    @Html.ValidationMessageFor(model => model.Telefono, "", new { @class = "text-danger" })
+                    <div class="col-md-offset-2 col-md-10" id="resultadosPersonas" style="display: none;">
+                        <span id="nombreResult"></span>
+                    </div>
                 </div>
 
-                @Html.LabelFor(model => model.Celular, htmlAttributes: new { @class = "control-label col-md-2" })
-                <div class="col-md-2">
-                    @Html.EditorFor(model => model.Celular, new { htmlAttributes = new { @class = "form-control" } })
-                    @Html.ValidationMessageFor(model => model.Celular, "", new { @class = "text-danger" })
+                <div class="form-group">
+                    @Html.LabelFor(model => model.FechaNacimiento, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-2">
+                        @Html.EditorFor(model => model.FechaNacimiento, new { htmlAttributes = new { @class = "form-control datepicker", @placeholder = "dd/mm/aaaa" } })
+                        @Html.ValidationMessageFor(model => model.FechaNacimiento, "", new { @class = "text-danger" })
+                    </div>
+                    @Html.LabelFor(model => model.EstadoCivil, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-2">
+                        @Html.EnumDropDownListFor(model => model.EstadoCivil, htmlAttributes: new { @class = "form-control" })
+                        @Html.ValidationMessageFor(model => model.EstadoCivil, "", new { @class = "text-danger" })
+                    </div>
+                    @Html.LabelFor(model => model.Ocupacion, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-2">
+                        @Html.EditorFor(model => model.Ocupacion, new { htmlAttributes = new { @class = "form-control" } })
+                        @Html.ValidationMessageFor(model => model.Ocupacion, "", new { @class = "text-danger" })
+                    </div>
                 </div>
 
-                @Html.LabelFor(model => model.CorreoElectronico, htmlAttributes: new { @class = "control-label col-md-2" })
-                <div class="col-md-2">
-                    @Html.EditorFor(model => model.CorreoElectronico, new { htmlAttributes = new { @class = "form-control" } })
-                    @Html.ValidationMessageFor(model => model.CorreoElectronico, "", new { @class = "text-danger" })
-                </div>
-            </div>
-        </fieldset>
-
-        <fieldset>
-            <legend>Domicilio</legend>
-
-            <div class="form-group">
-                @Html.LabelFor(model => model.CalleID, "Calle", htmlAttributes: new { @class = "control-label col-md-2" })
-                <div class="col-md-4">
-                    @Html.DropDownList("CalleID", null, htmlAttributes: new { @class = "chosen-select" })
-                    @Html.ValidationMessageFor(model => model.CalleID, "", new { @class = "text-danger" })
+                <div class="form-group">
+                    @Html.LabelFor(model => model.SeccionID, "Sección donde vota", htmlAttributes: new { @class = "control-label col-md-2 text-primary" })
+                    <div class="col-md-10">
+                        @Html.DropDownList("SeccionID", null, htmlAttributes: new { @class = "chosen-select" })
+                        @Html.ValidationMessageFor(model => model.SeccionID, "", new { @class = "text-danger" })
+                    </div>
                 </div>
 
-                @Html.LabelFor(model => model.NumExterior, htmlAttributes: new { @class = "control-label col-md-1" })
-                <div class="col-md-1">
-                    @Html.EditorFor(model => model.NumExterior, new { htmlAttributes = new { @class = "form-control text-right" } })
-                </div>
+                <div class="form-group">
+                    @Html.LabelFor(model => model.Telefono, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-2">
+                        @Html.EditorFor(model => model.Telefono, new { htmlAttributes = new { @class = "form-control", @placeholder = "1234567890|123-456-7890|123 456 7890|000.000.0000" } })
+                        @Html.ValidationMessageFor(model => model.Telefono, "", new { @class = "text-danger" })
+                    </div>
 
-                @Html.LabelFor(model => model.Letra, htmlAttributes: new { @class = "control-label col-md-1" })
-                <div class="col-md-1">
-                    @Html.EditorFor(model => model.Letra, new { htmlAttributes = new { @class = "form-control" } })
-                </div>
-
-                @Html.LabelFor(model => model.NumInterior, htmlAttributes: new { @class = "control-label col-md-1" })
-                <div class="col-md-1">
-                    @Html.EditorFor(model => model.NumInterior, new { htmlAttributes = new { @class = "form-control text-right" } })
-                </div>
-            </div>
-
-            <div class="form-group">
-                @Html.LabelFor(model => model.ColoniaID, "Colonia", htmlAttributes: new { @class = "control-label col-md-2" })
-                <div class="col-md-10">
-                    @Html.DropDownList("ColoniaID", null, htmlAttributes: new { @class = "chosen-select" })
-                    @Html.ValidationMessageFor(model => model.ColoniaID, "", new { @class = "text-danger" })
-                </div>
-            </div>
-
-            <div class="form-group">
-                @Html.LabelFor(model => model.Descripcion, htmlAttributes: new { @class = "control-label col-md-2" })
-                <div class="col-md-10">
-                    @Html.TextAreaFor(model => model.Descripcion, 3, 0, new { @class = "form-control" })
-                    @Html.ValidationMessageFor(model => model.Descripcion, "", new { @class = "text-danger" })
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label class="control-label col-md-2">Vota donde mismo</label>
-                <div class="col-md-10">
-                    @if (votaDomicilioShowPanel)
-                    {
-                    <input type="checkbox" value="SI" id="votaDomicilio" name="votaDomicilio" data-reverse checked />
-                    }
-                    else
-                    {
-                    <input type="checkbox" value="SI" id="votaDomicilio" name="votaDomicilio" data-reverse />
-                    }
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-md-offset-2 col-md-10">
-                    <div id="DomicilioVotaPanel" class="well" @Html.Raw(votaDomicilioShowPanel ? "style='display: none;'" : "")>
-                        <div class="form-group">
-                            <div class="col-md-offset-2 col-md-10">
-                                <h4>Domicilio donde vota</h4>
-                            </div>
-
-                            @Html.LabelFor(model => model.VotaCalleID, "Calle", htmlAttributes: new { @class = "control-label col-md-2" })
-                            <div class="col-md-4">
-                                @Html.DropDownList("VotaCalleID", null, htmlAttributes: new { @class = "chosen-select" })
-                                @Html.ValidationMessageFor(model => model.VotaCalleID, "", new { @class = "text-danger" })
-                            </div>
-
-                            @Html.LabelFor(model => model.VotaNumExterior, htmlAttributes: new { @class = "control-label col-md-1" })
-                            <div class="col-md-1">
-                                @Html.EditorFor(model => model.VotaNumExterior, new { htmlAttributes = new { @class = "form-control text-right" } })
-                            </div>
-
-                            @Html.LabelFor(model => model.VotaLetra, htmlAttributes: new { @class = "control-label col-md-1" })
-                            <div class="col-md-1">
-                                @Html.EditorFor(model => model.VotaLetra, new { htmlAttributes = new { @class = "form-control" } })
-                            </div>
-
-                            @Html.LabelFor(model => model.VotaNumInterior, htmlAttributes: new { @class = "control-label col-md-1" })
-                            <div class="col-md-1">
-                                @Html.EditorFor(model => model.VotaNumInterior, new { htmlAttributes = new { @class = "form-control text-right" } })
-                            </div>
+                    @Html.LabelFor(model => model.Celular, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-2">
+                        <div class="input-group">
+                            @Html.EditorFor(model => model.Celular, new { htmlAttributes = new { @class = "form-control" } })
+                            <span class="input-group-addon">
+                                <input type="checkbox" title="Whatsapp" />
+                            </span>
                         </div>
+                        @Html.ValidationMessageFor(model => model.Celular, "", new { @class = "text-danger" })
+                    </div>
 
-                        <div class="form-group">
-                            @Html.LabelFor(model => model.VotaColoniaID, "Colonia", htmlAttributes: new { @class = "control-label col-md-2" })
-                            <div class="col-md-10">
-                                @Html.DropDownList("VotaColoniaID", null, htmlAttributes: new { @class = "chosen-select" })
-                                @Html.ValidationMessageFor(model => model.VotaColoniaID, "", new { @class = "text-danger" })
+                    @Html.LabelFor(model => model.CorreoElectronico, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-2">
+                        @Html.EditorFor(model => model.CorreoElectronico, new { htmlAttributes = new { @class = "form-control" } })
+                        @Html.ValidationMessageFor(model => model.CorreoElectronico, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+            </fieldset>
+
+            <fieldset>
+                <legend>Domicilio</legend>
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.CalleID, "Calle", htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-4">
+                        @Html.DropDownList("CalleID", null, htmlAttributes: new { @class = "chosen-select" })
+                        @Html.ValidationMessageFor(model => model.CalleID, "", new { @class = "text-danger" })
+                    </div>
+
+                    @Html.LabelFor(model => model.NumExterior, htmlAttributes: new { @class = "control-label col-md-1" })
+                    <div class="col-md-1">
+                        @Html.EditorFor(model => model.NumExterior, new { htmlAttributes = new { @class = "form-control text-right" } })
+                    </div>
+
+                    @Html.LabelFor(model => model.Letra, htmlAttributes: new { @class = "control-label col-md-1" })
+                    <div class="col-md-1">
+                        @Html.EditorFor(model => model.Letra, new { htmlAttributes = new { @class = "form-control" } })
+                    </div>
+
+                    @Html.LabelFor(model => model.NumInterior, htmlAttributes: new { @class = "control-label col-md-1" })
+                    <div class="col-md-1">
+                        @Html.EditorFor(model => model.NumInterior, new { htmlAttributes = new { @class = "form-control text-right" } })
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.ColoniaID, "Colonia", htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        @Html.DropDownList("ColoniaID", null, htmlAttributes: new { @class = "chosen-select" })
+                        @Html.ValidationMessageFor(model => model.ColoniaID, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.Descripcion, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        @Html.TextAreaFor(model => model.Descripcion, 3, 0, new { @class = "form-control" })
+                        @Html.ValidationMessageFor(model => model.Descripcion, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="control-label col-md-2">Vota donde mismo</label>
+                    <div class="col-md-10">
+                        @if (votaDomicilioShowPanel)
+                        {
+                            <input type="checkbox" value="SI" id="votaDomicilio" name="votaDomicilio" data-reverse checked />
+                        }
+                        else
+                        {
+                            <input type="checkbox" value="SI" id="votaDomicilio" name="votaDomicilio" data-reverse />
+                        }
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-offset-2 col-md-10">
+                        <div id="DomicilioVotaPanel" class="well" @Html.Raw(votaDomicilioShowPanel ? "style='display: none;'" : "")>
+                            <div class="form-group">
+                                <div class="col-md-offset-2 col-md-10">
+                                    <h4>Domicilio donde vota</h4>
+                                </div>
+
+                                @Html.LabelFor(model => model.VotaCalleID, "Calle", htmlAttributes: new { @class = "control-label col-md-2" })
+                                <div class="col-md-4">
+                                    @Html.DropDownList("VotaCalleID", null, htmlAttributes: new { @class = "chosen-select" })
+                                    @Html.ValidationMessageFor(model => model.VotaCalleID, "", new { @class = "text-danger" })
+                                </div>
+
+                                @Html.LabelFor(model => model.VotaNumExterior, htmlAttributes: new { @class = "control-label col-md-1" })
+                                <div class="col-md-1">
+                                    @Html.EditorFor(model => model.VotaNumExterior, new { htmlAttributes = new { @class = "form-control text-right" } })
+                                </div>
+
+                                @Html.LabelFor(model => model.VotaLetra, htmlAttributes: new { @class = "control-label col-md-1" })
+                                <div class="col-md-1">
+                                    @Html.EditorFor(model => model.VotaLetra, new { htmlAttributes = new { @class = "form-control" } })
+                                </div>
+
+                                @Html.LabelFor(model => model.VotaNumInterior, htmlAttributes: new { @class = "control-label col-md-1" })
+                                <div class="col-md-1">
+                                    @Html.EditorFor(model => model.VotaNumInterior, new { htmlAttributes = new { @class = "form-control text-right" } })
+                                </div>
                             </div>
-                        </div>
 
-                        <div class="form-group">
-                            @Html.LabelFor(model => model.VotaDescripcion, htmlAttributes: new { @class = "control-label col-md-2" })
-                            <div class="col-md-10">
-                                @Html.TextAreaFor(model => model.VotaDescripcion, 3, 0, new { @class = "form-control" })
-                                @Html.ValidationMessageFor(model => model.VotaDescripcion, "", new { @class = "text-danger" })
+                            <div class="form-group">
+                                @Html.LabelFor(model => model.VotaColoniaID, "Colonia", htmlAttributes: new { @class = "control-label col-md-2" })
+                                <div class="col-md-10">
+                                    @Html.DropDownList("VotaColoniaID", null, htmlAttributes: new { @class = "chosen-select" })
+                                    @Html.ValidationMessageFor(model => model.VotaColoniaID, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                @Html.LabelFor(model => model.VotaDescripcion, htmlAttributes: new { @class = "control-label col-md-2" })
+                                <div class="col-md-10">
+                                    @Html.TextAreaFor(model => model.VotaDescripcion, 3, 0, new { @class = "form-control" })
+                                    @Html.ValidationMessageFor(model => model.VotaDescripcion, "", new { @class = "text-danger" })
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
-        </fieldset>
+            </fieldset>
 
-        <fieldset>
-            <legend>Características</legend>
+            <fieldset>
+                <legend>Redes Sociales</legend>
 
-            <div class="form-group">
-                @Html.LabelFor(model => model.Afinidad, htmlAttributes: new { @class = "control-label col-md-2" })
-                <div class="col-md-10">
-                    @Html.EnumDropDownListFor(model => model.Afinidad, htmlAttributes: new { @class = "form-control" })
-                    @Html.ValidationMessageFor(model => model.Afinidad, "", new { @class = "text-danger" })
+                <div class="form-group">
+                    @Html.LabelFor(model => model.Facebook, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-2">
+                        @Html.EditorFor(model => model.Facebook, new { htmlAttributes = new { @class = "form-control", @placeholder = "https://facebook.com/nombreusuario" } })
+                        @Html.ValidationMessageFor(model => model.Facebook, "", new { @class = "text-danger" })
+                    </div>
+
+                    @Html.LabelFor(model => model.Twitter, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-2">
+                        @Html.EditorFor(model => model.Twitter, new { htmlAttributes = new { @class = "form-control" } })
+                        @Html.ValidationMessageFor(model => model.Twitter, "", new { @class = "text-danger" })
+                    </div>
+
+                    @Html.LabelFor(model => model.Instagram, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-2">
+                        @Html.EditorFor(model => model.Instagram, new { htmlAttributes = new { @class = "form-control" } })
+                        @Html.ValidationMessageFor(model => model.Instagram, "", new { @class = "text-danger" })
+                    </div>
                 </div>
-            </div>
+            </fieldset>
 
-            <!-- Si es afiliado -->
-            <div class="form-group" id="SectorFormGroup" @Html.Raw(sectorShowFormGroup)>
-                @Html.LabelFor(model => model.SectorBrigadaID, "Apoya al sector", htmlAttributes: new { @class = "control-label col-md-2" })
-                <div class="col-md-10">
-                    @Html.DropDownList("SectorBrigadaID", null, htmlAttributes: new { @class = "form-control" })
-                    @Html.ValidationMessageFor(model => model.SectorBrigadaID, "", new { @class = "text-danger" })
-                </div>
-            </div>
+            <fieldset>
+                <legend>Características</legend>
 
-            <!-- Si es por sector o 1x10 -->
-            <div class="form-group" id="PromotorFormGroup" @Html.Raw(promotorShowFormGroup)>
-                @Html.LabelFor(model => model.PersonaPromotorID, "Promotor", htmlAttributes: new { @class = "control-label col-md-2" })
-                <div class="col-md-10">
-                    @Html.DropDownList("PersonaPromotorID", null, htmlAttributes: new { @class = "chosen-select" })
-                    @Html.ValidationMessageFor(model => model.PersonaPromotorID, "", new { @class = "text-danger" })
-                </div>
-            </div>
-
-            <div class="form-group">
-                @Html.LabelFor(model => model.VotanteSeguro, htmlAttributes: new { @class = "control-label col-md-2" })
-                <div class="col-md-2">
-                    @if (Model.VotanteSeguro == BoolTipo.Si)
-                    {
-                        <input type="checkbox" value="SI" id="votanteSeguroCheckbox" name="votanteSeguroCheckbox" data-reverse checked />
-                    }
-                    else
-                    {
-                        <input type="checkbox" value="SI" id="votanteSeguroCheckbox" name="votanteSeguroCheckbox" data-reverse />
-                    }
+                <div class="form-group">
+                    @Html.LabelFor(model => model.Afinidad, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        @Html.EnumDropDownListFor(model => model.Afinidad, htmlAttributes: new { @class = "form-control" })
+                        @Html.ValidationMessageFor(model => model.Afinidad, "", new { @class = "text-danger" })
+                    </div>
                 </div>
 
-                @Html.LabelFor(model => model.TieneBarda, htmlAttributes: new { @class = "control-label col-md-2" })
-                <div class="col-md-2">
-                    @if (Model.TieneBarda == BoolTipo.Si)
-                    {
-                        <input type="checkbox" value="SI" id="tieneBardaCheckbox" name="tieneBardaCheckbox" data-reverse checked />
-                    }
-                    else
-                    {
-                        <input type="checkbox" value="SI" id="tieneBardaCheckbox" name="tieneBardaCheckbox" data-reverse />
-                    }
+                <!-- Si es afiliado -->
+                <div class="form-group" id="SectorFormGroup" @Html.Raw(sectorShowFormGroup)>
+                    @Html.LabelFor(model => model.SectorBrigadaID, "Apoya al sector", htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        @Html.DropDownList("SectorBrigadaID", null, htmlAttributes: new { @class = "form-control" })
+                        @Html.ValidationMessageFor(model => model.SectorBrigadaID, "", new { @class = "text-danger" })
+                    </div>
                 </div>
 
-                @Html.LabelFor(model => model.TieneLona, htmlAttributes: new { @class = "control-label col-md-2" })
-                <div class="col-md-2">
-                    @if (Model.TieneLona == BoolTipo.Si)
-                    {
-                        <input type="checkbox" value="SI" id="tieneLonaCheckbox" name="tieneLonaCheckbox" data-reverse checked />
-                    }
-                    else
-                    {
-                        <input type="checkbox" value="SI" id="tieneLonaCheckbox" name="tieneLonaCheckbox" data-reverse />
-                    }
+                <!-- Si es por sector o 1x10 -->
+                <div class="form-group" id="PromotorFormGroup" @Html.Raw(promotorShowFormGroup)>
+                    @Html.LabelFor(model => model.PersonaPromotorID, "Promotor", htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        @Html.DropDownList("PersonaPromotorID", null, htmlAttributes: new { @class = "chosen-select" })
+                        @Html.ValidationMessageFor(model => model.PersonaPromotorID, "", new { @class = "text-danger" })
+                    </div>
                 </div>
-            </div>
 
-            <div class="row">
-                <div class="col-md-offset-2 col-md-10">
-                    <div class="well" id="notaCheckboxPanel" style="display: none;">
-                        <div class="form-group">
-                            <label for="notaCheckbox" class="control-label col-md-2">Incluir nota</label>
-                            <div class="col-md-10">
-                                <textarea id="notaCheckbox" name="notaCheckbox" class="form-control" placeholder="Incluir nota por el cambio"></textarea>
+                <div class="form-group">
+                    @Html.LabelFor(model => model.VotanteSeguro, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-2">
+                        @if (Model.VotanteSeguro == BoolTipo.Si)
+                        {
+                            <input type="checkbox" value="SI" id="votanteSeguroCheckbox" name="votanteSeguroCheckbox" data-reverse checked />
+                        }
+                        else
+                        {
+                            <input type="checkbox" value="SI" id="votanteSeguroCheckbox" name="votanteSeguroCheckbox" data-reverse />
+                        }
+                    </div>
+
+                    @Html.LabelFor(model => model.TieneBarda, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-2">
+                        @if (Model.TieneBarda == BoolTipo.Si)
+                        {
+                            <input type="checkbox" value="SI" id="tieneBardaCheckbox" name="tieneBardaCheckbox" data-reverse checked />
+                        }
+                        else
+                        {
+                            <input type="checkbox" value="SI" id="tieneBardaCheckbox" name="tieneBardaCheckbox" data-reverse />
+                        }
+                    </div>
+
+                    @Html.LabelFor(model => model.TieneLona, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-2">
+                        @if (Model.TieneLona == BoolTipo.Si)
+                        {
+                            <input type="checkbox" value="SI" id="tieneLonaCheckbox" name="tieneLonaCheckbox" data-reverse checked />
+                        }
+                        else
+                        {
+                            <input type="checkbox" value="SI" id="tieneLonaCheckbox" name="tieneLonaCheckbox" data-reverse />
+                        }
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-offset-2 col-md-10">
+                        <div class="well" id="notaCheckboxPanel" style="display: none;">
+                            <div class="form-group">
+                                <label for="notaCheckbox" class="control-label col-md-2">Incluir nota</label>
+                                <div class="col-md-10">
+                                    <textarea id="notaCheckbox" name="notaCheckbox" class="form-control" placeholder="Incluir nota por el cambio"></textarea>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
 
 
-        </fieldset>
+            </fieldset>
 
-        <div class="form-group">
-            <div class="col-md-offset-2 col-md-3">
-                <strong>@Html.DisplayNameFor(model => model.FechaAlta)</strong>
-                @Html.DisplayFor(model => model.FechaAlta)
-                <br />
-                <strong>@Html.DisplayNameFor(model => model.UserNameActualizacion)</strong>
-                @Html.DisplayFor(model => model.UserNameActualizacion)
-                <br />
-                <strong>@Html.DisplayNameFor(model => model.FechaActualizacion)</strong>
-                @Html.DisplayFor(model => model.FechaActualizacion)
-            </div>
-            <div class="col-md-7 text-right">
-                <label class="control-label">Información verificada</label>
-                @if (Model.Verificada == BoolTipo.Si)
-                {
-                <input type="checkbox" value="SI" id="verificadaCheckbox" name="verificadaCheckbox" data-reverse checked data-off-class="btn-warning" data-on-class="btn-primary" />
-                }
-                else
-                {
-                <input type="checkbox" value="SI" id="verificadaCheckbox" name="verificadaCheckbox" data-reverse data-off-class="btn-warning" data-on-class="btn-primary" />
-                }
-                @Html.Raw(
-                    @Html.ActionLink("Cancelar", "Index", null, new { @class = "btn btn-default", @style = "margin-left: 10px;" }).ToHtmlString()
-                        .Replace("Cancelar", "<span class='glyphicon glyphicon-remove' title='Cancelar cambios'></span> Cancelar")
-                )
-                <button type="submit" name="submitButton" class="btn btn-primary" value="save">
-                    <span class="glyphicon glyphicon-floppy-disk"></span>
-                    Guardar
-                </button>
+            <div class="form-group">
+                <div class="col-md-offset-2 col-md-3">
+                    <strong>@Html.DisplayNameFor(model => model.FechaAlta)</strong>
+                    @Html.DisplayFor(model => model.FechaAlta)
+                    <br />
+                    <strong>@Html.DisplayNameFor(model => model.UserNameActualizacion)</strong>
+                    @Html.DisplayFor(model => model.UserNameActualizacion)
+                    <br />
+                    <strong>@Html.DisplayNameFor(model => model.FechaActualizacion)</strong>
+                    @Html.DisplayFor(model => model.FechaActualizacion)
+                </div>
+                <div class="col-md-7 text-right">
+                    <label class="control-label">Información verificada</label>
+                    @if (Model.Verificada == BoolTipo.Si)
+                    {
+                        <input type="checkbox" value="SI" id="verificadaCheckbox" name="verificadaCheckbox" data-reverse checked data-off-class="btn-warning" data-on-class="btn-primary" />
+                    }
+                    else
+                    {
+                        <input type="checkbox" value="SI" id="verificadaCheckbox" name="verificadaCheckbox" data-reverse data-off-class="btn-warning" data-on-class="btn-primary" />
+                    }
+                    @Html.Raw(
+                        @Html.ActionLink("Cancelar", "Index", null, new { @class = "btn btn-default", @style = "margin-left: 10px;" }).ToHtmlString()
+                            .Replace("Cancelar", "<span class='glyphicon glyphicon-remove' title='Cancelar cambios'></span> Cancelar")
+                    )
+                    <button type="submit" name="submitButton" class="btn btn-primary" value="save">
+                        <span class="glyphicon glyphicon-floppy-disk"></span>
+                        Guardar
+                    </button>
 
-                <button type="submit" name="submitButton" class="btn btn-success" value="save-new">
-                    <span class="glyphicon glyphicon-floppy-open"></span>
-                    Guardar y nuevo
-                </button>
+                    <button type="submit" name="submitButton" class="btn btn-success" value="save-new">
+                        <span class="glyphicon glyphicon-floppy-open"></span>
+                        Guardar y nuevo
+                    </button>
+                </div>
             </div>
         </div>
-    </div>
     }
 
     <ul class="nav nav-tabs">
@@ -449,6 +495,7 @@
 
     <script src="~/Scripts/chosen.jquery.min.js"></script>
     <script src="~/Scripts/bootstrap-checkbox.js"></script>
+    <script src="~/Scripts/bootstrap-datepicker.js"></script>
 
     <script>
 
@@ -459,6 +506,14 @@
         $(document).ready(function () {
 
             $('.chosen-select').chosen();
+
+            $('.datepicker').datepicker({
+                format: "dd/mm/yyyy",
+                weekStart: 0,
+                todayBtn: "linked",
+                language: "es",
+                autoclose: true
+            });
 
             // https://www.jqueryscript.net/form/jQuery-Toggle-Button-Plugin-For-Bootstrap-Bootstrap-Checkbox.html
             $('#votaDomicilio, #votanteSeguroCheckbox, #tieneBardaCheckbox, #tieneLonaCheckbox, #YaVoto').checkboxpicker({
@@ -475,7 +530,7 @@
             });
 
             $(".toUpperCase").keyup(function () {
-                this.value = this.value.toLocaleUpperCase();                
+                this.value = this.value.toLocaleUpperCase();
             });
 
             var url_buscarSimilares = '@Url.Action("BuscarSimilares", "Persona")';
@@ -519,10 +574,10 @@
                 }
             });
 
-            @*// Al seleccionar una Sección, muestra las casillas existentes y 
+            @*// Al seleccionar una Sección, muestra las casillas existentes y
             // permite guardar el número INE del ciudadano
             $('#SeccionID').on('change', function () {
-                
+
                 if ($(this).val() == '00000000-0000-0000-0000-000000000000') {
                     $('#CasillaDIV').attr('style', 'display: none');
                     // Limpiar los campos INE y Voto
@@ -537,8 +592,8 @@
                         url: url,
                         data: {},
                         success: function (datos) {
-                            
-                            if (datos.message == null || datos.message == undefined) {                               
+
+                            if (datos.message == null || datos.message == undefined) {
 
                                 $('#CasillaVotaID').empty();
                                 $('#CasillaVotaID').append('<option value="00000000-0000-0000-0000-000000000000">(casilla)</option>');
@@ -556,10 +611,10 @@
                                 if (datos.message == 'notid') {
                                     alert('Se perdió el identificador de la sección');
                                 }
-                            }                            
+                            }
                         },
                         error: function (xhr, status, error) {
-                            alert('A ocurrido una excepción, error: ' + error);                            
+                            alert('A ocurrido una excepción, error: ' + error);
                         }
                     });
 
@@ -768,7 +823,7 @@
 
         @*function ObtenerNombreCasillaTipo(tipo) {
             var casillaNombre = '';
-                        
+
             switch (tipo) {
                 case @((int)CasillaTipo.Basica):
                     casillaNombre = '@Html.Raw(CasillaTipo.Basica.GetDisplayName())';

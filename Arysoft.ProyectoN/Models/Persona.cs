@@ -119,7 +119,7 @@ namespace Arysoft.ProyectoN.Models
 
         [Display(Name = "Fecha de nacimiento")]
         [DataType(DataType.DateTime)]
-        [DisplayFormat(DataFormatString = "{0:d}")]
+        [DisplayFormat(DataFormatString = "{0:d}", ApplyFormatInEditMode = true)]
         public DateTime? FechaNacimiento { get; set; }
 
         [Display(Name = "Estado civil")]
