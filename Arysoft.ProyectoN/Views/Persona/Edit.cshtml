@@ -5,7 +5,7 @@
     bool votaDomicilioShowPanel = Model.VotaEnDomicilio == BoolTipo.Si;
     bool tieneSeccion = Model.SeccionID != Guid.Empty;
     string sectorShowFormGroup = "style='display: none;'";
-    string promotorShowFormGroup = "style='display: none;'";
+    string promotorShowFormGroup = string.Empty; // "style='display: none;'";
     string classCasilla = "style='display: none;'";
 
     if (esNuevo)
@@ -20,6 +20,7 @@
     if (Model.Afinidad == AfinidadTipo.Movilizador || Model.Afinidad == AfinidadTipo.Simpatizante)
     {
         sectorShowFormGroup = string.Empty;
+        //promotorShowFormGroup = string.Empty; // Para que se muestre un promotor todo el tiempo
     }
     else if (Model.Afinidad == AfinidadTipo.PorSector || Model.Afinidad == AfinidadTipo.PorAfiliado)
     {
@@ -280,30 +281,6 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
-                </div>
-            </fieldset>
-
-            <fieldset>
-                <legend>Redes Sociales</legend>
-
-                <div class="form-group">
-                    @Html.LabelFor(model => model.Facebook, htmlAttributes: new { @class = "control-label col-md-2" })
-                    <div class="col-md-2">
-                        @Html.EditorFor(model => model.Facebook, new { htmlAttributes = new { @class = "form-control", @placeholder = "https://facebook.com/nombreusuario" } })
-                        @Html.ValidationMessageFor(model => model.Facebook, "", new { @class = "text-danger" })
-                    </div>
-
-                    @Html.LabelFor(model => model.Twitter, htmlAttributes: new { @class = "control-label col-md-2" })
-                    <div class="col-md-2">
-                        @Html.EditorFor(model => model.Twitter, new { htmlAttributes = new { @class = "form-control" } })
-                        @Html.ValidationMessageFor(model => model.Twitter, "", new { @class = "text-danger" })
-                    </div>
-
-                    @Html.LabelFor(model => model.Instagram, htmlAttributes: new { @class = "control-label col-md-2" })
-                    <div class="col-md-2">
-                        @Html.EditorFor(model => model.Instagram, new { htmlAttributes = new { @class = "form-control" } })
-                        @Html.ValidationMessageFor(model => model.Instagram, "", new { @class = "text-danger" })
                     </div>
                 </div>
             </fieldset>
@@ -641,17 +618,17 @@
                     case '@((int)AfinidadTipo.Movilizador)':
                     case '@((int)AfinidadTipo.Simpatizante)':
                         $('#SectorFormGroup').removeAttr('style');
-                        $('#PromotorFormGroup').attr('style', 'display: none;');
+                        // $('#PromotorFormGroup').attr('style', 'display: none;');
                         break;
                     case '@((int)AfinidadTipo.PorSector)':
                     case '@((int)AfinidadTipo.PorAfiliado)':
                         $('#SectorFormGroup').attr('style', 'display: none;');
-                        $('#PromotorFormGroup').removeAttr('style');
-                        $('#PersonaPromotorID').chosen('destroy').chosen();
+                        //$('#PromotorFormGroup').removeAttr('style');
+                        //$('#PersonaPromotorID').chosen('destroy').chosen();
                         break;
                     default:
                         $('#SectorFormGroup').attr('style', 'display: none;');
-                        $('#PromotorFormGroup').attr('style', 'display: none;');
+                        //$('#PromotorFormGroup').attr('style', 'display: none;');
                         break;
                 }
             });

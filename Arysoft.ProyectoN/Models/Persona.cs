@@ -31,7 +31,7 @@ namespace Arysoft.ProyectoN.Models
         [Display(Name = "Promotor")]
         public Guid? PersonaPromotorID { get; set; }
 
-        public Guid UbicacionViveID { get; set; }
+        public Guid? UbicacionViveID { get; set; }
 
         public Guid? UbicacionVotaID { get; set; }
 
@@ -125,20 +125,7 @@ namespace Arysoft.ProyectoN.Models
         [Display(Name = "Estado civil")]
         public EstadoCivilTipo EstadoCivil { get; set; }
 
-        [StringLength(500)]
-        public string Facebook { get; set; }
-
-        [StringLength(100)]
-        public string Twitter { get; set; }
-
-        [StringLength(100)]
-        public string Instagram { get; set; }
-
         public BoolTipo Whatsapp { get; set; }
-
-        [Display(Name = "Identificación")]
-        [StringLength(255)]
-        public string ArchivoIdentificacion { get; set; }
 
         [Display(Name = "Ocupación")]
         [StringLength(100)]

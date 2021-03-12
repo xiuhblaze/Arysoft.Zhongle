@@ -184,13 +184,6 @@
                             </li>
                         </ul>
                     </div>
-                    
-                @*<button type="button" id="exportExcelButton" class="btn btn-link" title="Exportar a Excel">
-                    <span class="glyphicon glyphicon-export glyphicon-toolbar-size"></span>
-                </button>
-                <button type="button" id="exportEstatalExcelButton" class="btn btn-link" title="Exportar para Estatal a Excel">
-                    <span class="glyphicon glyphicon-ex glyphicon-toolbar-size"></span>
-                </button>*@
                 }
             </div>
         </div>
@@ -553,8 +546,15 @@
                             <span class="@(item.EsResponsableSector ? "text-primary" : "")" title="@(item.EsResponsableSector ? "Responsable de sector" : "")">
                                 @Html.DisplayFor(modelItem => item.NombreCompleto)
                             </span>
-                            @if (item.Afinidad == AfinidadTipo.PorAfiliado || item.Afinidad == AfinidadTipo.PorSector)
+                            @*@if (item.Afinidad == AfinidadTipo.PorAfiliado || item.Afinidad == AfinidadTipo.PorSector)
                             {
+                                <br />
+                                <small class="text-muted" title="Promotor (invitado por)">
+                                    @Html.DisplayFor(modelItem => item.Promotor.NombreCompleto)
+                                </small>
+                            }*@
+                            @if (item.Promotor != null)
+                            { 
                                 <br />
                                 <small class="text-muted" title="Promotor (invitado por)">
                                     @Html.DisplayFor(modelItem => item.Promotor.NombreCompleto)

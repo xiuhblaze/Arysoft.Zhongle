@@ -45,11 +45,7 @@ public static class Comun
         // Campos agregados para 2021
         persona.FechaNacimiento = personaViewModel.FechaNacimiento;
         persona.EstadoCivil = personaViewModel.EstadoCivil;
-        persona.Facebook = personaViewModel.Facebook;
-        persona.Twitter = personaViewModel.Twitter;
-        persona.Instagram = personaViewModel.Instagram;
         persona.Whatsapp = personaViewModel.Whatsapp;
-        persona.ArchivoIdentificacion = personaViewModel.ArchivoIdentificacion;
         persona.Ocupacion = personaViewModel.Ocupacion;
 
         persona.FechaAlta = personaViewModel.FechaAlta;
@@ -103,12 +99,8 @@ public static class Comun
 
         // Campos agregados para 2021
         p.FechaNacimiento = persona.FechaNacimiento;
-        p.EstadoCivil = persona.EstadoCivil;
-        p.Facebook = persona.Facebook;
-        p.Twitter = persona.Twitter;
-        p.Instagram = persona.Instagram;
+        p.EstadoCivil = persona.EstadoCivil;        
         p.Whatsapp = persona.Whatsapp;
-        p.ArchivoIdentificacion = persona.ArchivoIdentificacion;
         p.Ocupacion = persona.Ocupacion;
 
         p.FechaAlta = persona.FechaAlta;
