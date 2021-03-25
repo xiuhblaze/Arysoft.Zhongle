@@ -324,6 +324,7 @@
                 success: function (result) {
                     var totalAfinesMeta = result.totalMovilizadores * 10;
                     var porcentaje = Math.round((result.totalAfines * 100) / totalAfinesMeta);
+                    if (totalAfinesMeta == 0) { porcentaje = 0; }
                     //porcentaje = porcentaje.toLocaleString(undefined, { minimumFractionDigits: 2 })
                     $('#personas1x10DIV').html(porcentaje + '%');
                     $('#totalMovilizadoresDIV').html('De ' + result.totalMovilizadores + ' movilizadores');
@@ -618,7 +619,7 @@
                     $('#votosPorSector').html('<p class="text-center" style="margin-top: 100px;"><img src="@Url.Content("~/Images/ajax-loader.gif")" /></p>');
                 },
                 success: function (result) {
-
+                    //console.log(result);
                     if (result != null) {
                         var data = new google.visualization.DataTable();
 

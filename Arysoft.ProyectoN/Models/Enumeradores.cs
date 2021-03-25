@@ -92,7 +92,11 @@ public enum CasillaTipo
     /// <summary>
     /// para electores residentes que por condiciones de comunicación o culturales tengan difícil acceso a su casilla
     /// </summary>
-    Extraordinaria
+    Extraordinaria,
+    [Display(Name = "Contigua 11")]
+    ContiguaXI,
+    [Display(Name = "Contigua 12")]
+    ContiguaXII
 } // CasillaTipo
 
 /// <summary>

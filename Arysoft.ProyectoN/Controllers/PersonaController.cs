@@ -19,7 +19,7 @@ namespace Arysoft.ProyectoN.Controllers
         private ApplicationDbContext db = new ApplicationDbContext();
 
         // GET: Persona
-        [Authorize(Roles = "Admin, Editor, Auditor, Consultant")]
+        [Authorize(Roles = "Admin, Editor, Auditor, Consultant, EditorXSector")]
         public async Task<ActionResult> Index(string buscar, string filtro, string orden, string afinidad, string SectorID, string SeccionID, string PromotorID,
             string CalleID, string ColoniaID, string bardaLona, string sectorTipo, string votanteSeguro, string status, string verificada,
             string filtroEspecifico, string yaVoto, string busquedaAvanzada, string llamadaOrigen,
@@ -30,6 +30,11 @@ namespace Arysoft.ProyectoN.Controllers
             Guid calleID = (CalleID != null && CalleID != Guid.Empty.ToString()) ? new Guid(CalleID) : Guid.Empty;
             Guid coloniaID = (ColoniaID != null && ColoniaID != Guid.Empty.ToString()) ? new Guid(ColoniaID) : Guid.Empty;
             Guid promotorID = (PromotorID != null && PromotorID != Guid.Empty.ToString()) ? new Guid(PromotorID) : Guid.Empty;
+
+            if (User.IsInRole("EditorXSector"))
+            { 
+                //HACK: Obligar el filtro por Sector, de acuerdo al que estará asignado el usuario
+            }
 
             ViewBag.Orden = orden;
             ViewBag.OrdenNombre = string.IsNullOrEmpty(orden) ? "nombre_desc" : "";
@@ -329,24 +334,20 @@ namespace Arysoft.ProyectoN.Controllers
             if (persona == null)
             {
                 TempData["MessageBox"] = "No se encontró el registro del identificador.";
-                if (Request.IsAjaxRequest())
-                {
-                    return Content("nofound");
-                }
+                if (Request.IsAjaxRequest()) { return Content("nofound"); }
                 return RedirectToAction("Index");
             }
-
             persona.SoloLectura = true;
             persona.EsResponsableSector = Comun.EsPersonaResponsable(persona.PersonaID);
-
             if (Request.IsAjaxRequest())
             {
+                persona.NmOrigen = "details";
                 PersonaEditViewModel personaVM = Comun.ObtenerPersonaEditViewModel(persona, true);
                 return PartialView("_details", personaVM);
             }
 
             return View(persona);
-        }
+        } // Detail
 
         // GET: Persona/Create
         [Authorize(Roles = "Admin, Editor")]
@@ -624,12 +625,24 @@ namespace Arysoft.ProyectoN.Controllers
             if (id == null)
             {
                 TempData["MessageBox"] = "No se recibió el identificador.";
+                if (Request.IsAjaxRequest()) { return Content("notid"); }
                 return RedirectToAction("Index");
                 //return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
             //Persona persona = await db.Personas.FindAsync(id);
 
-            Persona persona = await db.Personas                
+            Persona persona = await db.Personas
+                .Include(p => p.PersonasAfines)
+                .Include(p => p.PersonasAfines.Select(pa => pa.Notas))
+                .Include(p => p.PersonasAfines.Select(pa => pa.Seccion))
+                .Include(p => p.PersonasAfines.Select(pa => pa.Sector))
+                .Include(p => p.PersonasAfines.Select(pa => pa.Promotor))
+                .Include(p => p.PersonasAfines.Select(pa => pa.UbicacionVive))
+                .Include(p => p.PersonasAfines.Select(pa => pa.UbicacionVive.Calle))
+                .Include(p => p.PersonasAfines.Select(pa => pa.UbicacionVive.Colonia))
+                .Include(p => p.PersonasAfines.Select(pa => pa.UbicacionVota))
+                .Include(p => p.PersonasAfines.Select(pa => pa.UbicacionVota.Calle))
+                .Include(p => p.PersonasAfines.Select(pa => pa.UbicacionVota.Colonia))
                 .Include(p => p.Promotor)
                 .Include(p => p.UbicacionVive)
                 .Include(p => p.UbicacionVive.Calle)
@@ -639,19 +652,25 @@ namespace Arysoft.ProyectoN.Controllers
                 .Include(p => p.UbicacionVota.Colonia)
                 .Include(p => p.Sector)
                 .Include(p => p.Seccion)
-                .Include(p => p.Notas)
                 .Where(p => p.PersonaID == id)
                 .FirstOrDefaultAsync();
-
             if (persona == null)
             {
                 TempData["MessageBox"] = "No se encontró el registro.";
+                if (Request.IsAjaxRequest()) { return Content("notfound"); }
                 return RedirectToAction("Index");
                 //return HttpNotFound();
             }
+            persona.SoloLectura = true;
             persona.EsResponsableSector = Comun.EsPersonaResponsable(persona.PersonaID);
+            if (Request.IsAjaxRequest())
+            {
+                persona.NmOrigen = "delete";
+                PersonaEditViewModel personaVM = Comun.ObtenerPersonaEditViewModel(persona, true);
+                return PartialView("_details", personaVM);
+            }
             return View(persona);
-        }
+        } // Delete
 
         // POST: Persona/Delete/5
         [HttpPost, ActionName("Delete")]
@@ -721,7 +740,7 @@ namespace Arysoft.ProyectoN.Controllers
             }
 
             persona.Status = StatusTipo.Activo;
-            persona.UserNameActualizacion = ControllerContext.HttpContext.User.Identity.Name;
+            persona.UserNameActualizacion = User.Identity.Name;
             persona.FechaActualizacion = DateTime.Now;
             db.Entry(persona).State = EntityState.Modified;
             try

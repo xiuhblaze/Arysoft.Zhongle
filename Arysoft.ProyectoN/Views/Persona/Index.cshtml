@@ -1,7 +1,6 @@
 ﻿@model PagedList.IPagedList<Arysoft.ProyectoN.Models.Persona>
 
 @using Arysoft.ProyectoN.Models;
-
 @using PagedList.Mvc;
 
 @{
@@ -444,6 +443,11 @@
                         rowClass = "class='text-muted'";
                         rowTitle = "title='La persona está dada de baja'";
                     }
+                    else if (item.Status == StatusTipo.Eliminado && User.IsInRole("Admin"))
+                    {
+                        rowClass = "class='text-danger'";
+                        rowTitle = "title='La persona ha sido eliminada'";
+                    }
                     else
                     {
                         if (item.Voto != null) {
@@ -639,27 +643,27 @@
                                 <span class="badge" title="@AfinidadTipo.PorAfiliado.GetDisplayName()">@porAfiliado</span>
                             }
                         </td>
-                        
-                        @if(User.IsInRole("Admin") || User.IsInRole("Editor"))
-                        {
                         <td class="text-right">
-                            @if(item.Status == StatusTipo.Activo)
-                            { 
+                            @if ((User.IsInRole("Admin") || User.IsInRole("Editor"))
+                                && item.Status == StatusTipo.Activo)
+                            {
                                 @Html.Raw(
                                     @Html.ActionLink("Editar", "Edit", new { id = item.PersonaID }).ToHtmlString()
                                         .Replace("Editar", "<span class='glyphicon glyphicon-edit glyphicon-table-action-size' title='Editar'></span>")
                                 )
                             }
 
-                            @if (item.Status == StatusTipo.Activo || item.Status == StatusTipo.Baja)
+                            @if (User.IsInRole("Admin") && item.Status != StatusTipo.Eliminado)
                             {
-                                @Html.Raw(
+                                @*@Html.Raw(
                                     @Html.ActionLink("Eliminar", "Delete", new { id = item.PersonaID }).ToHtmlString()
                                         .Replace("Eliminar", "<span class='glyphicon glyphicon-trash glyphicon-table-action-size' title='Baja/Eliminar'></span>")
-                                )
+                                )*@
+                                <a href="#" onclick="getDelete('@item.PersonaID'); return false;" class="text-danger">
+                                    <span class='glyphicon glyphicon-trash glyphicon-table-action-size' title='Eliminar'></span>
+                                </a>
                             }
                         </td>
-                        }
                     </tr>
                 }
             </tbody>
@@ -847,7 +851,7 @@
         })
 
     }); // document.ready
-    
+
     var personaDetailsModalOriginalContent = $('#detalles-modal-content').html();
 
     function getPersonaDetails(id) {
@@ -887,6 +891,41 @@
         });
     } // getPersonaDetails
 
+    function getDelete(id) {
+        var url = '@Url.Action("Delete", "Persona")/' + id;
+
+        $('#detailsModal').modal('show');
+        $.ajax({
+            cache: false,
+            async: true,
+            type: 'get',
+            url: url,
+            data: {},
+            beforeSend: function () {
+                $('#detalles-modal-body').html('<p class="text-center" style="margin: 50px;"><img src="@Url.Content("~/Images/ajax-loader.gif")" /></p>');
+            },
+            success: function(vista) {
+                switch (vista) {
+                    case "notid":
+                        alert('No se recibió un identificador de la persona');
+                        $('#detailsModal').modal('hide');
+                        $('#detalles-modal-content').html(modalDetailsOriginalContent);
+                        break;
+                    case "notfound":
+                        alert('No se encontró la persona solicitada');
+                        $('#detailsModal').modal('hide');
+                        $('#detalles-modal-content').html(modalDetailsOriginalContent);
+                        break;
+                    default:
+                        $('#detalles-modal-content').html(vista);
+                        break;
+                }
+            },
+            error: function (xhr, status, error) {
+                alert('A ocurrido una excepción: ' + status + '\n error: ' + error);
+            }
+        });
+        } // getDelete
 </script>
 
 }

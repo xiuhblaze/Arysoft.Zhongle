@@ -39,12 +39,32 @@
 </div>
 
 <div class="modal-body">
-
+    @if (Model.NmOrigen == "delete")
+    {
+        string title = "";
+        switch (Model.Status)
+        {
+            case StatusTipo.Activo:
+                title = "¿Está seguro de dar de baja esta persona?";
+                break;
+            case StatusTipo.Baja:
+                title = "¿Está seguro de eliminar esta persona?";
+                break;
+            case StatusTipo.Eliminado:
+                title = "Persona eliminada";
+                break;
+        }
+        <div class="row">
+            <div class="col-md-12">
+                <h2 class="text-danger">@title</h2>
+            </div>
+        </div>
+    }
     <div class="row">
         <div class="col-md-8">
             <h4 style="margin-top: 0;">
                 <span class="glyphicon glyphicon-ok-sign @verificadaClassColor" title="@verificadaTitleText"></span>
-                <span class="glyphicon glyphicon-user @userClassColor" title="@Model.Afinidad.GetDisplayName()" ></span>
+                <span class="glyphicon glyphicon-user @userClassColor" title="@Model.Afinidad.GetDisplayName()"></span>
                 @Html.DisplayFor(model => model.NombreCompleto)
                 <small class="text-warning">SECCION @Model.Seccion.Numero</small>
             </h4>
@@ -177,32 +197,6 @@
                     @Html.DisplayFor(model => model.Ocupacion)
                 </dd>
 
-                <hr />
-
-                <dt>
-                    @Html.DisplayNameFor(model => model.Status)
-                </dt>
-
-                <dd>
-                    @switch (Model.Status)
-                    {
-                        case StatusTipo.Activo:
-                            <span class="label label-primary">
-                                @Html.DisplayFor(model => model.Status)
-                            </span>
-                            break;
-                        case StatusTipo.Baja:
-                            <span class="label label-warning">
-                                @Html.DisplayFor(model => model.Status)
-                            </span>
-                            break;
-                        case StatusTipo.Eliminado:
-                            <span class="label label-danger">
-                                @Html.DisplayFor(model => model.Status)
-                            </span>
-                            break;
-                    }
-                </dd>
                 <dt>Registro</dt>
                 <dd>@Html.DisplayFor(model => model.FechaAlta)</dd>
 
@@ -213,7 +207,7 @@
             @if (Model.VotanteSeguro == BoolTipo.Si)
             {
                 <div class="alert alert-success text-center">
-                    <span class="glyphicon glyphicon-erase" ></span>
+                    <span class="glyphicon glyphicon-erase"></span>
                     VOTANTE SEGURO
                 </div>
             }
@@ -238,29 +232,57 @@
                 <div class="col-md-6">
                     @if (Model.TieneLona == BoolTipo.Si)
                     {
-                    <div class="alert alert-info text-center">
-                        <span class="glyphicon glyphicon-ok"></span>
-                        TIENE LONA
-                    </div>
+                        <div class="alert alert-info text-center">
+                            <span class="glyphicon glyphicon-ok"></span>
+                            TIENE LONA
+                        </div>
                     }
                 </div>
             </div>
+
+            @switch (Model.Status)
+            {
+                case StatusTipo.Activo:
+                    <div class="alert alert-success text-center">
+                        <h4 style="margin-bottom: 0;">
+                            <span class="glyphicon glyphicon-ok"></span>
+                            Activo
+                        </h4>
+                    </div>
+                    break;
+                case StatusTipo.Baja:
+                    <div class="alert alert-warning text-center">
+                        <h4 style="margin-bottom: 0;">
+                            <span class="glyphicon glyphicon-save"></span>
+                            Baja
+                        </h4>
+                    </div>
+                    break;
+                case StatusTipo.Eliminado:
+                    <div class="alert alert-danger text-center">
+                        <h4 style="margin-bottom: 0;">
+                            <span class="glyphicon glyphicon-remove"></span>
+                            Eliminado
+                        </h4>
+                    </div>
+                    break;
+            }
         </div>
     </div>
 
     <ul class="nav nav-tabs">
         @if (Model.Afinidad == AfinidadTipo.Movilizador || Model.Afinidad == AfinidadTipo.Simpatizante)
         {
-        <li class="active">
-            <a href="#afines" data-toggle="tab">
-                <span class="glyphicon glyphicon-user"></span>
-                Personas afines
-                @if (Model.PersonasAfines != null)
-                {
-                <span class="badge">@Html.DisplayFor(model => model.PersonasAfines.Count)</span>
-                }
-            </a>
-        </li>
+            <li class="active">
+                <a href="#afines" data-toggle="tab">
+                    <span class="glyphicon glyphicon-user"></span>
+                    Personas afines
+                    @if (Model.PersonasAfines != null)
+                    {
+                        <span class="badge">@Html.DisplayFor(model => model.PersonasAfines.Count)</span>
+                    }
+                </a>
+            </li>
         }
         <li class="@((Model.Afinidad != AfinidadTipo.Movilizador && Model.Afinidad != AfinidadTipo.Simpatizante ) ? "active" : "")">
             <a href="#notas" data-toggle="tab">
@@ -271,26 +293,26 @@
         </li>
 
         @*<li>
-            <a href="#auditorias" data-toggle="tab">
-                <span class="glyphicon glyphicon-eye-open"></span>
-                Auditorias
-                <span class="badge">@Html.DisplayFor(model => model.AuditoriasRealizadas.Count)</span>
-            </a>
-        </li>*@
+                <a href="#auditorias" data-toggle="tab">
+                    <span class="glyphicon glyphicon-eye-open"></span>
+                    Auditorias
+                    <span class="badge">@Html.DisplayFor(model => model.AuditoriasRealizadas.Count)</span>
+                </a>
+            </li>*@
 
     </ul>
 
     <div class="tab-content">
         @if (Model.Afinidad == AfinidadTipo.Movilizador || Model.Afinidad == AfinidadTipo.Simpatizante)
-{
-        <div class="tab-pane fade in active" name="afines" id="afines">
-            <h4>Personas afines <small>Invitadas por esta persona</small></h4>
+        {
+            <div class="tab-pane fade in active" name="afines" id="afines">
+                <h4>Personas afines <small>Invitadas por la persona</small></h4>
 
-            <div id="listaPersonasAfines" name="listaPersonasAfines" style="max-height: 400px; overflow-y: scroll;">
-                @Html.Partial("_listaPersonas", Model)
+                <div id="listaPersonasAfines" name="listaPersonasAfines" style="max-height: 400px; overflow-y: scroll;">
+                    @Html.Partial("_listaPersonas", Model)
+                </div>
             </div>
-        </div>
-}
+        }
 
         <div class="tab-pane fade in @((Model.Afinidad != AfinidadTipo.Movilizador && Model.Afinidad != AfinidadTipo.Simpatizante) ? "active" : "")" name="notas" id="notas">
             <h4>Notas</h4>
@@ -301,12 +323,12 @@
         </div>
 
         @*<div class="tab-pane fade in" name="auditorias" id="auditorias">
-            <h4>Auditorias</h4>
+                <h4>Auditorias</h4>
 
-            <div id="listaAuditorias" name="listaAuditorias" style="max-height: 400px; overflow-y: scroll;">
-                @Html.Partial("_listaAuditorias", Model)
-            </div>
-        </div>*@
+                <div id="listaAuditorias" name="listaAuditorias" style="max-height: 400px; overflow-y: scroll;">
+                    @Html.Partial("_listaAuditorias", Model)
+                </div>
+            </div>*@
 
     </div>
 </div>
@@ -325,24 +347,76 @@
                 Cancelar
             </button>
 
-            @if(User.IsInRole("Admin") || User.IsInRole("Editor"))
-            { 
-                switch(Model.Status)
+            @if (User.IsInRole("Admin") || User.IsInRole("Editor"))
+            {
+                switch (Model.Status)
                 {
                     case StatusTipo.Activo:
-                        @Html.Raw(
-                            @Html.ActionLink("Editar", "Edit", new { id = Model.PersonaID }, new { @class = "btn btn-primary" }).ToHtmlString()
-                                .Replace("Editar", "<span class='glyphicon glyphicon-edit' title='Editar'></span> Editar")
-                        )
+                        if (Model.NmOrigen == "details")
+                        {
+                            @Html.Raw(
+                                @Html.ActionLink("Editar", "Edit", new { id = Model.PersonaID }, new { @class = "btn btn-primary" }).ToHtmlString()
+                                    .Replace("Editar", "<span class='glyphicon glyphicon-edit' title='Editar'></span> Editar")
+                            )
+                        }
+                        else if (Model.NmOrigen == "delete")
+                        {
+                            <form action="/Persona/Delete/@Model.PersonaID" method="post" style="float: right; margin-left: .5em;">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn btn-warning">
+                                    <span class='glyphicon glyphicon-trash' title='Dar de Baja'></span> Baja
+                                </button>
+                            </form>
+                        }
                         break;
+
                     case StatusTipo.Baja:
-                        @Html.Raw(
-                            @Html.ActionLink("[activar]", "Activar", new { id = Model.PersonaID }, new { @class = "btn btn-success" }).ToHtmlString()
-                                .Replace("[activar]", "<span class='glyphicon glyphicon-ok' title='Reactivar persona'></span> Reactivar")
-                        )
+                        switch (Model.NmOrigen)
+                        {
+                            case "details":
+                                @*<form action="/Persona/Activar/@Model.PersonaID" method="post" style="float: right; margin-left: .5em;">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn btn-success">
+                                    <span class='glyphicon glyphicon-ok' title='Reactivar'></span> Reactivar
+                                </button>
+                            </form>*@
+                                @Html.Raw(
+                                    @Html.ActionLink("[activar]", "Activar", new { id = Model.PersonaID }, new { @class = "btn btn-success" }).ToHtmlString()
+                                        .Replace("[activar]", "<span class='glyphicon glyphicon-ok' title='Reactivar persona'></span> Reactivar")
+                                )
+                                break;
+
+                            case "delete":
+                                <form action="/Persona/Delete/@Model.PersonaID" method="post" style="float: right; margin-left: .5em;">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn btn-danger">
+                                        <span class='glyphicon glyphicon-trash' title='Eliminar'></span> Eliminar
+                                    </button>
+                                </form>
+                                break;
+                        }
                         break;
                 }
             }
+
+            @*@if(User.IsInRole("Admin") || User.IsInRole("Editor"))
+        {
+            switch(Model.Status)
+            {
+                case StatusTipo.Activo:
+                    @Html.Raw(
+                        @Html.ActionLink("Editar", "Edit", new { id = Model.PersonaID }, new { @class = "btn btn-primary" }).ToHtmlString()
+                            .Replace("Editar", "<span class='glyphicon glyphicon-edit' title='Editar'></span> Editar")
+                    )
+                    break;
+                case StatusTipo.Baja:
+                    @Html.Raw(
+                        @Html.ActionLink("[activar]", "Activar", new { id = Model.PersonaID }, new { @class = "btn btn-success" }).ToHtmlString()
+                            .Replace("[activar]", "<span class='glyphicon glyphicon-ok' title='Reactivar persona'></span> Reactivar")
+                    )
+                    break;
+            }
+        }*@
         </div>
     </div>
 

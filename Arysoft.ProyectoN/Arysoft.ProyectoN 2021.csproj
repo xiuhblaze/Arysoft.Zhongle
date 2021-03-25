@@ -276,6 +276,7 @@
     <None Include="Properties\PublishProfiles\movimientozapotlan.com - Web Deploy.pubxml" />
     <None Include="Properties\PublishProfiles\Produccion Nube.pubxml" />
     <None Include="Properties\PublishProfiles\Pruebas Beta.pubxml" />
+    <None Include="Properties\PublishProfiles\surdejalisco.com - Web Deploy.pubxml" />
     <None Include="Scripts\jquery-3.3.1.intellisense.js" />
     <Content Include="Scripts\bootstrap-checkbox.js" />
     <Content Include="Scripts\bootstrap-datepicker.js" />

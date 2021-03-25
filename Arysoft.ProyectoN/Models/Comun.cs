@@ -65,6 +65,7 @@ public static class Comun
         persona.AuditoriasRealizadas = personaViewModel.AuditoriasRealizadas;
 
         persona.SoloLectura = soloLectura;
+        persona.NmOrigen = personaViewModel.NmOrigen;
 
         return persona;
     } // ObtenerPersona
@@ -144,6 +145,7 @@ public static class Comun
         }
 
         p.SoloLectura = soloLectura;
+        p.NmOrigen = persona.NmOrigen;
         p.EsResponsableSector = EsPersonaResponsable(persona.PersonaID);
 
         return p;

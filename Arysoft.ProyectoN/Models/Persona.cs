@@ -205,6 +205,8 @@ namespace Arysoft.ProyectoN.Models
         [NotMapped]
         public bool EsResponsableSector { get; set; }
 
+        [NotMapped]
+        public string NmOrigen { get; set; }
     } // Persona
 
     [NotMapped]
