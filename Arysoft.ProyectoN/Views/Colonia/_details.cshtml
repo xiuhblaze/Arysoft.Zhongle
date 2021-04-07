@@ -33,14 +33,6 @@
         <div class="col-md-8">
             <dl class="dl-horizontal">
                 <dt>
-                    Sección
-                </dt>
-
-                <dd>
-                    @Html.DisplayFor(model => model.Seccion.Numero)
-                </dd>
-
-                <dt>
                     @Html.DisplayNameFor(model => model.Nombre)
                 </dt>
 
@@ -105,12 +97,25 @@
                         <span class="badge">@Model.Calles.Count</span>
                     </a>
                 </li>
+                <li>
+                    <a href="#secciones" data-toggle="tab">
+                        <span class="glyphicon glyphicon-erease"></span>
+                        Secciones
+                        <span class="badge">@Model.Secciones.Count</span>
+                    </a>
+                </li>
             </ul>
             <div class="tab-content">
                 <div class="tab-pane fade in active" name="calles" id="calles">
                     <h4>Calles</h4>
                     <div id="listaCalles" name="listaCalles" style="max-height: 360px; overflow-y: scroll;">
                         @Html.Partial("_listaCalles", Model)
+                    </div>
+                </div>
+                <div class="tab-pane fade in" name="secciones" id="secciones">
+                    <h4>Secciones</h4>
+                    <div id="listaSecciones" name="listaSecciones" style="max-height: 360px; overflow-y: scroll;">
+                        @Html.Partial("_listaSecciones", Model)
                     </div>
                 </div>
             </div>

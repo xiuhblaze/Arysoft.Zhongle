@@ -37,7 +37,11 @@
 @section styles {
 
     <link href="~/Content/bootstrap-chosen.css" rel="stylesheet" />
-
+    <style>
+        .chosen-container {
+            width: 100% !important;
+        }
+    </style>
 }
 
 <div class="container">
@@ -80,13 +84,13 @@
                                 </div>
                             </div>
 
-                            <div class="form-group">
-                                @Html.LabelFor(model => model.SeccionID, "Sección", htmlAttributes: new { @class = "control-label col-md-2" })
-                                <div class="col-md-10">
-                                    @Html.DropDownList("SeccionID", null, htmlAttributes: new { @class = "form-control" })
-                                    @Html.ValidationMessageFor(model => model.SeccionID, "", new { @class = "text-danger" })
-                                </div>
-                            </div>
+                            @*<div class="form-group">
+                                    @Html.LabelFor(model => model.SeccionID, "Sección", htmlAttributes: new { @class = "control-label col-md-2" })
+                                    <div class="col-md-10">
+                                        @Html.DropDownList("SeccionID", null, htmlAttributes: new { @class = "form-control" })
+                                        @Html.ValidationMessageFor(model => model.SeccionID, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>*@
 
                             <div class="form-group">
                                 @Html.LabelFor(model => model.CodigoPostal, htmlAttributes: new { @class = "control-label col-md-2" })
@@ -123,12 +127,18 @@
                 </div>
             }
         </div>
-    </div>    
+    </div>
     <ul class="nav nav-tabs">
         <li class="active">
             <a href="#calles" data-toggle="tab">
                 <span class="glyphicon glyphicon-road"></span>
                 Calles
+            </a>
+        </li>
+        <li>
+            <a href="#seccionesTab" data-toggle="tab">
+                <span class="glyphicon glyphicon-erase"></span>
+                Secciones
             </a>
         </li>
     </ul>
@@ -156,7 +166,29 @@
                 @Html.Partial("_listaCalles", Model)
             </div>
         </div>
+        <div class="tab-pane fade in" name="seccionesTab" id="seccionesTab">
+            <h4>Secciones</h4>
 
+            <div class="form-horizontal">
+                <div class="form-group">
+                    <label for="Secciones" class="col-md-2 control-label">Sección</label>
+                    <div class="col-md-8">
+                        @Html.DropDownList("Secciones", null, htmlAttributes: new { @class = "chosen-select" })
+                    </div>
+                    <div class="col-md-2">
+                        <button type="button" id="agregarSeccionButton" name="agregarSeccionButton" class="btn btn-default"
+                                title="Agregar sección">
+                            <span class="glyphicon glyphicon-plus"></span>
+                            Agregar
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="listaSecciones" name="listaSecciones">
+                @Html.Partial("_listaSecciones", Model)
+            </div>
+        </div>
     </div>
 
 </div> <!-- container -->
@@ -214,6 +246,42 @@
                 }
             }); // agregarCalleButton.click
 
+            $('#agregarSeccionButton').on('click', function () {
+                var id = $('select[name=Secciones]').val();
+
+                if (id == '@Guid.Empty.ToString()') {
+                    alert('Es necesario seleccionar una sección');
+                }
+                else {
+                    var url = '@Url.Action("AgregarSeccion", "Colonia")';
+                    var coloniaID = '@Model.ColoniaID.ToString()';
+
+                    $.ajax({
+                        cache: false,
+                        async: true,
+                        type: 'post',
+                        url: url,
+                        data: {
+                            id: id,
+                            coloniaID: coloniaID
+                        },
+                        success: function (vista) {
+                            if (vista.message == null) {
+                                $('#listaSecciones').html(vista);
+                                $('#Secciones').val('@Guid.Empty.ToString()');
+                                $('#Secciones').trigger('chosen:updated'); // https://stackoverflow.com/questions/8980131/changing-selection-in-a-select-with-the-chosen-plugin
+                            }
+                            else {
+                                alert(vista.message);
+                            }
+                        },
+                        error: function (xhr, status, error) {
+                            alert('A ocurrido una excepción: ' + error);
+                        }
+                    });
+                }
+            }); // agregarSeccionButton.click
+
         }); // document.ready
 
         @*function MostrarListaPoblaciones(id) {
@@ -228,7 +296,7 @@
                     var reset = true;
 
                     $('#PoblacionID').empty();
-                    datos.forEach(function (item) {                        
+                    datos.forEach(function (item) {
                         if ('@Model.PoblacionID.ToString()' == item.Value) {
                             $('#PoblacionID').append(new Option(item.Text, item.Value, true, true));
                             reset = false;
@@ -270,5 +338,30 @@
 
             }
         } // eliminarCalle
+
+        function EliminarSeccion(id) {
+            if (confirm('¿Está seguro de quitar la sección de la colonia?')) {
+                var url = '@Url.Action("EliminarSeccion", "Colonia")';
+                var coloniaID = '@Model.ColoniaID.ToString()';
+
+                $.ajax({
+                    cache: false,
+                    async: true,
+                    type: 'post',
+                    url: url,
+                    data: {
+                        id: id,
+                        coloniaID: coloniaID
+                    },
+                    success: function (vista) {
+                        $('#listaSecciones').html(vista);
+                    },
+                    error: function (xhr, status, error) {
+                        alert('A ocurrido una excepción: ' + error);
+                    }
+                });
+            }
+        } // EliminarSeccion
+
     </script>
 }

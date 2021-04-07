@@ -8,7 +8,27 @@
 </div>
 
 <div class="modal-body">
-
+    @if (Model.NmOrigen == "delete")
+    {
+        string title = "";
+        switch (Model.Status)
+        {
+            case StatusTipo.Activo:
+                title = "¿Está seguro de dar de baja esta casilla?";
+                break;
+            case StatusTipo.Baja:
+                title = "¿Está seguro de eliminar esta casilla?";
+                break;
+            case StatusTipo.Eliminado:
+                title = "Casilla eliminada";
+                break;
+        }
+        <div class="row">
+            <div class="col-md-12">
+                <h2 class="text-danger">@title</h2>
+            </div>
+        </div>
+    }
     <div class="row">
         <div class="col-md-8">
 
@@ -158,7 +178,7 @@
             <div class="form-inline">
                 <div class="row">
                     <div class="col-md-6">
-                        
+
                     </div>
                     <div class="col-md-6 text-right">
                         <div class="form-group">
@@ -194,25 +214,25 @@
             <h4>Bingo</h4>
             @if (User.IsInRole("Excel"))
             {
-            <div class="btn-group">
-                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" data-submenu="" aria-haspopup="true" aria-expanded="false">
-                    Acciones <span class="caret"></span>
-                </button>
-                <ul class="dropdown-menu">
-                    <li>
-                        <a href="javascript:void(0);" id="imprimirBingo">
-                            <span class="glyphicon glyphicon-print"></span>
-                            Imprimir Bingo
-                        </a>
-                    </li>
-                    <li>
-                        <a href="javascript:void(0);" id="exportarExcel">
-                            <span class="glyphicon glyphicon-export"></span>
-                            Exportar a Excel
-                        </a>
-                    </li>
-                </ul>
-            </div>
+                <div class="btn-group">
+                    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" data-submenu="" aria-haspopup="true" aria-expanded="false">
+                        Acciones <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li>
+                            <a href="javascript:void(0);" id="imprimirBingo">
+                                <span class="glyphicon glyphicon-print"></span>
+                                Imprimir Bingo
+                            </a>
+                        </li>
+                        <li>
+                            <a href="javascript:void(0);" id="exportarExcel">
+                                <span class="glyphicon glyphicon-export"></span>
+                                Exportar a Excel
+                            </a>
+                        </li>
+                    </ul>
+                </div>
             }
             <div id="listaBingo" name="listaBingo" style="margin-top: 10px; max-height: 650px; overflow-y: scroll;">
                 @Html.Partial("_listaBingo", Model)
@@ -238,20 +258,48 @@
             </button>
 
             @if (User.IsInRole("Admin") || User.IsInRole("Editor"))
-            { 
+            {
                 switch (Model.Status)
                 {
                     case StatusTipo.Activo:
-                        @Html.Raw(
-                            @Html.ActionLink("Editar", "Edit", new { id = Model.CasillaID }, new { @class = "btn btn-primary" }).ToHtmlString()
-                                .Replace("Editar", "<span class='glyphicon glyphicon-edit' title='Editar'></span> Editar")
-                        )
+                        if (Model.NmOrigen == "details")
+                        {
+                            @Html.Raw(
+                                 @Html.ActionLink("Editar", "Edit", new { id = Model.CasillaID }, new { @class = "btn btn-primary" }).ToHtmlString()
+                                     .Replace("Editar", "<span class='glyphicon glyphicon-edit' title='Editar'></span> Editar"))
+                        }
+                        else if (Model.NmOrigen == "delete")
+                        {
+                            <form action="/Casilla/Delete/@Model.CasillaID" method="post" style="float: right; margin-left: .5em;">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn btn-warning">
+                                    <span class='glyphicon glyphicon-trash' title='Dar de Baja'></span> Baja
+                                </button>
+                            </form>
+                        }
                         break;
+
                     case StatusTipo.Baja:
-                        @Html.Raw(
-                            @Html.ActionLink("[activar]", "Activar", new { id = Model.CasillaID }, new { @class = "btn btn-success" }).ToHtmlString()
-                                .Replace("[activar]", "<span class='glyphicon glyphicon-ok' title='Reactivar casilla'></span> Reactivar")
-                        )
+                        switch (Model.NmOrigen)
+                        {
+                            case "details":
+                                <form action="/Casilla/Activar/@Model.CasillaID" method="post" style="float: right; margin-left: .5em;">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn btn-success">
+                                        <span class='glyphicon glyphicon-ok' title='Reactivar'></span> Reactivar
+                                    </button>
+                                </form>
+                                break;
+
+                            case "delete":
+                                <form action="/Casilla/Delete/@Model.CasillaID" method="post" style="float: right; margin-left: .5em;">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn btn-danger">
+                                        <span class='glyphicon glyphicon-trash' title='Eliminar'></span> Eliminar
+                                    </button>
+                                </form>
+                                break;
+                        }
                         break;
                 }
             }

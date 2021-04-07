@@ -991,11 +991,19 @@ namespace Arysoft.ProyectoN.Controllers
 
             foreach (var item in colonias)
             {
-                string seccion = item.Seccion != null ? " [" + item.Seccion.Numero + "]" : "";
+                string secciones = string.Empty;
+
+                if (item.Secciones != null)
+                {
+                    foreach (var seccion in item.Secciones)
+                    {
+                        secciones += "[" + seccion.Numero + "]";
+                    }
+                }
 
                 listado.Add(new SelectListItem
                 {
-                    Text = item.Nombre + " (" + item.Poblacion.Nombre + ")" + seccion,
+                    Text = item.Nombre + " (" + item.Poblacion.Nombre + ")" + secciones,
                     Value = item.ColoniaID.ToString(),
                     Selected = (item.ColoniaID == selectedID)
                 });

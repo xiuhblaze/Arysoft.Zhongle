@@ -73,5 +73,11 @@ namespace Arysoft.ProyectoN.Models
         [NotMapped]
         public bool SoloLectura { get; set; }
 
+        /// <summary>
+        /// Obtiene o establece un valor que se pasa a las vistas y determina si el origen del modelo
+        /// es desde un metodo de consulta o para dar de baja el registro
+        /// </summary>
+        [NotMapped]
+        public string NpOrigen { get; set; }
     } // Seccion
 }

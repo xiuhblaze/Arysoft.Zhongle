@@ -70,12 +70,7 @@
                 <tr>
                     <th></th>
                     <th>
-                        @Html.ActionLink("Sección", "Index", new
-                        {
-                            orden = ViewBag.OrdenSeccion,
-                            filtro = ViewBag.Filtro,
-                            pagina = Model.PageNumber
-                        })
+                        Secciones
                     </th>
                     <th>
                         @Html.ActionLink("Nombre", "Index", new
@@ -131,7 +126,13 @@
                             @Html.Raw(classStatusIcon)
                         </td>
                         <td style="cursor: pointer" onclick="getDetails('@item.ColoniaID')">
-                            @Html.DisplayFor(modelItem => item.Seccion.Numero)
+                            @if (item.Secciones != null)
+                            {
+                                foreach (var seccion in item.Secciones)
+                                {
+                                    <span class="label label-primary">@seccion.Numero</span>
+                                }
+                            }
                         </td>
                         <td style="cursor: pointer" onclick="getDetails('@item.ColoniaID')">
                             @Html.DisplayFor(modelItem => item.Nombre)

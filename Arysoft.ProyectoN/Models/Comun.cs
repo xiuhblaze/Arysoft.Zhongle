@@ -187,7 +187,8 @@ public static class Comun
             Representantes = casillaEditModel.Representantes,
             Notas = casillaEditModel.Notas,
 
-            SoloLectura = soloLectura
+            SoloLectura = soloLectura,
+            NmOrigen = casillaEditModel.NmOrigen
         };
 
         return c;
@@ -213,7 +214,8 @@ public static class Comun
             PersonaResponsable = casilla.PersonaResponsable ?? new Persona(),
             Votantes = casilla.Votantes ?? new List<Voto>(),
             Representantes = casilla.Representantes ?? new List<Persona>(),
-            Notas = casilla.Notas ?? new List<Nota>()
+            Notas = casilla.Notas ?? new List<Nota>(),
+            NmOrigen = casilla.NmOrigen
         };
 
         if (casilla.Ubicacion != null)

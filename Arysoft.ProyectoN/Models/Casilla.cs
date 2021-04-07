@@ -14,10 +14,10 @@ namespace Arysoft.ProyectoN.Models
         public Guid CasillaID { get; set; }
                 
         [Display(Name = "Sección")]
-        public Guid SeccionID { get; set; }
+        public Guid? SeccionID { get; set; }
 
         [Display(Name = "Ubicación")]
-        public Guid UbicacionID { get; set; }
+        public Guid? UbicacionID { get; set; }
         
         [Display(Name = "Afiliado responsable")]
         public Guid? PersonaResponsableID { get; set; }
@@ -140,6 +140,9 @@ namespace Arysoft.ProyectoN.Models
 
         [NotMapped]
         public bool SoloLectura { get; set; }
+
+        [NotMapped]
+        public string NmOrigen { get; set; }
     }
 
     [NotMapped]

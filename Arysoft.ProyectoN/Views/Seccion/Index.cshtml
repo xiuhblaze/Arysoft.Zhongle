@@ -199,20 +199,25 @@
                         </div>
                     </td>
 
-                    @if (User.IsInRole("Admin") || User.IsInRole("Editor"))
-                    { 
                     <td class="text-right">
-                        @Html.Raw(
+                        @if ((User.IsInRole("Admin") || User.IsInRole("Editor"))
+                            && item.Status != StatusTipo.Eliminado)
+                        {
+                            @Html.Raw(
                                 @Html.ActionLink("Editar", "Edit", new { id = item.SeccionID }).ToHtmlString()
                                     .Replace("Editar", "<span class='glyphicon glyphicon-edit glyphicon-table-action-size' title='Editar'></span>")
                             )
-
-                        @Html.Raw(
-                                @Html.ActionLink("Eliminar", "Delete", new { id = item.SeccionID }).ToHtmlString()
-                                    .Replace("Eliminar", "<span class='glyphicon glyphicon-trash glyphicon-table-action-size' title='Eliminar'></span>")
-                            )
+                        }
+                        <a href="#" onclick="getDetails('@item.SeccionID'); return false;">
+                            <span class='glyphicon glyphicon-new-window glyphicon-table-action-size' title='Detalles'></span>
+                        </a>
+                        @if (User.IsInRole("Admin") && item.Status != StatusTipo.Eliminado)
+                        {
+                            <a href="#" onclick="getDelete('@item.SeccionID'); return false;" class="text-danger">
+                                <span class='glyphicon glyphicon-trash glyphicon-table-action-size' title='Eliminar'></span>
+                            </a>
+                        }
                     </td>
-                    }
                 </tr>
             }
             </tbody>
@@ -222,7 +227,7 @@
 
 @section scripts {
 
-<script>
+    <script>
 
     var modalDetailsOriginalContent = $('#detalles-modal-content').html();
 
@@ -301,6 +306,42 @@
             });
     } // getPersonaDetails
 
+    function getDelete(id) {
+        var url = '@Url.Action("Delete", "Seccion")/' + id;
+
+        $('#detailsModal').modal('show');
+        $.ajax({
+            cache: false,
+            async: true,
+            type: 'get',
+            url: url,
+            data: {},
+            beforeSend: function () {
+                $('#detalles-modal-body').html('<p class="text-center" style="margin: 50px;"><img src="@Url.Content("~/Images/ajax-loader.gif")" /></p>');
+            },
+            success: function(vista) {
+                switch (vista) {
+                    case "notid":
+                        alert('No se recibió un identificador de la sección');
+                        $('#detailsModal').modal('hide');
+                        $('#detalles-modal-content').html(modalDetailsOriginalContent);
+                        break;
+                    case "notfound":
+                        alert('No se encontró la sección solicitada');
+                        $('#detailsModal').modal('hide');
+                        $('#detalles-modal-content').html(modalDetailsOriginalContent);
+                        break;
+                    default:
+                        $('#detalles-modal-content').html(vista);
+                        break;
+                }
+            },
+            error: function (xhr, status, error) {
+                alert('A ocurrido una excepción: ' + status + '\n error: ' + error);
+            }
+        });
+    } // getDelete
+
     $(document).ready(function () {
 
         $('#detailsModal').on('hidden.bs.modal', function (e) {
@@ -311,6 +352,6 @@
     });
 
 
-</script>
+    </script>
 
 }

@@ -44,16 +44,6 @@ else
                     <th id="colNombreCompleto">
                         Nombre completo
                     </th>
-
-                    <th>
-                        Brigada
-                    </th>
-                    <th id="colUbicacion">
-                        Ubicación
-                    </th>
-                    <th>
-                        (vota)
-                    </th>
                     <th>
                         Contacto
                     </th>
@@ -124,7 +114,7 @@ else
                                 <span class="glyphicon glyphicon-erase glyphicon-table-action-size text-danger" title="Posiblemente votará por otro partido, ver historial de auditorias."></span>
                             }
 
-                            @if (item.Persona.TieneBarda == BoolTipo.Si && item.Persona.TieneLona == BoolTipo.Si)
+                            @*@if (item.Persona.TieneBarda == BoolTipo.Si && item.Persona.TieneLona == BoolTipo.Si)
                             {
                                 <span class="glyphicon glyphicon-tags glyphicon-table-action-size text-primary" title="Cuenta con barda y lona"></span>
                             }
@@ -139,7 +129,7 @@ else
                             else
                             {
                                 <span class="glyphicon glyphicon-tag glyphicon-table-action-size text-muted" title="Sin barda ni lona"></span>
-                            }
+                            }*@
 
                             @if (item.Persona.Notas.Count == 0)
                             {
@@ -157,7 +147,7 @@ else
                         </td>
                         <td class="text-right" style="cursor: pointer" onclick="getVotanteDetails('@item.Persona.PersonaID')">
                             @Html.DisplayFor(modelItem => item.Persona.Seccion.Numero)
-                        </td>                        
+                        </td>
                         @if (Model.SoloLectura)
                         {
                             <td class="text-right" style="cursor: pointer" onclick="getVotanteDetails('@item.Persona.PersonaID')">
@@ -169,8 +159,8 @@ else
                             <td>
                                 <input type="text" id="@item.VotoID" value="@item.NumeroINE" class="form-control input-sm text-right control-ine" data-id="@item.Persona.PersonaID" />
                             </td>
-                        }                        
-                        <td style="cursor: pointer" onclick="getVotanteDetails('@item.Persona.PersonaID')">                            
+                        }
+                        <td style="cursor: pointer" onclick="getVotanteDetails('@item.Persona.PersonaID')">
                             @Html.DisplayFor(modelItem => item.Persona.NombreCompleto)
                             @if (item.Persona.Afinidad == AfinidadTipo.PorAfiliado || item.Persona.Afinidad == AfinidadTipo.PorSector)
                             {
@@ -180,59 +170,6 @@ else
                                 </small>
                             }
                         </td>
-                        <td style="cursor: pointer" onclick="getVotanteDetails('@item.Persona.PersonaID')">
-                            @Html.DisplayFor(modelItem => item.Persona.Sector.Nombre)
-                        </td>
-                        <td style="cursor: pointer" onclick="getVotanteDetails('@item.Persona.PersonaID')" @Html.Raw(item.Persona.VotaEnDomicilio == BoolTipo.Si ? "colspan='2'" : "")>
-                            <span class="glyphicon glyphicon-home glyphicon-table-info-size"></span>
-                            @if (item.Persona.UbicacionVive != null)
-                            {
-                                <span>
-                                    @if (item.Persona.UbicacionVive.Calle != null)
-                                    {<span>@item.Persona.UbicacionVive.Calle.Nombre</span>}
-                                    @item.Persona.UbicacionVive.NumExterior
-                                    @if (!string.IsNullOrEmpty(item.Persona.UbicacionVive.Letra))
-                                    {<span>@item.Persona.UbicacionVive.Letra</span>}
-                                    @if (!string.IsNullOrEmpty(item.Persona.UbicacionVive.NumInterior))
-                                    {<span>@item.Persona.UbicacionVive.NumInterior</span>}
-                                    @if (item.Persona.UbicacionVive.Colonia != null)
-                                    {
-                                        @item.Persona.UbicacionVive.Colonia.Nombre
-                                        <span>C.P.</span> @item.Persona.UbicacionVive.Colonia.CodigoPostal
-                                    }
-                                    @if (!string.IsNullOrEmpty(item.Persona.UbicacionVive.Descripcion))
-                                    {<br /><span class="text-muted">@item.Persona.UbicacionVive.Descripcion</span>}
-                                </span>
-                            }
-                        </td>
-                        @if (item.Persona.VotaEnDomicilio == BoolTipo.No)
-                        {
-                            <td style="cursor: pointer" onclick="getVotanteDetails('@item.Persona.PersonaID')">
-                                <span class="text-warning" title="Domicilio donde vota">
-                                    <span class="glyphicon glyphicon-erase glyphicon-table-info-size"></span>
-                                    @if (item.Persona.UbicacionVota != null)
-                                    {
-                                        <span>
-                                            @if (item.Persona.UbicacionVota.Calle != null)
-                                            {<span>@item.Persona.UbicacionVota.Calle.Nombre</span>}
-                                            @item.Persona.UbicacionVota.NumExterior
-                                            @if (!string.IsNullOrEmpty(item.Persona.UbicacionVota.Letra))
-                                            {<span>@item.Persona.UbicacionVota.Letra</span>}
-                                            @if (!string.IsNullOrEmpty(item.Persona.UbicacionVota.NumInterior))
-                                            {<span>@item.Persona.UbicacionVota.NumInterior</span>}
-                                            @if (item.Persona.UbicacionVota.Colonia != null)
-                                            {
-                                                @item.Persona.UbicacionVota.Colonia.Nombre
-                                                <span>C.P.</span> @item.Persona.UbicacionVota.Colonia.CodigoPostal
-                                            }
-                                            @if (!string.IsNullOrEmpty(item.Persona.UbicacionVota.Descripcion))
-                                            {<br /><span class="text-muted">@item.Persona.UbicacionVota.Descripcion</span>}
-                                        </span>
-                                    }
-                                </span>
-                            </td>
-                        }
-
                         <td style="cursor: pointer" onclick="getVotanteDetails('@item.Persona.PersonaID')">
                             <span class="glyphicon glyphicon-phone-alt glyphicon-table-info-size"></span>
                             @Html.DisplayFor(modelItem => item.Persona.Telefono) <br />
@@ -330,7 +267,7 @@ else
 
         var tablaVotantes = $('#tableVotantes');
 
-        $('#colINE, #colNombreCompleto, #colUbicacion')
+        $('#colINE, #colNombreCompleto')
             .wrapInner('<span title="Ordenar por esta columna" class="text-primary" style="cursor: pointer;" />')
             .each(function () {
                 var th = $(this);

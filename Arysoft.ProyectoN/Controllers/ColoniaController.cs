@@ -36,7 +36,7 @@ namespace Arysoft.ProyectoN.Controllers
 
             var colonias = db.Colonias
                 .Include(c => c.Poblacion)
-                .Include(c => c.Seccion)
+                .Include(c => c.Secciones)
                 .Include(c => c.Calles)
                 .Where(c => c.Status != StatusTipo.Ninguno);
 
@@ -49,7 +49,7 @@ namespace Arysoft.ProyectoN.Controllers
                     || c.CodigoPostal.Contains(buscar)
                     || c.Poblacion.Nombre.Contains(buscar)
                     && 
-                    seccion == 0 ? true : c.Seccion.Numero == seccion
+                    seccion == 0 ? true : c.Secciones.Where(s => s.Numero == seccion).Count() > 0
                 );
             }
 
@@ -57,12 +57,12 @@ namespace Arysoft.ProyectoN.Controllers
                 case "nombre_desc":
                     colonias = colonias.OrderByDescending(c => c.Nombre);
                     break;
-                case "seccion":
-                    colonias = colonias.OrderBy(c => c.Seccion.Numero).ThenBy(c => c.Nombre);
-                    break;
-                case "seccion_desc":
-                    colonias = colonias.OrderByDescending(c => c.Seccion.Numero).ThenBy(c => c.Nombre);
-                    break;
+                //case "seccion":
+                //    colonias = colonias.OrderBy(c => c.Seccion.Numero).ThenBy(c => c.Nombre);
+                //    break;
+                //case "seccion_desc":
+                //    colonias = colonias.OrderByDescending(c => c.Seccion.Numero).ThenBy(c => c.Nombre);
+                //    break;
                 case "cp":
                     colonias = colonias.OrderBy(c => c.CodigoPostal).ThenBy(c => c.Nombre);
                     break;
@@ -96,7 +96,7 @@ namespace Arysoft.ProyectoN.Controllers
             }
             Colonia colonia = await db.Colonias
                 .Include(c => c.Poblacion)
-                .Include(c => c.Seccion)
+                .Include(c => c.Secciones)
                 .Include(c => c.Calles)
                 .Where(c => c.ColoniaID == id)
                 .FirstOrDefaultAsync();
@@ -161,6 +161,7 @@ namespace Arysoft.ProyectoN.Controllers
             }
             Colonia colonia = await db.Colonias
                 .Include(c => c.Calles)
+                .Include(c => c.Secciones)
                 .Include(c => c.Poblacion)
                 .FirstOrDefaultAsync(c => c.ColoniaID == id);
             if (colonia == null)
@@ -174,8 +175,9 @@ namespace Arysoft.ProyectoN.Controllers
             //}
             colonia.NpSoloLectura = false;
             ViewBag.PoblacionID = await ObtenerListaPoblacionesAsync(colonia.PoblacionID);
-            ViewBag.SeccionID = await ObtenerListaSeccionesAsync(colonia.SeccionID ?? Guid.Empty);
+            //ViewBag.SeccionID = await ObtenerListaSeccionesAsync(colonia.SeccionID ?? Guid.Empty);
             ViewBag.Calles = await ObtenerListaCallesAsync();
+            ViewBag.Secciones = await ObtenerListaSeccionesAsync(Guid.Empty);
             // ViewBag.Municipios = await ObtenerListaMunicipiosAsync(colonia.Poblacion.MunicipioID);
 
             return View(colonia);
@@ -187,7 +189,7 @@ namespace Arysoft.ProyectoN.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Admin")]
-        public async Task<ActionResult> Edit([Bind(Include = "ColoniaID,PoblacionID,SeccionID,Nombre,CodigoPostal,Status,UserNameActualizacion,FechaActualizacion")] Colonia colonia)
+        public async Task<ActionResult> Edit([Bind(Include = "ColoniaID,PoblacionID,Nombre,CodigoPostal,Status,UserNameActualizacion,FechaActualizacion")] Colonia colonia)
         {
             bool esNuevo = colonia.Status == StatusTipo.Ninguno;
 
@@ -210,7 +212,7 @@ namespace Arysoft.ProyectoN.Controllers
             }
             colonia.NpSoloLectura = false;
             ViewBag.PoblacionID = await ObtenerListaPoblacionesAsync(colonia.PoblacionID);
-            ViewBag.SeccionID = await ObtenerListaSeccionesAsync(colonia.SeccionID ?? Guid.Empty);
+            //ViewBag.SeccionID = await ObtenerListaSeccionesAsync(colonia.SeccionID ?? Guid.Empty);
             ViewBag.Calles = await ObtenerListaCallesAsync();
             // ViewBag.Municipios = await ObtenerListaMunicipiosAsync(colonia.Poblacion.MunicipioID);
 
@@ -230,7 +232,7 @@ namespace Arysoft.ProyectoN.Controllers
             }
             Colonia colonia = await db.Colonias
                 .Include(c => c.Poblacion)
-                .Include(c => c.Seccion)
+                .Include(c => c.Secciones)
                 .Include(c => c.Calles)
                 .Where(c => c.ColoniaID == id)
                 .FirstOrDefaultAsync();
@@ -350,6 +352,35 @@ namespace Arysoft.ProyectoN.Controllers
 
             return PartialView("_listaCalles", colonia);
         } // EliminarCalle
+
+        [Authorize(Roles = "Admin")]
+        public async Task<ActionResult> AgregarSeccion(Guid id, Guid coloniaID)
+        {
+            Colonia colonia = await db.Colonias
+                .Include(c => c.Secciones)
+                .FirstOrDefaultAsync(c => c.ColoniaID == coloniaID);
+            Seccion seccion = await db.Secciones.FindAsync(id);
+
+            colonia.Secciones.Add(seccion);
+            db.Entry(colonia).State = EntityState.Modified;
+            await db.SaveChangesAsync();
+
+            return PartialView("_listaSecciones", colonia);
+        } // AgregarSeccion
+
+        public async Task<ActionResult> EliminarSeccion(Guid id, Guid coloniaID)
+        {
+            Colonia colonia = await db.Colonias
+                .Include(c => c.Secciones)
+                .FirstOrDefaultAsync(c => c.ColoniaID == coloniaID);
+            Seccion seccion = await db.Secciones.FindAsync(id);
+
+            colonia.Secciones.Remove(seccion);
+            db.Entry(colonia).State = EntityState.Modified;
+            await db.SaveChangesAsync();
+
+            return PartialView("_listaSecciones", colonia);
+        } // Eliminar Sección
 
         // METODOS PRIVADOS
 

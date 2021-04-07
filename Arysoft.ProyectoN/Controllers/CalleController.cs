@@ -33,6 +33,7 @@ namespace Arysoft.ProyectoN.Controllers
 
             var calles = db.Calles
                 .Include(c => c.Colonias)
+                .Include(c => c.Colonias.Select(col => col.Secciones))
                 .Where(c => c.Status != StatusTipo.Ninguno);
 
             if (!string.IsNullOrEmpty(buscar) || !string.IsNullOrEmpty(status))
@@ -97,7 +98,7 @@ namespace Arysoft.ProyectoN.Controllers
             }
             Calle calle = await db.Calles
                 .Include(c => c.Colonias)
-                .Include(c => c.Colonias.Select(col => col.Seccion))
+                .Include(c => c.Colonias.Select(col => col.Secciones))
                 .Include(c => c.Colonias.Select(col => col.Poblacion))
                 .Where(c => c.CalleID == id)
                 .FirstOrDefaultAsync();
@@ -158,7 +159,7 @@ namespace Arysoft.ProyectoN.Controllers
             }
             Calle calle = await db.Calles
                 .Include(c => c.Colonias)
-                .Include(c => c.Colonias.Select(col => col.Seccion))
+                .Include(c => c.Colonias.Select(col => col.Secciones))
                 .Include(c => c.Colonias.Select(col => col.Poblacion))
                 .FirstOrDefaultAsync(c => c.CalleID == id);
             if (calle == null)
@@ -217,7 +218,7 @@ namespace Arysoft.ProyectoN.Controllers
             }
             Calle calle = await db.Calles
                 .Include(c => c.Colonias)
-                .Include(c => c.Colonias.Select(col => col.Seccion))
+                .Include(c => c.Colonias.Select(col => col.Secciones))
                 .Include(c => c.Colonias.Select(col => col.Poblacion))
                 .Where(c => c.CalleID == id)
                 .FirstOrDefaultAsync();

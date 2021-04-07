@@ -812,11 +812,20 @@ namespace Arysoft.ProyectoN.Controllers
                 .Where(p => p.Status == StatusTipo.Activo)
                 .OrderBy(p => p.Nombre))
             {
-                string seccion = item.Seccion != null ? " [" + item.Seccion.Numero + "]" : "";
+                // string seccion = item.Seccion != null ? " [" + item.Seccion.Numero + "]" : "";
+                string secciones = string.Empty;  //item.Seccion != null ? " [" + item.Seccion.Numero + "]" : "";
+
+                if (item.Secciones != null)
+                {
+                    foreach (var seccion in item.Secciones)
+                    {
+                        secciones += "[" + seccion.Numero + "]";
+                    }
+                }
 
                 listado.Add(new SelectListItem
                 {
-                    Text = item.Nombre + " (" + item.Poblacion.Nombre + ")" + seccion,
+                    Text = item.Nombre + " (" + item.Poblacion.Nombre + ")" + secciones,
                     Value = item.ColoniaID.ToString(),
                     Selected = (item.ColoniaID == selectedID)
                 });

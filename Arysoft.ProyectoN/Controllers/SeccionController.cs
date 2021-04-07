@@ -39,6 +39,7 @@ namespace Arysoft.ProyectoN.Controllers
                 .Include(s => s.Sector)
                 .Include(s => s.Personas)
                 .Include(s => s.Casillas)
+                .Include(s => s.Colonias)
                 .Where(s => s.Status != StatusTipo.Ninguno);
 
             if (!string.IsNullOrEmpty(buscar))
@@ -102,10 +103,13 @@ namespace Arysoft.ProyectoN.Controllers
             }
             Seccion seccion = await db.Secciones
                 .Include(s => s.Casillas)
+                .Include(s => s.Casillas.Select(c => c.Ubicacion))
+                .Include(s => s.Casillas.Select(c => c.Ubicacion.Calle))
                 .Include(s => s.Colonias)
+                .Include(s => s.Colonias.Select(c => c.Poblacion))
                 .Include(s => s.Personas)
+                .Include(s => s.Personas.Select(p => p.Promotor))
                 .Include(s => s.Personas.Select(p => p.Notas))
-                .Include(s => s.Sector)
                 .Where(s => s.SeccionID == id)
                 .FirstOrDefaultAsync();
             if (seccion == null)
@@ -122,6 +126,7 @@ namespace Arysoft.ProyectoN.Controllers
 
             if (Request.IsAjaxRequest())
             {
+                seccion.NpOrigen = "details";
                 return PartialView("_details", seccion);
             }
 
@@ -132,14 +137,14 @@ namespace Arysoft.ProyectoN.Controllers
         [Authorize(Roles = "Admin, Editor")]
         public async Task<ActionResult> Create()
         {
-            await EliminarRegistrosTemporalesAsync(ControllerContext.HttpContext.User.Identity.Name);
+            await EliminarRegistrosTemporalesAsync(User.Identity.Name);
 
             Seccion seccion = new Seccion();
 
             seccion.SeccionID = Guid.NewGuid();
             seccion.SectorID = Guid.Empty;
             seccion.Status = StatusTipo.Ninguno;
-            seccion.UserNameActualizacion = ControllerContext.HttpContext.User.Identity.Name;
+            seccion.UserNameActualizacion = User.Identity.Name;
             seccion.FechaActualizacion = DateTime.Now;
 
             db.Secciones.Add(seccion);
@@ -157,7 +162,7 @@ namespace Arysoft.ProyectoN.Controllers
 
             //ViewBag.SectorID = new SelectList(db.Sectores, "SectorID", "Nombre");
             //return View();
-        }
+        } // Create
 
         // GET: Seccion/Edit/5
         [Authorize(Roles = "Admin, Editor")]
@@ -169,7 +174,16 @@ namespace Arysoft.ProyectoN.Controllers
                 TempData["MessageBox"] = "No se recibió el identificador.";
                 return RedirectToAction("Index");
             }
-            Seccion seccion = await db.Secciones.FindAsync(id);
+            Seccion seccion = await db.Secciones
+                .Include(s => s.Casillas)
+                .Include(s => s.Casillas.Select(c => c.Ubicacion))
+                .Include(s => s.Casillas.Select(c => c.Ubicacion.Calle))
+                .Include(s => s.Colonias)
+                .Include(s => s.Colonias.Select(c => c.Poblacion))
+                .Include(s => s.Personas)
+                .Include(s => s.Personas.Select(p => p.Promotor))
+                .Include(s => s.Personas.Select(p => p.Notas))
+                .FirstOrDefaultAsync(s => s.SeccionID == id);
             if (seccion == null)
             {
                 //return HttpNotFound();
@@ -182,7 +196,7 @@ namespace Arysoft.ProyectoN.Controllers
             ViewBag.SectorID = new SelectList(db.Sectores.Where(s => s.Status == StatusTipo.Activo).OrderBy(s => s.Nombre), "SectorID", "Nombre", seccion.SectorID);
 
             return View(seccion);
-        }
+        } // Edit
 
         // POST: Seccion/Edit/5
         // Para protegerse de ataques de publicación excesiva, habilite las propiedades específicas a las que desea enlazarse. Para obtener 
@@ -206,7 +220,7 @@ namespace Arysoft.ProyectoN.Controllers
 
             if (ModelState.IsValid)
             {
-                seccion.UserNameActualizacion = ControllerContext.HttpContext.User.Identity.Name;
+                seccion.UserNameActualizacion = User.Identity.Name;
                 seccion.FechaActualizacion = DateTime.Now;
                 db.Entry(seccion).State = EntityState.Modified;
                 await db.SaveChangesAsync();
@@ -235,13 +249,29 @@ namespace Arysoft.ProyectoN.Controllers
                 if (Request.IsAjaxRequest()) { return Content("notid"); }
                 return RedirectToAction("Index");
             }
-            Seccion seccion = await db.Secciones.FindAsync(id);
+            Seccion seccion = await db.Secciones
+                .Include(s => s.Casillas)
+                .Include(s => s.Casillas.Select(c => c.Ubicacion))
+                .Include(s => s.Casillas.Select(c => c.Ubicacion.Calle))
+                .Include(s => s.Colonias)
+                .Include(s => s.Colonias.Select(c => c.Poblacion))
+                .Include(s => s.Personas)
+                .Include(s => s.Personas.Select(p => p.Promotor))
+                .Include(s => s.Personas.Select(p => p.Notas))
+                .Where(s => s.SeccionID == id)
+                .FirstOrDefaultAsync();
             if (seccion == null)
             {
                 //return HttpNotFound();
                 TempData["MessageBox"] = "No se encontró el registro del identificador.";
                 if (Request.IsAjaxRequest()) { return Content("notfound"); }
                 return RedirectToAction("Index");
+            }
+            seccion.SoloLectura = true;
+            if (Request.IsAjaxRequest())
+            {
+                seccion.NpOrigen = "delete";
+                return PartialView("_details", seccion);
             }
             return View(seccion);
         } // Delete
@@ -253,10 +283,58 @@ namespace Arysoft.ProyectoN.Controllers
         public async Task<ActionResult> DeleteConfirmed(Guid id)
         {
             Seccion seccion = await db.Secciones.FindAsync(id);
-            db.Secciones.Remove(seccion);
-            db.SaveChanges();
+
+            if (seccion.Status == StatusTipo.Activo)
+            {
+                seccion.Status = StatusTipo.Baja;
+                seccion.UserNameActualizacion = User.Identity.Name;
+                seccion.FechaActualizacion = DateTime.Now;
+                db.Entry(seccion).State = EntityState.Modified;
+            }
+            else if (seccion.Status == StatusTipo.Baja)
+            {
+                seccion.Status = StatusTipo.Eliminado;
+                seccion.UserNameActualizacion = User.Identity.Name;
+                seccion.FechaActualizacion = DateTime.Now;
+                db.Entry(seccion).State = EntityState.Modified;
+            }
+            else
+            {
+                db.Secciones.Remove(seccion);
+            }
+            await db.SaveChangesAsync();
             return RedirectToAction("Index");
         }
+
+        // POST: Calle/Activar/5
+        [Authorize(Roles = "Admin, Editor")]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<ActionResult> Activar(Guid id)
+        {
+            Seccion seccion = await db.Secciones.FindAsync(id);
+            if (seccion == null)
+            {
+                TempData["MessageBox"] = "No se encontró el registro del identificador.";
+                return RedirectToAction("Index");
+            }
+            seccion.Status = StatusTipo.Activo;
+            seccion.UserNameActualizacion = ControllerContext.HttpContext.User.Identity.Name;
+            seccion.FechaActualizacion = DateTime.Now;
+            db.Entry(seccion).State = EntityState.Modified;
+            try
+            {
+                await db.SaveChangesAsync();
+            }
+            catch (Exception e)
+            {
+                TempData["MessageBox"] = "A ocurrido una excepción: " + e.Message;
+                return RedirectToAction("Index");
+            }
+            TempData["MessageBox"] = "La sección ha sido reactivada.";
+
+            return RedirectToAction("Index");
+        } // Activar
 
         protected override void Dispose(bool disposing)
         {

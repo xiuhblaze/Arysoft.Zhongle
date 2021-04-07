@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -16,6 +17,8 @@ namespace Arysoft.ProyectoN.Models
         public Guid PoblacionID { get; set; }
 
         [Display(Name = "Sección")]
+        [Obsolete("Esta propiedad no debe de ser utilizada, mejor utilice la colección Secciones", error: true)]
+        [EditorBrowsable(EditorBrowsableState.Never)] // https://geeks.ms/jorge/2017/08/25/algunos-consejos-y-recomendaciones-cuando-trabajamos-con-el-atributo-obsolete/
         public Guid? SeccionID { get; set; }
 
         [StringLength(100)]
@@ -39,7 +42,9 @@ namespace Arysoft.ProyectoN.Models
                 
         public Poblacion Poblacion { get; set; }
 
-        public Seccion Seccion { get; set; }
+        // public Seccion Seccion { get; set; }
+
+        public ICollection<Seccion> Secciones { get; set; }
 
         public ICollection<Calle> Calles { get; set; }
 

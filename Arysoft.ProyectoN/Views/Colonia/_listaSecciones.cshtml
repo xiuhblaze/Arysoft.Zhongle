@@ -1,0 +1,41 @@
+﻿@model Arysoft.ProyectoN.Models.Colonia
+
+<div class="table-responsive">
+    <table class="table table-hover">
+        <thead>
+            <tr>                
+                <th>
+                    Número
+                </th>
+                <th>
+                    Descripción
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.Secciones)
+            {   
+                <tr>                    
+                    <td class="text-right">
+                        <span class="label label-primary">
+                            @Html.DisplayFor(modelItem => item.Numero)
+                        </span>
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Descripcion)
+                    </td>
+                    @if (!Model.NpSoloLectura)
+                    { 
+                        <td class="text-right">
+                            <button id="seccionEliminar" name="seccionEliminar" class="btn btn-link" 
+                                    title="Quitar sección de la colonia"
+                                    onclick="EliminarSeccion('@item.SeccionID')">
+                                <span class="glyphicon glyphicon-trash glyphicon-table-action-size text-danger"></span>
+                            </button>
+                        </td>
+                    }
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

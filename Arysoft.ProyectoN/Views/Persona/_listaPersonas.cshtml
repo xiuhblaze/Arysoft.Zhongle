@@ -217,13 +217,19 @@ else
                     <td style="cursor: pointer" onclick="getPersonaDetails('@item.PersonaID')">
                         @item.Afinidad.GetDisplayName()
                         @if (item.Afinidad == AfinidadTipo.Movilizador || item.Afinidad == AfinidadTipo.Simpatizante)
-                    {
-                        int porSector = item.PersonasAfines.Where(p => p.Afinidad == AfinidadTipo.PorSector).Count();
-                        int porAfiliado = item.PersonasAfines.Where(p => p.Afinidad == AfinidadTipo.PorAfiliado).Count();
-                        <br />
-                        <span class="badge" title="@AfinidadTipo.PorSector.GetDisplayName()">@porSector</span>
-                        <span class="badge" title="@AfinidadTipo.PorAfiliado.GetDisplayName()">@porAfiliado</span>
-                }
+                        {
+                            int porSector = 0;
+                            int porAfiliado = 0;
+
+                            if (item.PersonasAfines != null)
+                            {
+                                porSector = item.PersonasAfines.Where(p => p.Afinidad == AfinidadTipo.PorSector).Count();
+                                porAfiliado = item.PersonasAfines.Where(p => p.Afinidad == AfinidadTipo.PorAfiliado).Count();
+                            }
+                            <br />
+                            <span class="badge" title="@AfinidadTipo.PorSector.GetDisplayName()">@porSector</span>
+                            <span class="badge" title="@AfinidadTipo.PorAfiliado.GetDisplayName()">@porAfiliado</span>
+                        }
                     </td>
                     @if (!Model.SoloLectura)
                     {

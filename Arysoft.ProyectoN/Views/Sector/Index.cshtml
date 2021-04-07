@@ -4,6 +4,15 @@
 
 @{
     ViewBag.Title = "Sectores";
+
+    var statusList = Enum.GetValues(typeof(StatusTipo))
+        .Cast<StatusTipo>().Where(e => e != StatusTipo.Eliminado)
+        .Select(e => new SelectListItem
+        {
+            Value = e.ToString(),
+            Text = e == StatusTipo.Ninguno ? "(status)" : e.GetDisplayName(),
+            Selected = ViewBag.Status == e.ToString()
+        });
 }
 
 <div id="detailsModal" class="modal fade" tabindex="-1" role="dialog" style="display: none;">
@@ -28,16 +37,23 @@
             <div class="col-md-12">
                 <div class="form-inline">
                     @if (User.IsInRole("Admin") || User.IsInRole("Editor"))
-                    { 
-                    @Html.Raw(
-                        Html.ActionLink("[replace]", "Create", null, new { @class = "btn btn-link", @title = "Nuevo sector" }).ToHtmlString()
-                            .Replace("[replace]", "<span class='glyphicon glyphicon-file glyphicon-toolbar-size' ></span>")
-                    )
+                    {
+                        @Html.Raw(
+                            Html.ActionLink("[replace]", "Create", null, new { @class = "btn btn-link", @title = "Nuevo sector" }).ToHtmlString()
+                                .Replace("[replace]", "<span class='glyphicon glyphicon-file glyphicon-toolbar-size' ></span>")
+                        )
                     }
                     <div class="form-group">
                         <label for="buscar" class="sr-only">Buscar</label>
                         @Html.TextBox("buscar", ViewBag.Filtro as string, htmlAttributes: new { @class = "form-control", @placeholder = "buscar..." })
                     </div>
+                    @if (User.IsInRole("Admin") || User.IsInRole("Editor"))
+                    {
+                        <div class="form-group">
+                            <label for="status" class="sr-only">Status</label>
+                            @Html.DropDownList("status", statusList, htmlAttributes: new { @class = "form-control" })
+                        </div>
+                    }
                     <div class="form-group">
                         <button type="submit" id="buscarButton" class="btn btn-link" title="Buscar">
                             <span class="glyphicon glyphicon-search glyphicon-toolbar-size"></span>

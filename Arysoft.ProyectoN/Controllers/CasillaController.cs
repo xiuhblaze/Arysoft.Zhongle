@@ -45,6 +45,10 @@ namespace Arysoft.ProyectoN.Controllers
                 .Include(c => c.Seccion)
                 .Include(c => c.Notas)
                 .Include(c => c.Ubicacion)
+                .Include(c => c.Ubicacion.Calle)
+                .Include(c => c.Ubicacion.Colonia)
+                .Include(c => c.Votantes)
+                .Include(c => c.Votantes.Select(v => v.Persona))
                 //.Include(c => c.Votantes) // https://stackoverflow.com/questions/10822656/entity-framework-include-multiple-levels-of-properties
                 .Include(c => c.Resultados)
                 .Where(c => c.Status != StatusTipo.Ninguno);
@@ -170,8 +174,11 @@ namespace Arysoft.ProyectoN.Controllers
             Casilla casilla = await db.Casillas
                 .Include(c => c.Seccion)
                 .Include(c => c.Ubicacion)
+                .Include(c => c.Ubicacion.Calle)
+                .Include(c => c.Ubicacion.Colonia)
                 .Include(c => c.PersonaResponsable)
                 .Include(c => c.Votantes)
+                .Include(c => c.Votantes.Select(v => v.Persona))
                 .Include(c => c.Representantes)
                 .Include(c => c.Notas)
                 .FirstOrDefaultAsync(c => c.CasillaID == id);
@@ -187,6 +194,7 @@ namespace Arysoft.ProyectoN.Controllers
 
             if (Request.IsAjaxRequest())
             {
+                casilla.NmOrigen = "details";
                 CasillaEditModel casillaEM = Comun.ObtenerCasillaEditModel(casilla, true);
                 return PartialView("_details", casillaEM);
             }
@@ -246,6 +254,7 @@ namespace Arysoft.ProyectoN.Controllers
                 .Include(c => c.Ubicacion)
                 .Include(c => c.PersonaResponsable)
                 .Include(c => c.Votantes)
+                .Include(c => c.Votantes.Select(v => v.Persona))
                 .Include(c => c.Representantes)
                 .Include(c => c.Resultados)
                 .Include(c => c.Notas)
@@ -263,7 +272,7 @@ namespace Arysoft.ProyectoN.Controllers
             }
                         
             ViewBag.PersonaResponsableID = await ObtenerListaPromotoresAsync(casilla.PersonaResponsableID ?? Guid.Empty); 
-            ViewBag.SeccionID = await ObtenerListaSeccionesAsync(casilla.SeccionID); 
+            ViewBag.SeccionID = await ObtenerListaSeccionesAsync(casilla.SeccionID ?? Guid.Empty); 
             ViewBag.CalleID = await ObtenerListaCallesAsync(CalleID); 
             ViewBag.ColoniaID = await ObtenerListaColoniasAsync(ColoniaID);
 
@@ -309,7 +318,7 @@ namespace Arysoft.ProyectoN.Controllers
             // Volver a la vista
             
             ViewBag.PersonaResponsableID = await ObtenerListaPromotoresAsync(casilla.PersonaResponsableID ?? Guid.Empty);
-            ViewBag.SeccionID = await ObtenerListaSeccionesAsync(casilla.SeccionID);
+            ViewBag.SeccionID = await ObtenerListaSeccionesAsync(casilla.SeccionID ?? Guid.Empty);
             ViewBag.CalleID = await ObtenerListaCallesAsync(casilla.CalleID);
             ViewBag.ColoniaID = await ObtenerListaColoniasAsync(casilla.ColoniaID);
 
@@ -323,18 +332,37 @@ namespace Arysoft.ProyectoN.Controllers
             if (id == null)
             {
                 TempData["MessageBox"] = "No se recibió el identificador.";
+                if (Request.IsAjaxRequest()) { return Content("notid"); }
                 return RedirectToAction("Index");
                 //return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            Casilla casilla = await db.Casillas.FindAsync(id);
+            Casilla casilla = await db.Casillas
+                .Include(c => c.Seccion)
+                .Include(c => c.Ubicacion)
+                .Include(c => c.Ubicacion.Calle)
+                .Include(c => c.Ubicacion.Colonia)
+                .Include(c => c.PersonaResponsable)
+                .Include(c => c.Votantes)
+                .Include(c => c.Votantes.Select(v => v.Persona))
+                .Include(c => c.Representantes)
+                .Include(c => c.Notas)
+                .FirstOrDefaultAsync(c => c.CasillaID == id);
             if (casilla == null)
             {
                 TempData["MessageBox"] = "No se encontró el registro.";
+                if (Request.IsAjaxRequest()) { return Content("notfound"); }
                 return RedirectToAction("Index");
                 //return HttpNotFound();
             }
+            casilla.SoloLectura = true;
+            if (Request.IsAjaxRequest())
+            {
+                casilla.NmOrigen = "delete";
+                CasillaEditModel casillaEM = Comun.ObtenerCasillaEditModel(casilla, true);
+                return PartialView("_details", casillaEM);
+            }
             return View(casilla);
-        }
+        } // Delete
 
         // POST: Casilla/Delete/5
         [Authorize(Roles = "Admin, Editor")]
@@ -352,7 +380,7 @@ namespace Arysoft.ProyectoN.Controllers
                 casilla.UserNameActualizacion = User.Identity.Name;
                 casilla.FechaActualizacion = DateTime.Now;
                 db.Entry(casilla).State = EntityState.Modified;
-                TempData["MessageBox"] = "Casilla " + casilla.Seccion.Numero + " " + casilla.Tipo.GetDisplayName() + " ha sido dado de baja.";
+                //TempData["MessageBox"] = "Casilla " + casilla.Seccion.Numero + " " + casilla.Tipo.GetDisplayName() + " ha sido dado de baja.";
             }
             else if (casilla.Status == StatusTipo.Baja)
             {
@@ -360,12 +388,12 @@ namespace Arysoft.ProyectoN.Controllers
                 casilla.UserNameActualizacion = User.Identity.Name;
                 casilla.FechaActualizacion = DateTime.Now;
                 db.Entry(casilla).State = EntityState.Modified;
-                TempData["MessageBox"] = "Casilla " + casilla.Seccion.Numero + " " + casilla.Tipo.GetDisplayName() + " ha sido eliminada.";
+                //TempData["MessageBox"] = "Casilla " + casilla.Seccion.Numero + " " + casilla.Tipo.GetDisplayName() + " ha sido eliminada.";
             }
             else if (casilla.Status == StatusTipo.Eliminado)
             {
                 //HACK: Validar que no tenga asociaciones
-                TempData["MessageBox"] = "Casilla " + casilla.Seccion.Numero + " " + casilla.Tipo.GetDisplayName() + " ha sido eliminada definitivamente, esta acción no se puede deshacer.";
+                //TempData["MessageBox"] = "Casilla " + casilla.Seccion.Numero + " " + casilla.Tipo.GetDisplayName() + " ha sido eliminada definitivamente, esta acción no se puede deshacer.";
                 db.Casillas.Remove(casilla);
             }
             
@@ -375,7 +403,7 @@ namespace Arysoft.ProyectoN.Controllers
 
         // GET: Casilla/Activar/5
         [Authorize(Roles = "Admin, Editor")]
-        public async Task<ActionResult> ActivarAsync(Guid? id)
+        public async Task<ActionResult> Activar(Guid? id)
         {
             if (id == null)
             {
@@ -383,7 +411,10 @@ namespace Arysoft.ProyectoN.Controllers
                 return RedirectToAction("Index");
                 //return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            Casilla casilla = await db.Casillas.FindAsync(id);
+            //Casilla casilla = await db.Casillas.FindAsync(id);
+            Casilla casilla = await db.Casillas
+                .Include(c => c.Seccion)
+                .FirstOrDefaultAsync(c => c.CasillaID == id);
             if (casilla == null)
             {
                 TempData["MessageBox"] = "No se encontró el registro.";
@@ -1289,11 +1320,20 @@ namespace Arysoft.ProyectoN.Controllers
                 .Where(p => p.Status == StatusTipo.Activo)
                 .OrderBy(p => p.Nombre))
             {
-                string seccion = item.Seccion != null ? " [" + item.Seccion.Numero + "]" : "";
+                //string seccion = item.Seccion != null ? " [" + item.Seccion.Numero + "]" : "";
+                string secciones = string.Empty;  //item.Seccion != null ? " [" + item.Seccion.Numero + "]" : "";
+
+                if (item.Secciones != null)
+                {
+                    foreach (var seccion in item.Secciones)
+                    {
+                        secciones += "[" + seccion.Numero + "]";
+                    }
+                }
 
                 listado.Add(new SelectListItem
                 {
-                    Text = item.Nombre + " (" + item.Poblacion.Nombre + ")" + seccion,
+                    Text = item.Nombre + " (" + item.Poblacion.Nombre + ")" + secciones,
                     Value = item.ColoniaID.ToString(),
                     Selected = (item.ColoniaID == selectedID)
                 });
@@ -1399,17 +1439,27 @@ namespace Arysoft.ProyectoN.Controllers
             List<SelectListItem> listado = new List<SelectListItem>();
 
             listado.Add(new SelectListItem { Text = "(colonia)", Value = Guid.Empty.ToString() });
-            var colonias = await (db.Colonias.Include(c => c.Seccion).Include(c => c.Poblacion)
+            var colonias = await (db.Colonias.Include(c => c.Secciones).Include(c => c.Poblacion)
                 .Where(p => p.Status == StatusTipo.Activo)
                 .OrderBy(p => p.Nombre)).ToListAsync();
 
             foreach (var item in colonias)
             {
-                string seccion = item.Seccion != null ? " [" + item.Seccion.Numero + "]" : "";
+                //string seccion = item.Seccion != null ? " [" + item.Seccion.Numero + "]" : "";
+
+                string secciones = string.Empty;  //item.Seccion != null ? " [" + item.Seccion.Numero + "]" : "";
+
+                if (item.Secciones != null)
+                {
+                    foreach (var seccion in item.Secciones)
+                    {
+                        secciones += "[" + seccion.Numero + "]";
+                    }
+                }
 
                 listado.Add(new SelectListItem
                 {
-                    Text = item.Nombre + " (" + item.Poblacion.Nombre + ")" + seccion,
+                    Text = item.Nombre + " (" + item.Poblacion.Nombre + ")" + secciones,
                     Value = item.ColoniaID.ToString(),
                     Selected = (item.ColoniaID == selectedID)
                 });

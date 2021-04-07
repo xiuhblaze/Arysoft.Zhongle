@@ -20,7 +20,7 @@ namespace Arysoft.ProyectoN.Controllers
 
         // GET: Sector
         [Authorize(Roles = "Admin, Editor, Consultant")]
-        public async Task<ActionResult> Index(string buscar, string filtro, string orden)
+        public async Task<ActionResult> Index(string buscar, string filtro, string orden, string status)
         {
             ViewBag.Orden = orden;
             ViewBag.OrdenNombre = string.IsNullOrEmpty(orden) ? "nombre_desc" : "";
@@ -38,15 +38,35 @@ namespace Arysoft.ProyectoN.Controllers
                 .Include(s => s.Secciones)
                 .Include(s => s.Secciones.Select(se => se.Personas))
                 .Include(s => s.Secciones.Select(se => se.Casillas))
-                .Where(s => s.Status == StatusTipo.Activo || s.Status == StatusTipo.Baja);
+                .Include(s => s.Responsable)
+                .Where(s => s.Status != StatusTipo.Ninguno);
 
-            if (!string.IsNullOrEmpty(buscar))
+            if (!string.IsNullOrEmpty(buscar) || !string.IsNullOrEmpty(status))
             {
-                sectores = sectores.Where(s => s.Nombre.Contains(buscar)
-                    || s.Responsable.Nombres.Contains(buscar)
-                    || s.Responsable.ApellidoPaterno.Contains(buscar)
-                    || s.Responsable.ApellidoMaterno.Contains(buscar)
-                    || s.Descripcion.Contains(buscar));
+                bool hayPalabras = !string.IsNullOrEmpty(buscar);
+                status = string.IsNullOrEmpty(status) ? StatusTipo.Ninguno.ToString() : status;
+
+                sectores = sectores.Where(s =>
+                    (
+                        !hayPalabras
+                        || s.Nombre.Contains(buscar)
+                        || s.Responsable.Nombres.Contains(buscar)
+                        || s.Responsable.ApellidoPaterno.Contains(buscar)
+                        || s.Responsable.ApellidoMaterno.Contains(buscar)
+                        || s.Descripcion.Contains(buscar)
+                    )
+                    && (status == StatusTipo.Ninguno.ToString() ? true : s.Status.ToString() == status)
+                );
+            }
+
+            // Filtra por el rol asignado al usuario, para solo mostrar registros de acuerdo a su nivel
+            if (ControllerContext.HttpContext.User.IsInRole("Consultant"))
+            {
+                sectores = sectores.Where(s => s.Status == StatusTipo.Activo);
+            }
+            else if (ControllerContext.HttpContext.User.IsInRole("Editor"))
+            {
+                sectores = sectores.Where(s => s.Status == StatusTipo.Activo || s.Status == StatusTipo.Baja);
             }
 
             switch (orden)
@@ -105,9 +125,10 @@ namespace Arysoft.ProyectoN.Controllers
             if (sector.Personas != null) sector.Personas = sector.Personas.Where(p => p.Status == StatusTipo.Activo).OrderBy(p => p.Nombres).ToList();
 
             sector.SoloLectura = true;
-            
+
             if (Request.IsAjaxRequest())
             {
+                sector.NmOrigen = "details";
                 return PartialView("_details", sector);
             }
 
@@ -118,7 +139,7 @@ namespace Arysoft.ProyectoN.Controllers
         [Authorize(Roles = "Admin, Editor")]
         public async Task<ActionResult> Create()
         {
-            await EliminarRegistrosTemporalesAsync(ControllerContext.HttpContext.User.Identity.Name);
+            await EliminarRegistrosTemporalesAsync(User.Identity.Name);
             
             Sector sector = new Sector();
 
@@ -126,7 +147,7 @@ namespace Arysoft.ProyectoN.Controllers
             sector.ResponsableID = Guid.Empty;
             sector.Nombre = string.Empty;
             sector.Status = StatusTipo.Ninguno;
-            sector.UserNameActualizacion = ControllerContext.HttpContext.User.Identity.Name; // string.Empty;
+            sector.UserNameActualizacion = User.Identity.Name; // string.Empty;
             sector.FechaActualizacion = DateTime.Now;
 
             db.Sectores.Add(sector);
@@ -214,7 +235,7 @@ namespace Arysoft.ProyectoN.Controllers
 
             if (ModelState.IsValid)
             {
-                sector.UserNameActualizacion = ControllerContext.HttpContext.User.Identity.Name;
+                sector.UserNameActualizacion = User.Identity.Name;
                 sector.FechaActualizacion = DateTime.Now;
                 db.Entry(sector).State = EntityState.Modified;
                 await db.SaveChangesAsync();
@@ -238,12 +259,34 @@ namespace Arysoft.ProyectoN.Controllers
         {
             if (id == null)
             {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+                //return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+                TempData["MessageBox"] = "No se recibió el identificador.";
+                if (Request.IsAjaxRequest()) { return Content("notid"); }
+                return RedirectToAction("Index");
             }
-            Sector sector = await db.Sectores.FindAsync(id);
+            Sector sector = await db.Sectores
+                .Include(s => s.Secciones)
+                .Include(s => s.Secciones.Select(se => se.Personas))
+                .Include(s => s.Secciones.Select(se => se.Casillas))
+                .Include(s => s.Secciones.Select(se => se.Casillas.Select(cas => cas.Votantes)))
+                .Include(s => s.Personas)
+                //.Include(s => s.Personas.Select(p => p.UbicacionVive))                
+                //.Include(s => s.Personas.Select(p => p.UbicacionVota))                
+                .Include(s => s.Personas.Select(p => p.PersonasAfines))
+                .Include(s => s.Personas.Select(p => p.Notas))
+                .FirstOrDefaultAsync(s => s.SectorID == id);
             if (sector == null)
             {
-                return HttpNotFound();
+                //return HttpNotFound();
+                TempData["MessageBox"] = "No se encontró el registro del identificador.";
+                if (Request.IsAjaxRequest()) { return Content("notfound"); }
+                return RedirectToAction("Index");
+            }
+            sector.SoloLectura = true;
+            if (Request.IsAjaxRequest())
+            {
+                sector.NmOrigen = "delete";
+                return PartialView("_details", sector);
             }
             return View(sector);
         }
@@ -264,31 +307,65 @@ namespace Arysoft.ProyectoN.Controllers
             if (sector.Secciones != null && sector.Secciones.Count > 0) { sePuedeEliminar = false; }
             if (sector.Personas != null && sector.Personas.Count > 0) { sePuedeEliminar = false; }
 
-            if (sePuedeEliminar)
+            switch (sector.Status)
             {
-                switch (sector.Status)
-                {
-                    case StatusTipo.Activo:
-                        sector.Status = StatusTipo.Baja;
-                        db.Entry(sector).State = EntityState.Modified;
-                        break;
-                    case StatusTipo.Baja:
-                        sector.Status = StatusTipo.Eliminado;
-                        db.Entry(sector).State = EntityState.Modified;
-                        break;
-                    case StatusTipo.Eliminado:
+                case StatusTipo.Activo:
+                    sector.Status = StatusTipo.Baja;
+                    sector.UserNameActualizacion = ControllerContext.HttpContext.User.Identity.Name;
+                    sector.FechaActualizacion = DateTime.Now;
+                    db.Entry(sector).State = EntityState.Modified;
+                    break;
+                case StatusTipo.Baja:
+                    sector.Status = StatusTipo.Eliminado;
+                    sector.UserNameActualizacion = ControllerContext.HttpContext.User.Identity.Name;
+                    sector.FechaActualizacion = DateTime.Now;
+                    db.Entry(sector).State = EntityState.Modified;
+                    break;
+                case StatusTipo.Eliminado:
+                    if (sePuedeEliminar)
+                    {
                         db.Sectores.Remove(sector);
-                        break;
-                }
-
-                sector.UserNameActualizacion = ControllerContext.HttpContext.User.Identity.Name;
-                sector.FechaActualizacion = DateTime.Now;
-
-                await db.SaveChangesAsync();
+                    }
+                    break;
             }
+
+            sector.UserNameActualizacion = ControllerContext.HttpContext.User.Identity.Name;
+            sector.FechaActualizacion = DateTime.Now;
+
+            await db.SaveChangesAsync();
 
             return RedirectToAction("Index");
         } // DeleteConfirmed
+
+        // POST: Sector/Activar/5
+        [Authorize(Roles = "Admin, Editor")]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<ActionResult> Activar(Guid? id)
+        {
+            Sector sector = await db.Sectores.FindAsync(id);
+            if (sector == null)
+            {
+                TempData["MessageBox"] = "No se encontró el registro del identificador.";
+                return RedirectToAction("Index");
+            }
+            sector.Status = StatusTipo.Activo;
+            sector.UserNameActualizacion = User.Identity.Name;
+            sector.FechaActualizacion = DateTime.Now;
+            db.Entry(sector).State = EntityState.Modified;
+            try
+            {
+                await db.SaveChangesAsync();
+            }
+            catch (Exception e)
+            {
+                TempData["MessageBox"] = "A ocurrido una excepción: " + e.Message;
+                return RedirectToAction("Index");
+            }
+            TempData["MessageBox"] = "El sector ha sido activado.";
+
+            return RedirectToAction("Index");
+        } // Activar
 
         protected override void Dispose(bool disposing)
         {

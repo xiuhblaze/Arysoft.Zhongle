@@ -117,10 +117,17 @@ namespace Arysoft.ProyectoN.Models
                     .MapRightKey("ColoniaID")
                     .ToTable("CalleColonia"));
 
+            // Relación muchos a muchos sin modelo especificado Colonias <-> Secciones
+            modelBuilder.Entity<Colonia>()
+                .HasMany(c => c.Secciones).WithMany(s => s.Colonias)
+                .Map(l => l.MapLeftKey("ColoniaID")
+                    .MapRightKey("SeccionID")
+                    .ToTable("ColoniasSecciones"));
+
             //modelBuilder.Entity<Persona>()
             //    .HasOptional(p => p.Voto)
             //    .WithOptionalPrincipal(p => p.Persona);
-            
+
             modelBuilder.Entity<Casilla>()
                 .HasMany(c => c.Representantes)
                 .WithOptional(p => p.Casilla)
