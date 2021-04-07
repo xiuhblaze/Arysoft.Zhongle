@@ -455,6 +455,7 @@
     <Content Include="Views\Colonia\_details.cshtml" />
     <Content Include="Views\Calle\_details.cshtml" />
     <Content Include="Views\Calle\_listaColonias.cshtml" />
+    <Content Include="Views\Colonia\_listaSecciones.cshtml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>

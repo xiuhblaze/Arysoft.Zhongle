@@ -197,7 +197,9 @@ namespace Arysoft.ProyectoN.Controllers
                 .Include(s => s.Personas.Select(p => p.UbicacionVive))
                 .Include(s => s.Personas.Select(p => p.UbicacionVive.Calle))
                 .Include(s => s.Personas.Select(p => p.UbicacionVive.Colonia))
-                //.Include(s => s.Personas.Select(p => p.UbicacionVota))
+                .Include(s => s.Personas.Select(p => p.UbicacionVota))
+                .Include(s => s.Personas.Select(p => p.UbicacionVota.Calle))
+                .Include(s => s.Personas.Select(p => p.UbicacionVota.Colonia))
                 .Include(s => s.Personas.Select(p => p.PersonasAfines))
                 .Include(s => s.Personas.Select(p => p.Notas))
                 .FirstOrDefaultAsync(s => s.SectorID == id);
@@ -440,7 +442,7 @@ namespace Arysoft.ProyectoN.Controllers
 
             int semanaNo = 18;
             DateTime fechaInicio = new DateTime(2021, 4, 4);
-            DateTime fechaTermino = new DateTime(2021, 6, 2);
+            DateTime fechaTermino = new DateTime(2021, 6, 6);
             DateTime semanaActual = fechaInicio;
 
             // https://stackoverflow.com/questions/12427280/creating-dynamic-objects

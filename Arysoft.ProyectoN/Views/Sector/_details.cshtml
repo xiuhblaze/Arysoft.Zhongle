@@ -43,117 +43,145 @@
 </div>
 
 <div class="modal-body">
+    @if (Model.NmOrigen == "delete")
+    {
+        string title = "";
+        switch (Model.Status)
+        {
+            case StatusTipo.Activo:
+                title = "¿Está seguro de dar de baja este sector?";
+                break;
+            case StatusTipo.Baja:
+                title = "¿Está seguro de eliminar este sector?";
+                break;
+            case StatusTipo.Eliminado:
+                title = "Sector eliminado";
+                break;
+        }
+        <div class="row">
+            <div class="col-md-12">
+                <h2 class="text-danger">@title</h2>
+            </div>
+        </div>
+    }
+    <div class="row">
+        <div class="col-md-8">
+            <dl class="dl-horizontal">
 
-    <dl class="dl-horizontal">
+                <dt>
+                    @Html.DisplayNameFor(model => model.Nombre)
+                </dt>
 
-        <dt>
-            @Html.DisplayNameFor(model => model.Nombre)
-        </dt>
+                <dd>
+                    @Html.DisplayFor(model => model.Nombre)
+                </dd>
 
-        <dd>
-            @Html.DisplayFor(model => model.Nombre)
-        </dd>
+                <dt>
+                    @Html.DisplayNameFor(model => model.Descripcion)
+                </dt>
 
-        <dt>
-            @Html.DisplayNameFor(model => model.Descripcion)
-        </dt>
+                <dd>
+                    @Html.DisplayFor(model => model.Descripcion)
+                </dd>
 
-        <dd>
-            @Html.DisplayFor(model => model.Descripcion)
-        </dd>
+                <dt>
+                    @Html.DisplayNameFor(model => model.VotosMeta)
+                </dt>
 
-        <dt>
-            @Html.DisplayNameFor(model => model.VotosMeta)
-        </dt>
+                <dd>
+                    @Html.DisplayFor(model => model.VotosMeta)
+                </dd>
 
-        <dd>
-            @Html.DisplayFor(model => model.VotosMeta)
-        </dd>
+                <dt></dt>
+                <dd><hr /></dd>
 
-        <dt>
-            @Html.DisplayNameFor(model => model.Status)
-        </dt>
+                <dt>Votos seguros/meta</dt>
+                <dd>
+                    @votosSeguros / @Html.DisplayFor(modelItem => Model.VotosMeta)
+                    <div class="progress" title="Votos seguros @porcentajeVotosSeguros%" style="margin-bottom: 0;">
+                        <div class="progress-bar progress-bar-success" style="width: @porcentajeVotosSeguros%"></div>
+                    </div>
+                </dd>
 
-        <dd>
+                <dt>Votaron/Votantes</dt>
+                <dd>
+                    @totalVotaron / @totalVotantes
+                    <div class="progress" title="Ya votarón @porcentajeVotaron%" style="margin-bottom: 0;">
+                        <div class="progress-bar progress-bar-warning" style="width: @porcentajeVotaron%"></div>
+                    </div>
+                </dd>
+
+            </dl>
+        </div>
+        <div class="col-md-4">
             @switch (Model.Status)
             {
                 case StatusTipo.Activo:
-                    <span class="label label-primary">
-                        @Html.DisplayFor(model => model.Status)
-                    </span>
+                    <div class="alert alert-success text-center">
+                        <h4 style="margin-bottom: 0;">
+                            <span class="glyphicon glyphicon-ok"></span>
+                            Activo
+                        </h4>
+                    </div>
                     break;
                 case StatusTipo.Baja:
-                    <span class="label label-warning">
-                        @Html.DisplayFor(model => model.Status)
-                    </span>
+                    <div class="alert alert-warning text-center">
+                        <h4 style="margin-bottom: 0;">
+                            <span class="glyphicon glyphicon-save"></span>
+                            Baja
+                        </h4>
+                    </div>
                     break;
                 case StatusTipo.Eliminado:
-                    <span class="label label-danger">
-                        @Html.DisplayFor(model => model.Status)
-                    </span>
+                    <div class="alert alert-danger text-center">
+                        <h4 style="margin-bottom: 0;">
+                            <span class="glyphicon glyphicon-remove"></span>
+                            Eliminado
+                        </h4>
+                    </div>
                     break;
-              }
-        </dd>
-
-        <dt></dt>
-        <dd><hr/></dd>
-
-        <dt>Votos seguros/meta</dt>
-        <dd>
-            @votosSeguros / @Html.DisplayFor(modelItem => Model.VotosMeta)
-            <div class="progress" title="Votos seguros @porcentajeVotosSeguros%" style="margin-bottom: 0;">
-                <div class="progress-bar progress-bar-success" style="width: @porcentajeVotosSeguros%"></div>
-            </div>
-        </dd>
-
-        <dt>Votaron/Votantes</dt>
-        <dd>
-            @totalVotaron / @totalVotantes
-            <div class="progress" title="Ya votarón @porcentajeVotaron%" style="margin-bottom: 0;">
-                <div class="progress-bar progress-bar-warning" style="width: @porcentajeVotaron%"></div>
-            </div>
-        </dd>
-
-    </dl>
-
-    <ul class="nav nav-tabs">
-        <li class="active">
-            <a href="#secciones" data-toggle="tab">
-                <span class="glyphicon glyphicon-screenshot"></span>
-                Secciones
-                <span class="badge">@Html.DisplayFor(model => model.Secciones.Count)</span>
-            </a>
-        </li>
-        <li>
-            <a href="#brigada" data-toggle="tab">
-                <span class="glyphicon glyphicon-user"></span>
-                Brigada
-                <span class="badge">@Html.DisplayFor(model => model.Personas.Count)</span>
-            </a>
-        </li>
-    </ul>
-
-    <div class="tab-content">
-        <div class="tab-pane fade in active" name="secciones" id="secciones">
-            <h4>Secciones</h4>
-
-            <div id="listaSecciones" name="listaSecciones" style="max-height: 400px; overflow-y: scroll;">
-                @Html.Partial("_listaSecciones", Model)
-            </div>
+            }
         </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <ul class="nav nav-tabs">
+                <li class="active">
+                    <a href="#secciones" data-toggle="tab">
+                        <span class="glyphicon glyphicon-screenshot"></span>
+                        Secciones
+                        <span class="badge">@Html.DisplayFor(model => model.Secciones.Count)</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#brigada" data-toggle="tab">
+                        <span class="glyphicon glyphicon-user"></span>
+                        Brigada
+                        <span class="badge">@Html.DisplayFor(model => model.Personas.Count)</span>
+                    </a>
+                </li>
+            </ul>
 
-        <div class="tab-pane fade in" name="brigada" id="brigada">
-            <h4>Brigada</h4>
+            <div class="tab-content">
+                <div class="tab-pane fade in active" name="secciones" id="secciones">
+                    <h4>Secciones</h4>
 
-            <div id="listaBrigada" name="listaBrigada" style="max-height: 400px; overflow-y: scroll;">
-                @Html.Partial("_listaBrigada", Model)
+                    <div id="listaSecciones" name="listaSecciones" style="max-height: 400px; overflow-y: scroll;">
+                        @Html.Partial("_listaSecciones", Model)
+                    </div>
+                </div>
+
+                <div class="tab-pane fade in" name="brigada" id="brigada">
+                    <h4>Brigada</h4>
+
+                    <div id="listaBrigada" name="listaBrigada" style="max-height: 400px; overflow-y: scroll;">
+                        @Html.Partial("_listaBrigada", Model)
+                    </div>
+                </div>
             </div>
         </div>
     </div>
-
-
 </div>
-
 <div class="modal-footer">
     <div class="row">
         <div class="col-md-8 text-left text-muted">
@@ -169,11 +197,50 @@
             </button>
 
             @if (User.IsInRole("Admin") || User.IsInRole("Editor"))
-            { 
-                @Html.Raw(
-                    @Html.ActionLink("Editar", "Edit", new { id = Model.SectorID }, new { @class = "btn btn-primary" }).ToHtmlString()
-                        .Replace("Editar", "<span class='glyphicon glyphicon-edit' title='Editar'></span> Editar")
-                )
+            {
+                switch (Model.Status)
+                {
+                    case StatusTipo.Activo:
+                        if (Model.NmOrigen == "details")
+                        {
+                            @Html.Raw(
+                                 @Html.ActionLink("Editar", "Edit", new { id = Model.SectorID }, new { @class = "btn btn-primary" }).ToHtmlString()
+                                     .Replace("Editar", "<span class='glyphicon glyphicon-edit' title='Editar'></span> Editar"))
+                        }
+                        else if (Model.NmOrigen == "delete")
+                        {
+                            <form action="/Sector/Delete/@Model.SectorID" method="post" style="float: right; margin-left: .5em;">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn btn-warning">
+                                    <span class='glyphicon glyphicon-trash' title='Dar de Baja'></span> Baja
+                                </button>
+                            </form>
+                        }
+                        break;
+
+                    case StatusTipo.Baja:
+                        switch (Model.NmOrigen)
+                        {
+                            case "details":
+                                <form action="/Sector/Activar/@Model.SectorID" method="post" style="float: right; margin-left: .5em;">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn btn-success">
+                                        <span class='glyphicon glyphicon-ok' title='Reactivar'></span> Reactivar
+                                    </button>
+                                </form>
+                                break;
+
+                            case "delete":
+                                <form action="/Sector/Delete/@Model.SectorID" method="post" style="float: right; margin-left: .5em;">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn btn-danger">
+                                        <span class='glyphicon glyphicon-trash' title='Eliminar'></span> Eliminar
+                                    </button>
+                                </form>
+                                break;
+                        }
+                        break;
+                }
             }
         </div>
     </div>

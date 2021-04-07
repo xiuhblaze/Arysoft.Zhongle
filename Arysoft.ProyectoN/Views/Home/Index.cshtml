@@ -1,5 +1,5 @@
 ﻿@{
-    ViewBag.Title = "Ciudadanos";
+    ViewBag.Title = "Dashboard";
 }
 
 @section styles {
@@ -106,7 +106,8 @@
 
     </div>
 
-    <div class="row">
+    <!-- Para el día D -->
+    @*<div class="row">
         <div class="col-md-4">
             <div class="">
                 <div id="votosRealizados" style="width: 100%; height: 300px;"></div>
@@ -117,9 +118,9 @@
                 <div id="votosPorSector" style="width: 100%; height: 300px;"></div>
             </div>
         </div>
-    </div>
+    </div>*@
 
-    <div class="row">
+    <div class="row" style="display: none;">
         <div class="col-md-6">
             <div class="row">
                 <div class="col-md-12">
@@ -206,9 +207,9 @@
         google.charts.setOnLoadCallback(VotantesMetaVSAlcanzados);
 
         // - Para el día D
-        google.charts.setOnLoadCallback(VotosRealizados);
-        google.charts.setOnLoadCallback(VotosRealizadosPorSector);
-        google.charts.setOnLoadCallback(ResultadosTotales);
+        //google.charts.setOnLoadCallback(VotosRealizados);
+        //google.charts.setOnLoadCallback(VotosRealizadosPorSector);
+        //google.charts.setOnLoadCallback(ResultadosTotales);
 
         $(function () {
 
@@ -303,7 +304,7 @@
             FaltanDiasCierre();
 
             // Para el día D
-            VotosTotalPorHora();
+            //VotosTotalPorHora();
             
         }); // document.ready
 
