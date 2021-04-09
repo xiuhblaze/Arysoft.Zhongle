@@ -52,10 +52,10 @@
             </div>
         </div>
         <div class="form-group">
-            @Html.LabelFor(m => m.CURP, new { @class = "col-md-2 control-label" })
+            @Html.LabelFor(m => m.SectorID, new { @class = "col-md-2 control-label" })
             <div class="col-md-10">
-                @Html.TextBoxFor(m => m.CURP, new { @class = "form-control" })
-                @Html.ValidationMessageFor(model => model.CURP, "", new { @class = "text-danger" })
+                @Html.DropDownList("SectorID", null, htmlAttributes: new { @class = "form-control" })
+                @Html.ValidationMessageFor(model => model.SectorID, "", new { @class = "text-danger" })
             </div>
         </div>
 
@@ -79,9 +79,9 @@
         <div class="form-group">
             <div class="col-md-offset-2 col-md-10 text-right">
                 @Html.Raw(
-                            @Html.ActionLink("Cancelar", "Index", null, new { @class = "btn btn-default" }).ToHtmlString()
-                                .Replace("Cancelar", "<span class=\"glyphicon glyphicon-remove\" title=\"Cancelar cambios\"></span> Cancelar")
-                        )
+                    @Html.ActionLink("Cancelar", "Index", null, new { @class = "btn btn-default" }).ToHtmlString()
+                        .Replace("Cancelar", "<span class=\"glyphicon glyphicon-remove\" title=\"Cancelar cambios\"></span> Cancelar")
+                )
                 <button type="submit" class="btn btn-primary">
                     <span class="glyphicon glyphicon-floppy-disk"></span>
                     Guardar

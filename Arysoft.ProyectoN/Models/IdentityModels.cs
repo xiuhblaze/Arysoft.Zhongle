@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.EntityFramework;
+using System;
 using System.Data.Entity;
 using System.Security.Claims;
 using System.Threading.Tasks;
@@ -13,8 +14,9 @@ namespace Arysoft.ProyectoN.Models
 {
     // You can add profile data for the user by adding more properties to your ApplicationUser class, please visit http://go.microsoft.com/fwlink/?LinkID=317594 to learn more.
     public class ApplicationUser : IdentityUser
-    {
-        string curp;
+    {   
+        [Display(Name = "Sector")]
+        public Guid? SectorID { get; set; }
 
         [StringLength(50)]
         public string Nombres { get; set; }
@@ -27,11 +29,7 @@ namespace Arysoft.ProyectoN.Models
         [Display(Name = "Apellido materno")]
         public string ApellidoMaterno { get; set; }
 
-        [StringLength(50)]        
-        public string CURP {
-            get { return curp; }
-            set { curp = value != null ? value.ToUpperInvariant() : value; }
-        }
+        public Sector Sector { get; set; }
 
         [Display(Name = "Nombre")]
         public string NombreCompleto
@@ -49,10 +47,15 @@ namespace Arysoft.ProyectoN.Models
         {
             // Note the authenticationType must match the one defined in CookieAuthenticationOptions.AuthenticationType
             var userIdentity = await manager.CreateIdentityAsync(this, DefaultAuthenticationTypes.ApplicationCookie);
+
             // Add custom user claims here
+            // - https://stackoverflow.com/questions/28335353/how-to-extend-available-properties-of-user-identity
+            userIdentity.AddClaim(new Claim("SectorID", this.SectorID.ToString() ?? Guid.Empty.ToString()));
+            userIdentity.AddClaim(new Claim("NombreCompleto", this.NombreCompleto));
+            
             return userIdentity;
         }
-    }
+    } // ApplicationUser
 
     //[NotMapped]
     public class ApplicationRole : IdentityRole

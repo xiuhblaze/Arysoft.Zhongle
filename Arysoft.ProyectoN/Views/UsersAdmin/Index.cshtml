@@ -43,7 +43,7 @@
                     @Html.ActionLink("Nombre", "Index", new { orden = ViewBag.OrdenNombre, filtro = ViewBag.Filtro })
                 </th>
                 <th>
-                    @Html.ActionLink("CURP", "Index", new { orden = ViewBag.OrdenCURP, filtro = ViewBag.Filtro })
+                    Sector
                 </th>
                 
                 <th class="col-md-1"></th>
@@ -60,23 +60,22 @@
                         @Html.DisplayFor(modelItem => item.NombreCompleto)
                     </td>
                     <td>
-                        @Html.DisplayFor(modelItem => item.CURP)
+                        @Html.DisplayFor(modelItem => item.Sector.Nombre)
                     </td>
                     
                     <td class="text-right">
                         @Html.Raw(
-                                    @Html.ActionLink("Editar", "Edit", new { id = item.Id }).ToHtmlString()
-                                    .Replace("Editar", "<span class='glyphicon glyphicon-edit' style='font-size: 18px;' title='Editar'></span>")
-                                )
+                            @Html.ActionLink("Editar", "Edit", new { id = item.Id }).ToHtmlString()
+                            .Replace("Editar", "<span class='glyphicon glyphicon-edit' style='font-size: 18px;' title='Editar'></span>")
+                        )
                         @Html.Raw(
-        @Html.ActionLink("Detalles", "Details", new { id = item.Id }).ToHtmlString()
-        .Replace("Detalles", "<span class=\"glyphicon glyphicon-share\" style=\"font-size: 18px;\" title=\"Detalles\"></span>")
-    )
+                            @Html.ActionLink("Detalles", "Details", new { id = item.Id }).ToHtmlString()
+                            .Replace("Detalles", "<span class=\"glyphicon glyphicon-share\" style=\"font-size: 18px;\" title=\"Detalles\"></span>")
+                        )
                         @Html.Raw(
-            @Html.ActionLink("Eliminar", "Delete", new { id = item.Id }).ToHtmlString()
-            .Replace("Eliminar", "<span class=\"glyphicon glyphicon-trash\" style=\"font-size: 18px;\" title=\"Eliminar\"></span>")
-        )
-                       
+                            @Html.ActionLink("Eliminar", "Delete", new { id = item.Id }).ToHtmlString()
+                            .Replace("Eliminar", "<span class=\"glyphicon glyphicon-trash\" style=\"font-size: 18px;\" title=\"Eliminar\"></span>")
+                        )
                     </td>
                 </tr>
             }

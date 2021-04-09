@@ -19,7 +19,7 @@ namespace Arysoft.ProyectoN.Controllers
         private ApplicationDbContext db = new ApplicationDbContext();
 
         // GET: Persona
-        [Authorize(Roles = "Admin, Editor, Auditor, Consultant, EditorXSector")]
+        [Authorize(Roles = "Admin, Editor, Auditor, Consultant, SectorEditor")]
         public async Task<ActionResult> Index(string buscar, string filtro, string orden, string afinidad, string SectorID, string SeccionID, string PromotorID,
             string CalleID, string ColoniaID, string bardaLona, string sectorTipo, string votanteSeguro, string status, string verificada,
             string filtroEspecifico, string yaVoto, string busquedaAvanzada, string llamadaOrigen,
@@ -31,9 +31,11 @@ namespace Arysoft.ProyectoN.Controllers
             Guid coloniaID = (ColoniaID != null && ColoniaID != Guid.Empty.ToString()) ? new Guid(ColoniaID) : Guid.Empty;
             Guid promotorID = (PromotorID != null && PromotorID != Guid.Empty.ToString()) ? new Guid(PromotorID) : Guid.Empty;
 
-            if (User.IsInRole("EditorXSector"))
-            { 
-                //HACK: Obligar el filtro por Sector, de acuerdo al que estará asignado el usuario
+            if (User.IsInRole("SectorEditor"))
+            {
+                //HACK: Obligar el filtro por Sector, de acuerdo al que estará asignado el usuario                
+                sectorID = User.Identity.GetSectorId();
+                sectorTipo = string.IsNullOrEmpty(sectorTipo) ? "0" : sectorTipo;
             }
 
             ViewBag.Orden = orden;

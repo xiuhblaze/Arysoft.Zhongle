@@ -179,6 +179,7 @@ namespace Arysoft.ProyectoN.Controllers
                 .Include(c => c.PersonaResponsable)
                 .Include(c => c.Votantes)
                 .Include(c => c.Votantes.Select(v => v.Persona))
+                .Include(c => c.Votantes.Select(v => v.Persona.Notas))
                 .Include(c => c.Representantes)
                 .Include(c => c.Notas)
                 .FirstOrDefaultAsync(c => c.CasillaID == id);
@@ -255,6 +256,7 @@ namespace Arysoft.ProyectoN.Controllers
                 .Include(c => c.PersonaResponsable)
                 .Include(c => c.Votantes)
                 .Include(c => c.Votantes.Select(v => v.Persona))
+                .Include(c => c.Votantes.Select(v => v.Persona.Notas))
                 .Include(c => c.Representantes)
                 .Include(c => c.Resultados)
                 .Include(c => c.Notas)
@@ -344,6 +346,7 @@ namespace Arysoft.ProyectoN.Controllers
                 .Include(c => c.PersonaResponsable)
                 .Include(c => c.Votantes)
                 .Include(c => c.Votantes.Select(v => v.Persona))
+                .Include(c => c.Votantes.Select(v => v.Persona.Notas))
                 .Include(c => c.Representantes)
                 .Include(c => c.Notas)
                 .FirstOrDefaultAsync(c => c.CasillaID == id);

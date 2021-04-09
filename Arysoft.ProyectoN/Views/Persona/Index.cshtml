@@ -6,6 +6,7 @@
 @{
     var busquedaAvanzadaShowClass = "display: none; ";
     var busquedaSectorTipoShowClass = "display: none;";
+    var sectorDisabled = "";
 
     ViewBag.Title = "Personas";
 
@@ -42,13 +43,13 @@
     sectorTipoList.Add(new SelectListItem() { Text = "Trabajados", Value = "3" });
 
     var votanteSeguroList = Enum.GetValues(typeof(BoolTipo))
-.Cast<BoolTipo>()
-.Select(e => new SelectListItem
-{
-    Value = e.ToString(),
-    Text = e == BoolTipo.Ninguno ? "(votante seguro)" : e.GetDisplayName(),
-    Selected = ViewBag.VotanteSeguro == e.ToString()
-});
+        .Cast<BoolTipo>()
+        .Select(e => new SelectListItem
+        {
+            Value = e.ToString(),
+            Text = e == BoolTipo.Ninguno ? "(votante seguro)" : e.GetDisplayName(),
+            Selected = ViewBag.VotanteSeguro == e.ToString()
+        });
 
     var verificadaList = Enum.GetValues(typeof(BoolTipo))
         .Cast<BoolTipo>()
@@ -86,6 +87,13 @@
             Selected = ViewBag.FiltroEspecifico == e.ToString()
         });
 
+    if (User.IsInRole("SectorEditor"))
+    {
+        busquedaAvanzadaShowClass = string.Empty;
+        busquedaSectorTipoShowClass = string.Empty;
+        ViewBag.BusquedaAvanzada = "1";
+        sectorDisabled = "disabled";
+    }
 }
 
 @section styles {
@@ -100,7 +108,6 @@
             white-space: nowrap;
             overflow: hidden;
         }
-
     </style>
 
 }
@@ -141,7 +148,7 @@
             <div class="col-md-11">
                 <div class="form-inline">
                     @if (User.IsInRole("Admin") || User.IsInRole("Editor"))
-                    { 
+                    {
                         @Html.Raw(
                             Html.ActionLink("Nuevo", "Create", null, new { @class = "btn btn-link", @title = "Nueva persona" }).ToHtmlString()
                             .Replace("Nuevo", "<span class='glyphicon glyphicon-file glyphicon-toolbar-size'></span>")
@@ -151,12 +158,12 @@
                         <label for="buscar" class="sr-only">Buscar</label>
                         @Html.TextBox("buscar", ViewBag.Filtro as string, htmlAttributes: new { @class = "form-control", @placeholder = "buscar..." })
                     </div>
-                    <div class="form-group">                       
+                    <div class="form-group">
                         <button type="button" id="busquedaAvanzadaButton" class="btn btn-link @(ViewBag.BusquedaAvanzada == "1" ? "active" : "")" data-toggle="button" aria-pressed="@(ViewBag.BusquedaAvanzada == "1" ? "true" : "false")" title="Busqueda avanzada">
                             <span class="glyphicon glyphicon-filter"></span>
                         </button>
                         <button type="submit" id="buscarButton" class="btn btn-link" title="Buscar">
-                            <span class="glyphicon glyphicon-search glyphicon-toolbar-size" ></span>
+                            <span class="glyphicon glyphicon-search glyphicon-toolbar-size"></span>
                         </button>
                         @Html.Raw(
                             @Html.ActionLink("Limpiar", "Index", null, new { @class = "btn btn-link" }).ToHtmlString()
@@ -196,8 +203,15 @@
                     </div>
 
                     <div class="form-group search-bar-control">
-                        <label for="idarea" class="sr-only">Sector</label>
-                        @Html.DropDownList("SectorID", null, htmlAttributes: new { @class = "form-control", style = "width: 300px;" })
+                        <label for="SectorID" class="sr-only">Sector</label>
+                        @if (sectorDisabled == "disabled")
+                        {
+                            @Html.DropDownList("SectorID", null, htmlAttributes: new { @class = "form-control", style = "width: 300px;", @disabled = "disabled" })
+                        }
+                        else
+                        {
+                            @Html.DropDownList("SectorID", null, htmlAttributes: new { @class = "form-control", style = "width: 300px;" })
+                        }
                     </div>
 
                     <div class="form-group search-bar-control" id="sectorTipoFormGroup" style="@busquedaSectorTipoShowClass">
@@ -206,7 +220,7 @@
                     </div>
 
                     <div class="form-group search-bar-control">
-                        <label for="idarea" class="sr-only">Sección</label>
+                        <label for="SeccionID" class="sr-only">Sección</label>
                         @Html.DropDownList("SeccionID", null, htmlAttributes: new { @class = "chosen-select", style = "width: 100px;" })
                     </div>
 
@@ -221,17 +235,17 @@
                     </div>
 
                     <div class="form-group search-bar-control">
-                        <label for="idarea" class="sr-only">Colonia</label>
+                        <label for="ColoniaID" class="sr-only">Colonia</label>
                         @Html.DropDownList("ColoniaID", null, htmlAttributes: new { @class = "chosen-select", style = "width: 300px;" })
                     </div>
 
                     <div class="form-group search-bar-control">
-                        <label for="idarea" class="sr-only">Calle</label>
+                        <label for="CalleID" class="sr-only">Calle</label>
                         @Html.DropDownList("CalleID", null, htmlAttributes: new { @class = "chosen-select", style = "width: 300px;" })
                     </div>
 
                     <div class="form-group search-bar-control">
-                        <label for="idarea" class="sr-only">Calle</label>
+                        <label for="PromotorID" class="sr-only">Calle</label>
                         @Html.DropDownList("PromotorID", null, htmlAttributes: new { @class = "chosen-select", style = "width: 300px;" })
                     </div>
 
@@ -241,17 +255,17 @@
                     </div>
 
                     <div class="form-group search-bar-control">
-                        <label for="status" class="sr-only">Informacion verificada</label>
+                        <label for="verificada" class="sr-only">Informacion verificada</label>
                         @Html.DropDownList("verificada", verificadaList, htmlAttributes: new { @class = "form-control" })
                     </div>
 
                     <div class="form-group search-bar-control">
-                        <label for="status" class="sr-only">Ya votó</label>
+                        <label for="yaVoto" class="sr-only">Ya votó</label>
                         @Html.DropDownList("yaVoto", yaVotoList, htmlAttributes: new { @class = "form-control" })
                     </div>
 
                     <div class="form-group search-bar-control">
-                        <label for="status" class="sr-only">Específico</label>
+                        <label for="filtroEspecifico" class="sr-only">Específico</label>
                         @Html.DropDownList("filtroEspecifico", filtroEspecificoList, htmlAttributes: new { @class = "form-control" })
                     </div>
                 </div>
@@ -289,7 +303,7 @@
             <thead>
                 <tr>
                     <th>
-                        
+
                     </th>
                     <th>
                         @Html.ActionLink("Sector", "Index", new
@@ -331,27 +345,27 @@
                             pagina = Model.PageNumber
                         })
                     </th>
-                    <th>                        
-                       @Html.ActionLink("Nombre completo", "Index", new
-                        {
-                            orden = ViewBag.OrdenNombre,
-                            filtro = ViewBag.Filtro,
-                            afinidad = ViewBag.Afinidad,
-                            SectorID = ViewBag.SectorIDSelected,
-                            SeccionID = ViewBag.SeccionIDSelected,
-                            CalleID = ViewBag.CalleIDSelected,
-                            ColoniaID = ViewBag.ColoniaIDSelected,
-                            PromotorID = ViewBag.PromotorIDSelected,
-                            bardaLona = ViewBag.BardaLona,
-                            sectorTipo = ViewBag.SectorTipo,
-                            votanteSeguro = ViewBag.VotanteSeguro,
-                            status = ViewBag.Status,
-                            verificada = ViewBag.Verificada,
-                            busquedaAvanzada = ViewBag.BusquedaAvanzada,
-                            pagina = Model.PageNumber
-                        })
+                    <th>
+                        @Html.ActionLink("Nombre completo", "Index", new
+                         {
+                             orden = ViewBag.OrdenNombre,
+                             filtro = ViewBag.Filtro,
+                             afinidad = ViewBag.Afinidad,
+                             SectorID = ViewBag.SectorIDSelected,
+                             SeccionID = ViewBag.SeccionIDSelected,
+                             CalleID = ViewBag.CalleIDSelected,
+                             ColoniaID = ViewBag.ColoniaIDSelected,
+                             PromotorID = ViewBag.PromotorIDSelected,
+                             bardaLona = ViewBag.BardaLona,
+                             sectorTipo = ViewBag.SectorTipo,
+                             votanteSeguro = ViewBag.VotanteSeguro,
+                             status = ViewBag.Status,
+                             verificada = ViewBag.Verificada,
+                             busquedaAvanzada = ViewBag.BusquedaAvanzada,
+                             pagina = Model.PageNumber
+                         })
                     </th>
-                    
+
                     <th>
                         @Html.ActionLink("Brigada", "Index", new
                         {
@@ -373,221 +387,229 @@
                         })
                     </th>
                     <th>
-                        Ubicación 
+                        Ubicación
                         <small style="font-size: 80%;">
                             [@Html.ActionLink("COLONIA", "Index", new
+                           {
+                               orden = ViewBag.OrdenColonia,
+                               filtro = ViewBag.Filtro,
+                               afinidad = ViewBag.Afinidad,
+                               SectorID = ViewBag.SectorIDSelected,
+                               SeccionID = ViewBag.SeccionIDSelected,
+                               CalleID = ViewBag.CalleIDSelected,
+                               ColoniaID = ViewBag.ColoniaIDSelected,
+                               PromotorID = ViewBag.PromotorIDSelected,
+                               bardaLona = ViewBag.BardaLona,
+                               sectorTipo = ViewBag.SectorTipo,
+                               votanteSeguro = ViewBag.VotanteSeguro,
+                               busquedaAvanzada = ViewBag.BusquedaAvanzada,
+                               pagina = Model.PageNumber
+                           },
+                           new
+                                {
+                               @title = "Ordenar por colonia"
+                           })] [@Html.ActionLink("CALLE", "Index", new
+                      {
+                          orden = ViewBag.OrdenCalle,
+                          filtro = ViewBag.Filtro,
+                          afinidad = ViewBag.Afinidad,
+                          SectorID = ViewBag.SectorIDSelected,
+                          SeccionID = ViewBag.SeccionIDSelected,
+                          CalleID = ViewBag.CalleIDSelected,
+                          ColoniaID = ViewBag.ColoniaIDSelected,
+                          PromotorID = ViewBag.PromotorIDSelected,
+                          bardaLona = ViewBag.BardaLona,
+                          sectorTipo = ViewBag.SectorTipo,
+                          votanteSeguro = ViewBag.VotanteSeguro,
+                          busquedaAvanzada = ViewBag.BusquedaAvanzada,
+                          pagina = Model.PageNumber
+                      },
+                      new
                             {
-                                orden = ViewBag.OrdenColonia,
-                                filtro = ViewBag.Filtro,
-                                afinidad = ViewBag.Afinidad,
-                                SectorID = ViewBag.SectorIDSelected,
-                                SeccionID = ViewBag.SeccionIDSelected,
-                                CalleID = ViewBag.CalleIDSelected,
-                                ColoniaID = ViewBag.ColoniaIDSelected,
-                                PromotorID = ViewBag.PromotorIDSelected,
-                                bardaLona = ViewBag.BardaLona,
-                                sectorTipo = ViewBag.SectorTipo,
-                                votanteSeguro = ViewBag.VotanteSeguro,
-                                busquedaAvanzada = ViewBag.BusquedaAvanzada,
-                                pagina = Model.PageNumber
-                            },
-                            new {
-                                @title = "Ordenar por colonia"
-                            })] [@Html.ActionLink("CALLE", "Index", new
-                            {
-                                orden = ViewBag.OrdenCalle,
-                                filtro = ViewBag.Filtro,
-                                afinidad = ViewBag.Afinidad,
-                                SectorID = ViewBag.SectorIDSelected,
-                                SeccionID = ViewBag.SeccionIDSelected,
-                                CalleID = ViewBag.CalleIDSelected,
-                                ColoniaID = ViewBag.ColoniaIDSelected,
-                                PromotorID = ViewBag.PromotorIDSelected,
-                                bardaLona = ViewBag.BardaLona,
-                                sectorTipo = ViewBag.SectorTipo,
-                                votanteSeguro = ViewBag.VotanteSeguro,
-                                busquedaAvanzada = ViewBag.BusquedaAvanzada,
-                                pagina = Model.PageNumber
-                            },
-                            new {
-                                @title = "Ordenar por calle"
-                            })]
-                        </small>
-                    </th>
-                    <th>
-                        (vota)
-                    </th>
-                    <th style="min-width: 120px;">
-                        Contacto                        
-                    </th>                    
-                    <th>
-                        Afinidad
-                    </th>                                
-                    @if(User.IsInRole("Admin") || User.IsInRole("Editor"))
-                    { 
-                    <th class="col-md-1"></th>
-                    }
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var item in Model)
+                          @title = "Ordenar por calle"
+                      })]
+                    </small>
+                </th>
+                <th>
+                    (vota)
+                </th>
+                <th style="min-width: 120px;">
+                    Contacto
+                </th>
+                <th>
+                    Afinidad
+                </th>
+                @if (User.IsInRole("Admin") || User.IsInRole("Editor"))
                 {
-                    string rowClass = string.Empty;
-                    string rowTitle = string.Empty;
+                    <th class="col-md-1"></th>
+                }
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                string rowClass = string.Empty;
+                string rowTitle = string.Empty;
 
-                    string userClassColor = string.Empty;
-                    string userTitle = string.Empty;
+                string userClassColor = string.Empty;
+                string userTitle = string.Empty;
 
-                    if (item.Status == StatusTipo.Baja)
+                if (item.Status == StatusTipo.Baja)
+                {
+                    rowClass = "class='text-muted'";
+                    rowTitle = "title='La persona está dada de baja'";
+                }
+                else if (item.Status == StatusTipo.Eliminado && User.IsInRole("Admin"))
+                {
+                    rowClass = "class='text-danger'";
+                    rowTitle = "title='La persona ha sido eliminada'";
+                }
+                else
+                {
+                    if (item.Voto != null)
                     {
-                        rowClass = "class='text-muted'";
-                        rowTitle = "title='La persona está dada de baja'";
-                    }
-                    else if (item.Status == StatusTipo.Eliminado && User.IsInRole("Admin"))
-                    {
-                        rowClass = "class='text-danger'";
-                        rowTitle = "title='La persona ha sido eliminada'";
-                    }
-                    else
-                    {
-                        if (item.Voto != null) {
-                            if (item.Voto.YaVoto == BoolTipo.Si)
-                            {
-                                rowClass = "class='warning'";
-                                rowTitle = "title='La persona ya votó'";
-                            }
+                        if (item.Voto.YaVoto == BoolTipo.Si)
+                        {
+                            rowClass = "class='warning'";
+                            rowTitle = "title='La persona ya votó'";
                         }
                     }
+                }
 
-                    switch (item.Afinidad)
-                    {
-                        case AfinidadTipo.Movilizador:
-                        case AfinidadTipo.Simpatizante:
-                            userClassColor = "text-warning";
-                            break;
-                        case AfinidadTipo.PorAfiliado:
-                            userClassColor = "text-info";
-                            break;
-                        case AfinidadTipo.PorSector:
-                            userClassColor = "text-primary";
-                            break;
-                        default:
-                            userClassColor = "text-muted";
-                            break;
-                    }
-                    userTitle = item.Afinidad.GetDisplayName();
+                switch (item.Afinidad)
+                {
+                    case AfinidadTipo.Movilizador:
+                    case AfinidadTipo.Simpatizante:
+                        userClassColor = "text-warning";
+                        break;
+                    case AfinidadTipo.PorAfiliado:
+                        userClassColor = "text-info";
+                        break;
+                    case AfinidadTipo.PorSector:
+                        userClassColor = "text-primary";
+                        break;
+                    default:
+                        userClassColor = "text-muted";
+                        break;
+                }
+                userTitle = item.Afinidad.GetDisplayName();
 
-                    <tr @Html.Raw(rowClass) @Html.Raw(rowTitle)>
-                        <td>                            
-                            @if (item.Verificada == BoolTipo.Si)
-                            {
-                                <span class="glyphicon glyphicon-ok-sign glyphicon-table-action-size text-primary" title="Datos confiables"></span>
-                            }
-                            else
-                            {
-                                <span class="glyphicon glyphicon-question-sign glyphicon-table-action-size text-muted" title="Datos no verificados"></span>
-                            }
+                <tr @Html.Raw(rowClass) @Html.Raw(rowTitle)>
+                    <td>
+                        @if (item.Verificada == BoolTipo.Si)
+                        {
+                            <span class="glyphicon glyphicon-ok-sign glyphicon-table-action-size text-primary" title="Datos confiables"></span>
+                        }
+                        else
+                        {
+                            <span class="glyphicon glyphicon-question-sign glyphicon-table-action-size text-muted" title="Datos no verificados"></span>
+                        }
 
-                            <span class="glyphicon glyphicon-user @userClassColor" title="@userTitle"></span>
+                        <span class="glyphicon glyphicon-user @userClassColor" title="@userTitle"></span>
 
-                            @if (item.VotanteSeguro == BoolTipo.Si)
-                            {
-                                <span class="glyphicon glyphicon-erase glyphicon-table-action-size text-success" title="Votante seguro"></span>
-                            }
-                            else
-                            {
-                                <span class="glyphicon glyphicon-erase glyphicon-table-action-size text-danger" title="Posiblemente votará por otro partido, ver historial de auditorias."></span>
-                            }
+                        @if (item.VotanteSeguro == BoolTipo.Si)
+                        {
+                            <span class="glyphicon glyphicon-erase glyphicon-table-action-size text-success" title="Votante seguro"></span>
+                        }
+                        else
+                        {
+                            <span class="glyphicon glyphicon-erase glyphicon-table-action-size text-danger" title="Posiblemente votará por otro partido, ver historial de auditorias."></span>
+                        }
 
-                            @if (item.TieneBarda == BoolTipo.Si && item.TieneLona == BoolTipo.Si)
-                            {
-                                <span class="glyphicon glyphicon-tags glyphicon-table-action-size text-primary" title="Cuenta con barda y lona"></span>
-                            }
-                            else if (item.TieneBarda == BoolTipo.Si)
-                            {
-                                <span class="glyphicon glyphicon-tag glyphicon-table-action-size text-primary" title="Cuenta con barda"></span>
-                            }
-                            else if (item.TieneLona == BoolTipo.Si)
-                            {
-                                <span class="glyphicon glyphicon-tag glyphicon-table-action-size text-primary" title="Cuenta con lona"></span>
-                            }
-                            else
-                            {
-                                <span class="glyphicon glyphicon-tag glyphicon-table-action-size text-muted" title="Sin barda ni lona"></span>
-                            }
+                        @if (item.TieneBarda == BoolTipo.Si && item.TieneLona == BoolTipo.Si)
+                        {
+                            <span class="glyphicon glyphicon-tags glyphicon-table-action-size text-primary" title="Cuenta con barda y lona"></span>
+                        }
+                        else if (item.TieneBarda == BoolTipo.Si)
+                        {
+                            <span class="glyphicon glyphicon-tag glyphicon-table-action-size text-primary" title="Cuenta con barda"></span>
+                        }
+                        else if (item.TieneLona == BoolTipo.Si)
+                        {
+                            <span class="glyphicon glyphicon-tag glyphicon-table-action-size text-primary" title="Cuenta con lona"></span>
+                        }
+                        else
+                        {
+                            <span class="glyphicon glyphicon-tag glyphicon-table-action-size text-muted" title="Sin barda ni lona"></span>
+                        }
 
-                            @if (item.Notas.Count == 0)
+                        @if (item.Notas.Count == 0)
+                        {
+                            <span class="glyphicon glyphicon-comment glyphicon-table-action-size text-muted" title="Sin comentarios"></span>
+                        }
+                        else
+                        {
+                            string notas = string.Empty;
+                            foreach (Nota nota in item.Notas)
                             {
-                                <span class="glyphicon glyphicon-comment glyphicon-table-action-size text-muted" title="Sin comentarios"></span>
+                                notas += nota.VistaAttrbTitle + "\n";
                             }
-                            else
-                            {
-                                string notas = string.Empty;
-                                foreach (Nota nota in item.Notas) {
-                                    notas += nota.VistaAttrbTitle + "\n";
-                                }
-                                <span class="glyphicon glyphicon-comment glyphicon-table-action-size text-info" title="@notas"></span>
-                            }
-                        </td>
-                        <td class="text-right" style="cursor: pointer" onclick="getPersonaDetails('@item.PersonaID')">
-                            @Html.DisplayFor(modelItem => item.Seccion.Sector.Nombre)
-                        </td>
-                        <td class="text-right" style="cursor: pointer" onclick="getPersonaDetails('@item.PersonaID')">
-                            @Html.DisplayFor(modelItem => item.Seccion.Numero)
-                            @if (item.Voto != null)
-                            {
-                                <br />
-                                <span class="text-muted" title="Casilla">
-                                    @item.Voto.Casilla.Tipo.GetDisplayName()
-                                </span>
-                                if (item.Voto.NumeroINE > 0)
-                                {
-                                <span class="text-muted" title="Número INE">[@item.Voto.NumeroINE]</span>
-                                }
-                            }
-                        </td>
-                        <td style="cursor: pointer" onclick="getPersonaDetails('@item.PersonaID')">
-                            <span class="@(item.EsResponsableSector ? "text-primary" : "")" title="@(item.EsResponsableSector ? "Responsable de sector" : "")">
-                                @Html.DisplayFor(modelItem => item.NombreCompleto)
+                            <span class="glyphicon glyphicon-comment glyphicon-table-action-size text-info" title="@notas"></span>
+                        }
+                    </td>
+                    <td class="text-right" style="cursor: pointer" onclick="getPersonaDetails('@item.PersonaID')">
+                        @Html.DisplayFor(modelItem => item.Seccion.Sector.Nombre)
+                    </td>
+                    <td class="text-right" style="cursor: pointer" onclick="getPersonaDetails('@item.PersonaID')">
+                        @Html.DisplayFor(modelItem => item.Seccion.Numero)
+                        @if (item.Voto != null)
+                        {
+                            <br />
+                            <span class="text-muted" title="Casilla">
+                                @item.Voto.Casilla.Tipo.GetDisplayName()
                             </span>
-                            @*@if (item.Afinidad == AfinidadTipo.PorAfiliado || item.Afinidad == AfinidadTipo.PorSector)
+                            if (item.Voto.NumeroINE > 0)
+                            {
+                                <span class="text-muted" title="Número INE">[@item.Voto.NumeroINE]</span>
+                            }
+                        }
+                    </td>
+                    <td style="cursor: pointer" onclick="getPersonaDetails('@item.PersonaID')">
+                        <span class="@(item.EsResponsableSector ? "text-primary" : "")" title="@(item.EsResponsableSector ? "Responsable de sector" : "")">
+                            @Html.DisplayFor(modelItem => item.NombreCompleto)
+                        </span>
+                        @*@if (item.Afinidad == AfinidadTipo.PorAfiliado || item.Afinidad == AfinidadTipo.PorSector)
                             {
                                 <br />
                                 <small class="text-muted" title="Promotor (invitado por)">
                                     @Html.DisplayFor(modelItem => item.Promotor.NombreCompleto)
                                 </small>
                             }*@
-                            @if (item.Promotor != null)
-                            { 
-                                <br />
-                                <small class="text-muted" title="Promotor (invitado por)">
-                                    @Html.DisplayFor(modelItem => item.Promotor.NombreCompleto)
-                                </small>
-                            }
-                        </td>                        
-                        <td style="cursor: pointer" onclick="getPersonaDetails('@item.PersonaID')">
-                            @Html.DisplayFor(modelItem => item.Sector.Nombre)
-                        </td>
-                        <td style="cursor: pointer" onclick="getPersonaDetails('@item.PersonaID')" @Html.Raw(item.VotaEnDomicilio == BoolTipo.Si ? "colspan='2'" : "")>                            
-                            <span class="glyphicon glyphicon-home glyphicon-table-info-size"></span>
-                            @if (item.UbicacionVive != null)
-                            {
-                                <span>
-                                    @if (item.UbicacionVive.Calle != null) { <span>@item.UbicacionVive.Calle.Nombre</span> }
-                                    @item.UbicacionVive.NumExterior
-                                    @if (!string.IsNullOrEmpty(item.UbicacionVive.Letra)) { <span>@item.UbicacionVive.Letra</span> }
-                                    @if (!string.IsNullOrEmpty(item.UbicacionVive.NumInterior)) { <span>@item.UbicacionVive.NumInterior</span> }
-                                    @if (item.UbicacionVive.Colonia != null)
-                                    { 
-                                        @item.UbicacionVive.Colonia.Nombre
-                                        <span>C.P.</span> @item.UbicacionVive.Colonia.CodigoPostal
-                                    }
-                                    @if (!string.IsNullOrEmpty(item.UbicacionVive.Descripcion)) { <br /><span class="text-muted">@item.UbicacionVive.Descripcion</span> }
-                                </span>
-                            }                            
-                        </td>  
-                        @if (item.VotaEnDomicilio == BoolTipo.No)
+                        @if (item.Promotor != null)
                         {
+                            <br />
+                            <small class="text-muted" title="Promotor (invitado por)">
+                                @Html.DisplayFor(modelItem => item.Promotor.NombreCompleto)
+                            </small>
+                        }
+                    </td>
+                    <td style="cursor: pointer" onclick="getPersonaDetails('@item.PersonaID')">
+                        @Html.DisplayFor(modelItem => item.Sector.Nombre)
+                    </td>
+                    <td style="cursor: pointer" onclick="getPersonaDetails('@item.PersonaID')" @Html.Raw(item.VotaEnDomicilio == BoolTipo.Si ? "colspan='2'" : "")>
+                        <span class="glyphicon glyphicon-home glyphicon-table-info-size"></span>
+                        @if (item.UbicacionVive != null)
+                        {
+                            <span>
+                                @if (item.UbicacionVive.Calle != null)
+                                {<span>@item.UbicacionVive.Calle.Nombre</span>}
+                                @item.UbicacionVive.NumExterior
+                                @if (!string.IsNullOrEmpty(item.UbicacionVive.Letra))
+                                {<span>@item.UbicacionVive.Letra</span>}
+                                @if (!string.IsNullOrEmpty(item.UbicacionVive.NumInterior))
+                                {<span>@item.UbicacionVive.NumInterior</span>}
+                                @if (item.UbicacionVive.Colonia != null)
+                                {
+                                    @item.UbicacionVive.Colonia.Nombre
+                                    <span>C.P.</span> @item.UbicacionVive.Colonia.CodigoPostal
+                                }
+                                @if (!string.IsNullOrEmpty(item.UbicacionVive.Descripcion))
+                                {<br /><span class="text-muted">@item.UbicacionVive.Descripcion</span>}
+                            </span>
+                        }
+                    </td>
+                    @if (item.VotaEnDomicilio == BoolTipo.No)
+                    {
                         <td style="cursor: pointer" onclick="getPersonaDetails('@item.PersonaID')">
                             <span class="text-warning" title="Domicilio donde vota">
                                 <span class="glyphicon glyphicon-erase glyphicon-table-info-size"></span>
@@ -595,105 +617,106 @@
                                 {
                                     <span>
                                         @if (item.UbicacionVota.Calle != null)
-                                        { <span>@item.UbicacionVota.Calle.Nombre</span> }
+                                        {<span>@item.UbicacionVota.Calle.Nombre</span>}
                                         @item.UbicacionVota.NumExterior
                                         @if (!string.IsNullOrEmpty(item.UbicacionVota.Letra))
-                                        { <span>@item.UbicacionVota.Letra</span> }
+                                        {<span>@item.UbicacionVota.Letra</span>}
                                         @if (!string.IsNullOrEmpty(item.UbicacionVota.NumInterior))
-                                        { <span>@item.UbicacionVota.NumInterior</span> }
+                                        {<span>@item.UbicacionVota.NumInterior</span>}
                                         @if (item.UbicacionVota.Colonia != null)
                                         {
                                             @item.UbicacionVota.Colonia.Nombre
                                             <span>C.P.</span> @item.UbicacionVota.Colonia.CodigoPostal
                                         }
                                         @if (!string.IsNullOrEmpty(item.UbicacionVota.Descripcion))
-                                        { <br /><span class="text-muted">@item.UbicacionVota.Descripcion</span> }
+                                        {<br /><span class="text-muted">@item.UbicacionVota.Descripcion</span>}
                                     </span>
                                 }
                             </span>
                         </td>
+                    }
+
+                    <td style="cursor: pointer" onclick="getPersonaDetails('@item.PersonaID')">
+                        @if (!string.IsNullOrEmpty(item.Telefono))
+                        {
+                            <span class="glyphicon glyphicon-phone-alt glyphicon-table-info-size"></span>
+                            @Html.DisplayFor(modelItem => item.Telefono) <br />
+                        }
+                        @if (!string.IsNullOrEmpty(item.Celular))
+                        {
+                            <span class="glyphicon glyphicon-phone glyphicon-table-info-size"></span>
+                            @Html.DisplayFor(modelItem => item.Celular) <br />
+                        }
+                        @if (!string.IsNullOrEmpty(item.CorreoElectronico))
+                        {
+                            <div class="cortarEMail" title="@item.CorreoElectronico">
+                                <span class="glyphicon glyphicon-envelope glyphicon-table-info-size"></span>
+                                @Html.DisplayFor(modelItem => item.CorreoElectronico)
+                            </div>
+                        }
+                    </td>
+                    <td style="cursor: pointer" onclick="getPersonaDetails('@item.PersonaID')">
+                        @item.Afinidad.GetDisplayName()
+                        @if (item.Afinidad == AfinidadTipo.Movilizador || item.Afinidad == AfinidadTipo.Simpatizante)
+                        {
+                            int porSector = item.PersonasAfines.Where(p => p.Afinidad == AfinidadTipo.PorSector).Count();
+                            int porAfiliado = item.PersonasAfines.Where(p => p.Afinidad == AfinidadTipo.PorAfiliado).Count();
+                            <br />
+                            <span class="badge" title="@AfinidadTipo.PorSector.GetDisplayName()">@porSector</span>
+                            <span class="badge" title="@AfinidadTipo.PorAfiliado.GetDisplayName()">@porAfiliado</span>
+                        }
+                    </td>
+                    <td class="text-right">
+                        @if ((User.IsInRole("Admin") || User.IsInRole("Editor"))
+                            && item.Status == StatusTipo.Activo)
+                        {
+                            @Html.Raw(
+                                @Html.ActionLink("Editar", "Edit", new { id = item.PersonaID }).ToHtmlString()
+                                    .Replace("Editar", "<span class='glyphicon glyphicon-edit glyphicon-table-action-size' title='Editar'></span>")
+                            )
                         }
 
-                        <td style="cursor: pointer" onclick="getPersonaDetails('@item.PersonaID')">
-                            @if (!string.IsNullOrEmpty(item.Telefono))
-                            {
-                                <span class="glyphicon glyphicon-phone-alt glyphicon-table-info-size"></span>
-                                @Html.DisplayFor(modelItem => item.Telefono) <br />
-                            }
-                            @if (!string.IsNullOrEmpty(item.Celular))
-                            {
-                                <span class="glyphicon glyphicon-phone glyphicon-table-info-size"></span>
-                                @Html.DisplayFor(modelItem => item.Celular) <br />
-                            }
-                            @if (!string.IsNullOrEmpty(item.CorreoElectronico))
-                            {
-                                <div class="cortarEMail" title="@item.CorreoElectronico">
-                                    <span class="glyphicon glyphicon-envelope glyphicon-table-info-size"></span>
-                                    @Html.DisplayFor(modelItem => item.CorreoElectronico)
-                                </div>
-                            }
-                        </td>
-                        <td style="cursor: pointer" onclick="getPersonaDetails('@item.PersonaID')">
-                            @item.Afinidad.GetDisplayName()
-                            @if (item.Afinidad == AfinidadTipo.Movilizador || item.Afinidad == AfinidadTipo.Simpatizante) {
-                                int porSector = item.PersonasAfines.Where(p => p.Afinidad == AfinidadTipo.PorSector).Count();
-                                int porAfiliado = item.PersonasAfines.Where(p => p.Afinidad == AfinidadTipo.PorAfiliado).Count();
-                                <br />
-                                <span class="badge" title="@AfinidadTipo.PorSector.GetDisplayName()">@porSector</span>
-                                <span class="badge" title="@AfinidadTipo.PorAfiliado.GetDisplayName()">@porAfiliado</span>
-                            }
-                        </td>
-                        <td class="text-right">
-                            @if ((User.IsInRole("Admin") || User.IsInRole("Editor"))
-                                && item.Status == StatusTipo.Activo)
-                            {
-                                @Html.Raw(
-                                    @Html.ActionLink("Editar", "Edit", new { id = item.PersonaID }).ToHtmlString()
-                                        .Replace("Editar", "<span class='glyphicon glyphicon-edit glyphicon-table-action-size' title='Editar'></span>")
-                                )
-                            }
-
-                            @if (User.IsInRole("Admin") && item.Status != StatusTipo.Eliminado)
-                            {
-                                @*@Html.Raw(
+                        @if (User.IsInRole("Admin") && item.Status != StatusTipo.Eliminado)
+                        {
+                            @*@Html.Raw(
                                     @Html.ActionLink("Eliminar", "Delete", new { id = item.PersonaID }).ToHtmlString()
                                         .Replace("Eliminar", "<span class='glyphicon glyphicon-trash glyphicon-table-action-size' title='Baja/Eliminar'></span>")
                                 )*@
-                                <a href="#" onclick="getDelete('@item.PersonaID'); return false;" class="text-danger">
-                                    <span class='glyphicon glyphicon-trash glyphicon-table-action-size' title='Eliminar'></span>
-                                </a>
-                            }
-                        </td>
-                    </tr>
-                }
-            </tbody>
-        </table>
-    </div>
-    
-    @Html.PagedListPager(Model, pagina => Url.Action("Index", new
-    {
-        pagina,
-        orden = ViewBag.Orden,
-        filtro = ViewBag.Filtro,
-        afinidad = ViewBag.Afinidad,
-        SectorID = ViewBag.SectorIDSelected,
-        SeccionID = ViewBag.SeccionIDSelected,
-        CalleID = ViewBag.CalleIDSelected,
-        ColoniaID = ViewBag.ColoniaIDSelected,
-        PromotorID = ViewBag.PromotorIDSelected,
-        bardaLona = ViewBag.BardaLona,
-        sectorTipo = ViewBag.SectorTipo,
-        votanteSeguro = ViewBag.VotanteSeguro,
-        busquedaAvanzada = ViewBag.BusquedaAvanzada
-    }))
+                            <a href="#" onclick="getDelete('@item.PersonaID'); return false;" class="text-danger">
+                                <span class='glyphicon glyphicon-trash glyphicon-table-action-size' title='Eliminar'></span>
+                            </a>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@Html.PagedListPager(Model, pagina => Url.Action("Index", new
+{
+    pagina,
+    orden = ViewBag.Orden,
+    filtro = ViewBag.Filtro,
+    afinidad = ViewBag.Afinidad,
+    SectorID = ViewBag.SectorIDSelected,
+    SeccionID = ViewBag.SeccionIDSelected,
+    CalleID = ViewBag.CalleIDSelected,
+    ColoniaID = ViewBag.ColoniaIDSelected,
+    PromotorID = ViewBag.PromotorIDSelected,
+    bardaLona = ViewBag.BardaLona,
+    sectorTipo = ViewBag.SectorTipo,
+    votanteSeguro = ViewBag.VotanteSeguro,
+    busquedaAvanzada = ViewBag.BusquedaAvanzada
+}))
 </div>
 
 @section scripts{
 
-<script src="~/Scripts/chosen.jquery.min.js"></script>
-<script src="~/Scripts/jquery.table2excel.js"></script>
+    <script src="~/Scripts/chosen.jquery.min.js"></script>
+    <script src="~/Scripts/jquery.table2excel.js"></script>
 
-<script>
+    <script>
 
     $(document).ready(function () {
         var busquedaAvanzadaFlip = @ViewBag.BusquedaAvanzada;
@@ -926,6 +949,6 @@
             }
         });
         } // getDelete
-</script>
+    </script>
 
 }
