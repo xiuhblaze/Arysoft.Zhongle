@@ -47,9 +47,9 @@ else
                     <th>
                         Contacto
                     </th>
-                    <th>
+                    @*<th>
                         Afinidad
-                    </th>
+                    </th>*@
                     <th style="min-width: 100px;">
                         Voto
                     </th>
@@ -180,7 +180,7 @@ else
                                 @Html.DisplayFor(modelItem => item.Persona.CorreoElectronico)
                             </div>
                         </td>
-                        <td style="cursor: pointer" onclick="getVotanteDetails('@item.Persona.PersonaID')">
+                        @*<td style="cursor: pointer" onclick="getVotanteDetails('@item.Persona.PersonaID')">
                             @item.Persona.Afinidad.GetDisplayName()
                             @if (item.Persona.Afinidad == AfinidadTipo.Movilizador || item.Persona.Afinidad == AfinidadTipo.Simpatizante)
                             {
@@ -190,7 +190,7 @@ else
                                 <span class="badge" title="@AfinidadTipo.PorSector.GetDisplayName()">@porSector</span>
                                 <span class="badge" title="@AfinidadTipo.PorAfiliado.GetDisplayName()">@porAfiliado</span>
                             }
-                        </td>
+                        </td>*@
                         <td>
                             @if (Model.SoloLectura)
                             {

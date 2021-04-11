@@ -331,6 +331,7 @@ namespace Arysoft.ProyectoN.Controllers
                 .Include(p => p.UbicacionVota.Colonia)
                 .Include(p => p.Sector)
                 .Include(p => p.Seccion)
+                .Include(p => p.Seccion.Sector)
                 .Where(p => p.PersonaID == id)
                 .FirstOrDefaultAsync();
             if (persona == null)
@@ -352,7 +353,7 @@ namespace Arysoft.ProyectoN.Controllers
         } // Detail
 
         // GET: Persona/Create
-        [Authorize(Roles = "Admin, Editor")]
+        [Authorize(Roles = "Admin, Editor, SectorEditor")]
         public async Task<ActionResult> Create()
         {
             await EliminarRegistrosTemporalesAsync(ControllerContext.HttpContext.User.Identity.Name);
@@ -360,7 +361,6 @@ namespace Arysoft.ProyectoN.Controllers
             Persona persona = new Persona();
 
             persona.PersonaID = Guid.NewGuid();
-            persona.SectorBrigadaID = Guid.Empty;
             persona.SeccionID = Guid.Empty;
             persona.UbicacionViveID = Guid.Empty;
             persona.VotaEnDomicilio = BoolTipo.Si;
@@ -396,7 +396,7 @@ namespace Arysoft.ProyectoN.Controllers
         } // GET: Create
 
         // GET: Persona/Edit/5
-        [Authorize(Roles = "Admin, Editor")]
+        [Authorize(Roles = "Admin, Editor, SectorEditor")]
         public async Task<ActionResult> Edit(Guid? id)
         {
             Guid CalleID, ColoniaID, VotaCalleID, VotaColoniaID;
@@ -429,6 +429,7 @@ namespace Arysoft.ProyectoN.Controllers
                 .Include(p => p.UbicacionVota.Colonia)
                 .Include(p => p.Sector)
                 .Include(p => p.Seccion)
+                .Include(p => p.Seccion.Sector)
                 .Include(p => p.Notas)
                 .Where(p => p.PersonaID == id)
                 .FirstOrDefaultAsync();
@@ -436,6 +437,12 @@ namespace Arysoft.ProyectoN.Controllers
             if (persona == null)
             {
                 TempData["MessageBox"] = "No se encontró el registro.";
+                return RedirectToAction("Index");
+            }
+
+            if (User.IsInRole("SectorEditor") && persona.Status != StatusTipo.Ninguno && persona.Seccion.SectorID != User.Identity.GetSectorId())
+            {
+                TempData["MessageBox"] = "No se puede editar una persona que se encuentra en otro Sector asignado al Usuario.";
                 return RedirectToAction("Index");
             }
 
@@ -500,10 +507,10 @@ namespace Arysoft.ProyectoN.Controllers
         // POST: Persona/Edit/5
         // Para protegerse de ataques de publicación excesiva, habilite las propiedades específicas a las que desea enlazarse. Para obtener 
         // más información vea https://go.microsoft.com/fwlink/?LinkId=317598.
-        [Authorize(Roles = "Admin, Editor")]
+        [Authorize(Roles = "Admin, Editor, SectorEditor")]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> Edit([Bind(Include = "PersonaID,SectorBrigadaID,SeccionID,PersonaPromotorID,CasillaID,Nombres,ApellidoPaterno,ApellidoMaterno,VotaEnDomicilio,Telefono,Celular,CorreoElectronico,Afinidad,VotanteSeguro,TieneBarda,TieneLona,RepresentanteTipo,RepresentanteAsistencia,RepresentanteCapacitacion,FechaAlta,Verificada,FechaNacimiento,Whatsapp,Ocupacion,Status,UserNameActualizacion,FechaActualizacion,CalleID,ColoniaID,NumExterior,NumInterior,Descripcion,Latitud,Longitud,VotaCalleID,VotaColoniaID,VotaNumExterior,VotaNumInterior,VotaDescripcion,VotaLatitud,VotaLongitud")] PersonaEditViewModel persona, string notaCheckbox, string submitButton)
+        public async Task<ActionResult> Edit([Bind(Include = "PersonaID,SectorBrigadaID,SeccionID,PersonaPromotorID,CasillaID,Nombres,ApellidoPaterno,ApellidoMaterno,VotaEnDomicilio,Telefono,Celular,CorreoElectronico,Afinidad,VotanteSeguro,TieneBarda,TieneLona,RepresentanteTipo,RepresentanteAsistencia,RepresentanteCapacitacion,FechaAlta,Verificada,FechaNacimiento,Whatsapp,Status,UserNameActualizacion,FechaActualizacion,CalleID,ColoniaID,NumExterior,NumInterior,Descripcion,Latitud,Longitud,VotaCalleID,VotaColoniaID,VotaNumExterior,VotaNumInterior,VotaDescripcion,VotaLatitud,VotaLongitud")] PersonaEditViewModel persona, string notaCheckbox, string submitButton)
         {
             bool esNuevo = persona.Status == StatusTipo.Ninguno;
             Guid CalleID, ColoniaID, VotaCalleID, VotaColoniaID, ubicacionID, votaUbicacionID;
@@ -527,11 +534,18 @@ namespace Arysoft.ProyectoN.Controllers
                 ModelState.AddModelError("SeccionID", "Faltó especificar la sección donde vota la persona.");
             }
 
+            // Solo por si alguien intenta forzar el cambio de sector de una persona
+            if (User.IsInRole("SectorEditor"))
+            {
+                //TODO: Se debe de validar contra la sección donde vota
+                //persona.SectorBrigadaID = User.Identity.GetSectorId();
+            }
+
             // Si hubo algún cambio, agregar la nota
 
             if (!string.IsNullOrEmpty(notaCheckbox))
             {
-                await AgregarNotaAsync(persona.PersonaID, notaCheckbox, ControllerContext.HttpContext.User.Identity.Name, PropietarioTipo.Persona);                
+                await AgregarNotaAsync(persona.PersonaID, notaCheckbox, User.Identity.Name, PropietarioTipo.Persona);
             }
 
             if (ModelState.IsValid)
@@ -544,7 +558,7 @@ namespace Arysoft.ProyectoN.Controllers
                     p.UbicacionVotaID = (votaUbicacionID == Guid.Empty) ? AgregarUbicacion(persona, true) : votaUbicacionID;
                 }
 
-                p.UserNameActualizacion = ControllerContext.HttpContext.User.Identity.Name;
+                p.UserNameActualizacion = User.Identity.Name;
                 p.FechaActualizacion = DateTime.Now;
 
                 if (await ExistePersonaAsync(p.PersonaID))
@@ -960,8 +974,16 @@ namespace Arysoft.ProyectoN.Controllers
 
         private async Task<List<SelectListItem>> ObtenerListaSeccionesAsync(Guid selectedID)
         {
+            Guid sectorID = Guid.Empty;
+
+            if (User.IsInRole("SectorEditor"))
+            {
+                sectorID = User.Identity.GetSectorId();
+            }
+
             var listado = new SelectList(await (db.Secciones
-                .Where(s => s.Status == StatusTipo.Activo)
+                .Where(s => s.Status == StatusTipo.Activo
+                    && sectorID == Guid.Empty ? true : s.SectorID == sectorID)
                 .OrderBy(s => s.Numero)).ToListAsync(), "SeccionID", "Numero", selectedID).ToList();
 
             listado.Insert(0, new SelectListItem { Text = "(sección)", Value = Guid.Empty.ToString() });

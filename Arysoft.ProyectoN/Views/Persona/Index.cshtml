@@ -89,9 +89,9 @@
 
     if (User.IsInRole("SectorEditor"))
     {
-        busquedaAvanzadaShowClass = string.Empty;
+        //busquedaAvanzadaShowClass = string.Empty;
         busquedaSectorTipoShowClass = string.Empty;
-        ViewBag.BusquedaAvanzada = "1";
+        //ViewBag.BusquedaAvanzada = "1";
         sectorDisabled = "disabled";
     }
 }
@@ -136,7 +136,7 @@
     </div><!-- /.modal-dialog -->
 </div><!-- /.modal -->
 
-<div class="container-fluid">
+<div class="container-fluid shadow-lg">
 
     <h2>Personas</h2>
 
@@ -147,7 +147,7 @@
         <div class="row">
             <div class="col-md-11">
                 <div class="form-inline">
-                    @if (User.IsInRole("Admin") || User.IsInRole("Editor"))
+                    @if (User.IsInRole("Admin") || User.IsInRole("Editor") || User.IsInRole("SectorEditor"))
                     {
                         @Html.Raw(
                             Html.ActionLink("Nuevo", "Create", null, new { @class = "btn btn-link", @title = "Nueva persona" }).ToHtmlString()
@@ -667,7 +667,7 @@
                         }
                     </td>
                     <td class="text-right">
-                        @if ((User.IsInRole("Admin") || User.IsInRole("Editor"))
+                        @if ((User.IsInRole("Admin") || User.IsInRole("Editor") || User.IsInRole("SectorEditor"))
                             && item.Status == StatusTipo.Activo)
                         {
                             @Html.Raw(

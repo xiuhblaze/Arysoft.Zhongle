@@ -133,7 +133,7 @@ namespace Arysoft.ProyectoN.Controllers
         //
         // POST: /Users/Create
         [HttpPost]
-        public async Task<ActionResult> Create(RegisterViewModel userViewModel, params string[] selectedRoles)
+        public async Task<ActionResult> Create(RegisterViewModel userViewModel, params string[] SelectedRole)
         {
             if (ModelState.IsValid)
             {
@@ -150,9 +150,9 @@ namespace Arysoft.ProyectoN.Controllers
                 //Add User to the selected Roles 
                 if (adminresult.Succeeded)
                 {
-                    if (selectedRoles != null)
+                    if (SelectedRole != null)
                     {
-                        var result = await UserManager.AddToRolesAsync(user.Id, selectedRoles);
+                        var result = await UserManager.AddToRolesAsync(user.Id, SelectedRole);
                         if (!result.Succeeded)
                         {
                             ModelState.AddModelError("", result.Errors.First());
