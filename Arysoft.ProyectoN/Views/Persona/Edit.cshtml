@@ -183,14 +183,6 @@
                                 </div>
 
                                 <div class="form-group">
-                                    @Html.LabelFor(model => model.SeccionID, "Sección donde vota", htmlAttributes: new { @class = "control-label col-md-2 text-primary" })
-                                    <div class="col-md-10">
-                                        @Html.DropDownList("SeccionID", null, htmlAttributes: new { @class = "chosen-select" })
-                                        @Html.ValidationMessageFor(model => model.SeccionID, "", new { @class = "text-danger" })
-                                    </div>
-                                </div>
-
-                                <div class="form-group">
                                     @Html.LabelFor(model => model.Telefono, htmlAttributes: new { @class = "control-label col-md-2" })
                                     <div class="col-md-2">
                                         @Html.EditorFor(model => model.Telefono, new { htmlAttributes = new { @class = "form-control", @placeholder = "1234567890|123-456-7890|123 456 7890|000.000.0000" } })
@@ -354,6 +346,14 @@
                                     <div class="col-md-10">
                                         @Html.DropDownList("PersonaPromotorID", null, htmlAttributes: new { @class = "chosen-select" })
                                         @Html.ValidationMessageFor(model => model.PersonaPromotorID, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    @Html.LabelFor(model => model.SeccionID, "Sección donde vota", htmlAttributes: new { @class = "control-label col-md-2 text-primary" })
+                                    <div class="col-md-10">
+                                        @Html.DropDownList("SeccionID", null, htmlAttributes: new { @class = "chosen-select" })
+                                        @Html.ValidationMessageFor(model => model.SeccionID, "", new { @class = "text-danger" })
                                     </div>
                                 </div>
 
@@ -529,6 +529,7 @@
         var cambioVotante = false;
         var cambioBarda = false;
         var cambioLona = false;
+        var estanTodasLasSecciones = @(Model.Afinidad == AfinidadTipo.PorSector ? "false" : "true" ); // Validar si desde el principio solo tiene las secciones del sector
 
         $(document).ready(function () {
 
@@ -663,6 +664,10 @@
             });
 
             $('#Afinidad').on('change', function () {
+                var porSector = 'True' == '@User.IsInRole("SectorEditor")';
+                var obtenerSecciones = false;
+                var afinidadSelecionada = true;
+                
 
                 switch ($(this).val()) {
                     case '@((int)AfinidadTipo.Movilizador)':
@@ -678,10 +683,73 @@
                         break;
                     default:
                         $('#SectorFormGroup').attr('style', 'display: none;');
-                        //$('#PromotorFormGroup').attr('style', 'display: none;');
+                        //$('#PromotorFormGroup').attr('style', 'display: none;');                        
+                        if (porSector) {
+                            $('#SeccionID').empty();
+                            $('#SeccionID').append('<option value="00000000-0000-0000-0000-000000000000">(primero seleccione la Afinidad)</option>');
+                            $('#SeccionID').chosen('destroy').chosen();
+                            afinidadSelecionada = false;
+                        }
                         break;
                 }
-            });
+
+                // Actualizar las secciones, según el permiso de SectorEditor y si va a registrar una persona Por Sector
+
+                if (porSector) {
+                    var esPorSector = true;
+
+                    if ($(this).val() == '@((int)AfinidadTipo.PorSector)') {
+                        //alert('filtrar solo por sector');
+                        estanTodasLasSecciones = false;
+                        obtenerSecciones = true;
+                        esPorSector = true;
+                    }
+                    else if (!estanTodasLasSecciones && afinidadSelecionada) {
+                        //alert('mostrar todas las secciones');
+                        estanTodasLasSecciones = true;
+                        obtenerSecciones = true;
+                        esPorSector = false;
+                    }
+                    //else {
+                    //    alert('No tienes el perimso, no va a cambiar nunca nada.');
+                    //}
+
+                    if (obtenerSecciones) {
+                        var url = '@Url.Action("ObtenerSeccionesVota", "Persona")';
+
+                        $.ajax({
+                            cache: false,
+                            async: true,
+                            type: 'get',
+                            url: url,
+                            data: {
+                                esPorSector: esPorSector ? '1' : '0'
+                            },
+                            success: function (datos) {
+                                if (datos.message == null || datos.message == undefined) {
+                                    $('#SeccionID').empty();
+                                    $('#SeccionID').append('<option value="00000000-0000-0000-0000-000000000000">(sección)</option>');
+                                    $.each(datos.Secciones, function (index, item) {
+                                        var opcion = $('<option>', { value: item.Id }).text(item.Nombre);
+                                        $('#SeccionID').append(opcion);
+                                    });
+                                    $('#SeccionID')
+                                        .chosen('destroy')
+                                        .chosen();
+                                }
+                                //else {
+                                //    if (datos.message == 'notid') {
+                                //        alert('Se perdió el identificador de la sección');
+                                //    }
+                                //}
+                            },
+                            error: function (xhr, status, error) {
+                                alert('A ocurrido una excepción, error: ' + error);
+                            }
+                        });
+                    }
+                } // porSector
+            }); // Afinidad.Change
 
             $('#votanteSeguroCheckbox').on('change', function () {
 

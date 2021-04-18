@@ -296,7 +296,7 @@ namespace Arysoft.ProyectoN.Controllers
             }
 
             return View(personasPagedList); //View(personasList.ToPagedList(numeroPagina, elementosPagina)); //personas.ToList());
-        }
+        } // Index
 
         // GET: Persona/Details/5
         public async Task<ActionResult> Details(Guid? id)
@@ -459,8 +459,18 @@ namespace Arysoft.ProyectoN.Controllers
             }
 
             ViewBag.PersonaPromotorID = await ObtenerListaPromotoresAsync(persona.PersonaPromotorID ?? Guid.Empty); //new SelectList(db.Personas.Where(p => p.Status != StatusTipo.Ninguno && p.Afinidad == AfinidadTipo.Afiliado).OrderBy(p => p.Nombres), "PersonaID", "Nombres", persona.PersonaPromotorID);
-            ViewBag.SeccionID = await ObtenerListaSeccionesAsync(persona.SeccionID ?? Guid.Empty); // new SelectList(db.Secciones.OrderBy(s => s.Numero), "SeccionID", "Numero", persona.SeccionID);
-            ViewBag.SectorBrigadaID = await ObtenerListaSectoresAsync(persona.SectorBrigadaID ?? Guid.Empty); //new SelectList(db.Sectores.OrderBy(s => s.Nombre), "SectorID", "Nombre", persona.SectorBrigadaID);
+            if (persona.Afinidad == AfinidadTipo.Ninguno && User.IsInRole("SectorEditor"))
+            {
+                ViewBag.SeccionID = new List<SelectListItem>
+                {
+                    new SelectListItem { Value = Guid.Empty.ToString(), Text = "(primero seleccione la Afinidad)" }
+                };                
+            }
+            else 
+            {
+                ViewBag.SeccionID = await ObtenerListaSeccionesAsync(persona.SeccionID ?? Guid.Empty); // new SelectList(db.Secciones.OrderBy(s => s.Numero), "SeccionID", "Numero", persona.SeccionID);
+            }
+            ViewBag.SectorBrigadaID = await ObtenerListaSectoresAsync(persona.SectorBrigadaID ?? (User.IsInRole("SectorEditor") ? User.Identity.GetSectorId() : Guid.Empty)); //Guid.Empty); //new SelectList(db.Sectores.OrderBy(s => s.Nombre), "SectorID", "Nombre", persona.SectorBrigadaID);
 
             if (persona.UbicacionVive == null)
             {
@@ -593,8 +603,20 @@ namespace Arysoft.ProyectoN.Controllers
             // SI NO ES VALIDO RETORNAR A LA VISTA
 
             ViewBag.PersonaPromotorID = await ObtenerListaPromotoresAsync(persona.PersonaPromotorID ?? Guid.Empty);  // new SelectList(db.Personas.Where(p => p.Status != StatusTipo.Ninguno && p.Afinidad == AfinidadTipo.Afiliado).OrderBy(p => p.Nombres), "PersonaID", "Nombres", persona.PersonaPromotorID);
-            ViewBag.SeccionID = await ObtenerListaSeccionesAsync(persona.SeccionID ?? Guid.Empty); // new SelectList(db.Secciones.OrderBy(s => s.Numero), "SeccionID", "Numero", persona.SeccionID);
-            ViewBag.SectorBrigadaID = await ObtenerListaSectoresAsync(persona.SectorBrigadaID ?? Guid.Empty); // new SelectList(db.Sectores.OrderBy(s => s.Nombre), "SectorID", "Nombre", persona.SectorBrigadaID);
+            //ViewBag.SeccionID = await ObtenerListaSeccionesAsync(persona.SeccionID ?? Guid.Empty); // new SelectList(db.Secciones.OrderBy(s => s.Numero), "SeccionID", "Numero", persona.SeccionID);
+            if (persona.Afinidad == AfinidadTipo.Ninguno && User.IsInRole("SectorEditor"))
+            {
+                ViewBag.SeccionID = new List<SelectListItem>
+                {
+                    new SelectListItem { Value = Guid.Empty.ToString(), Text = "(primero seleccione la Afinidad)" }
+                };
+            }
+            else
+            {
+                ViewBag.SeccionID = await ObtenerListaSeccionesAsync(persona.SeccionID ?? Guid.Empty); // new SelectList(db.Secciones.OrderBy(s => s.Numero), "SeccionID", "Numero", persona.SeccionID);
+            }
+            //ViewBag.SectorBrigadaID = await ObtenerListaSectoresAsync(persona.SectorBrigadaID ?? Guid.Empty); // new SelectList(db.Sectores.OrderBy(s => s.Nombre), "SectorID", "Nombre", persona.SectorBrigadaID);
+            ViewBag.SectorBrigadaID = await ObtenerListaSectoresAsync(persona.SectorBrigadaID ?? (User.IsInRole("SectorEditor") ? User.Identity.GetSectorId() : Guid.Empty));
 
             if (persona.UbicacionVive == null)
             {
@@ -793,7 +815,12 @@ namespace Arysoft.ProyectoN.Controllers
                 return Json(new { message = "nofound" }, JsonRequestBehavior.AllowGet);
             }
 
-            var personas = await (db.Personas.Where(p => p.Status != StatusTipo.Ninguno
+            var personas = await (db.Personas
+                .Include(p => p.UbicacionVive)
+                .Include(p => p.UbicacionVive.Colonia)
+                .Include(p => p.UbicacionVive.Calle)
+                .Include(p => p.Promotor)
+                .Where(p => p.Status != StatusTipo.Ninguno
                 && p.Nombres.Contains(nombres)
                 && (p.ApellidoPaterno.Contains(apellidoPaterno) || string.IsNullOrEmpty(apellidoPaterno))
                 && (p.ApellidoMaterno.Contains(apellidoMaterno) || string.IsNullOrEmpty(apellidoMaterno))))
@@ -806,6 +833,27 @@ namespace Arysoft.ProyectoN.Controllers
 
             return PartialView("_listaPersonasEncontradas", personas);
         } // BuscarSimilares
+
+        public async Task<ActionResult> ObtenerSeccionesVota(string esPorSector)
+        {
+            Guid sectorID = Guid.Empty;
+
+            if (esPorSector == "1")
+            {
+                sectorID = User.Identity.GetSectorId();
+            }
+
+            var secciones = await (from s in db.Secciones
+                                   where s.Status == StatusTipo.Activo
+                                    && (esPorSector == "0" ? true : s.SectorID == sectorID)
+                                   orderby s.Numero
+                                   select new { Id = s.SeccionID, Nombre = s.Numero }).ToListAsync();
+
+            return Json(new
+            {
+                Secciones = secciones
+            }, JsonRequestBehavior.AllowGet);
+        } // ObtenerSeccionesVota
 
         public async Task<ActionResult> AgregarNota(Guid id, string texto, PropietarioTipo tipo)
         {
@@ -993,6 +1041,7 @@ namespace Arysoft.ProyectoN.Controllers
 
         private async Task<List<SelectListItem>> ObtenerListaSectoresAsync(Guid selectedID)
         {
+
             var listado = new SelectList(await (db.Sectores
                 .Where(s => s.Status == StatusTipo.Activo)
                 .OrderBy(s => s.Nombre)).ToListAsync(), "SectorID", "Nombre", selectedID).ToList();
