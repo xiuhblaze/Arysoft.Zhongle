@@ -245,22 +245,26 @@
                                 <ul class="dropdown-menu">
                                     <li><a href="javascript:void(0)" id="actualizarSeleccionadas">Actualizar seleccionadas</a></li>
                                     <li><a href="javascript:void(0);" id="quitarPersonasSeleccionadas">Quitar seleccionadas</a></li>
-                                    <li role="separator" class="divider"></li>
-                                    <li>
-                                        <a href="javascript:void(0);" id="exportarExcel">
-                                            <span class="glyphicon glyphicon-export"></span>
-                                            Exportar a Excel
-                                        </a>
-                                    </li>
+                                    @if (User.IsInRole("Admin"))
+                                    {
+                                        <li role="separator" class="divider"></li>
+                                        <li>
+                                            <a href="javascript:void(0);" id="exportarExcel">
+                                                <span class="glyphicon glyphicon-export"></span>
+                                                Exportar a Excel
+                                            </a>
+                                        </li>
+                                    }
+
                                     @*<li class="dropdown-submenu" style="cursor: pointer;">
-                                            <a tabindex="0">Marcar seleccionadas como</a>
-                                            <ul class="dropdown-menu">
-                                                <li><a href="javascript:void(0)" id="marcarComoVisitados">Visitadas</a></li>
-                                                <li><a href="javascript:void(0)" id="marcarComoNoEncontrado">No encontradas</a></li>
-                                                <li><a href="javascript:void(0)" id="marcarComoNoDomicilio">No es el domicilio</a></li>
-                                                <li><a href="javascript:void(0)" id="marcarComoNoViveNadie">No vive nadie</a></li>
-                                            </ul>
-                                        </li>*@
+                                        <a tabindex="0">Marcar seleccionadas como</a>
+                                        <ul class="dropdown-menu">
+                                            <li><a href="javascript:void(0)" id="marcarComoVisitados">Visitadas</a></li>
+                                            <li><a href="javascript:void(0)" id="marcarComoNoEncontrado">No encontradas</a></li>
+                                            <li><a href="javascript:void(0)" id="marcarComoNoDomicilio">No es el domicilio</a></li>
+                                            <li><a href="javascript:void(0)" id="marcarComoNoViveNadie">No vive nadie</a></li>
+                                        </ul>
+                                    </li>*@
                                 </ul>
                             </div>
                         </div>

@@ -177,8 +177,15 @@
                 <dd>
                     @Html.DisplayFor(model => model.FechaNacimiento)
                 </dd>
-
                 <dt>
+                    @Html.DisplayNameFor(model => model.Sexo)
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.Sexo)
+                </dd>
+
+                @*<dt>
                     @Html.DisplayNameFor(model => model.EstadoCivil)
                 </dt>
 
@@ -192,7 +199,7 @@
 
                 <dd>
                     @Html.DisplayFor(model => model.Ocupacion)
-                </dd>
+                </dd>*@
 
                 <dt>Registro</dt>
                 <dd>@Html.DisplayFor(model => model.FechaAlta)</dd>
@@ -289,14 +296,13 @@
             </a>
         </li>
 
-        @*<li>
-                <a href="#auditorias" data-toggle="tab">
-                    <span class="glyphicon glyphicon-eye-open"></span>
-                    Auditorias
-                    <span class="badge">@Html.DisplayFor(model => model.AuditoriasRealizadas.Count)</span>
-                </a>
-            </li>*@
-
+        <li>
+            <a href="#auditorias" data-toggle="tab">
+                <span class="glyphicon glyphicon-eye-open"></span>
+                Auditorias
+                <span class="badge">@Html.DisplayFor(model => model.AuditoriasRealizadas.Count)</span>
+            </a>
+        </li>
     </ul>
 
     <div class="tab-content">
@@ -319,13 +325,13 @@
             </div>
         </div>
 
-        @*<div class="tab-pane fade in" name="auditorias" id="auditorias">
-                <h4>Auditorias</h4>
+        <div class="tab-pane fade in" name="auditorias" id="auditorias">
+            <h4>Auditorias</h4>
 
-                <div id="listaAuditorias" name="listaAuditorias" style="max-height: 400px; overflow-y: scroll;">
-                    @Html.Partial("_listaAuditorias", Model)
-                </div>
-            </div>*@
+            <div id="listaAuditorias" name="listaAuditorias" style="max-height: 400px; overflow-y: scroll;">
+                @Html.Partial("_listaAuditorias", Model)
+            </div>
+        </div>
 
     </div>
 </div>
@@ -344,7 +350,7 @@
                 Cancelar
             </button>
 
-            @if (User.IsInRole("Admin") || User.IsInRole("Editor"))
+            @if (User.IsInRole("Admin") || User.IsInRole("Editor") || User.IsInRole("SectorEditor"))
             {
                 switch (Model.Status)
                 {
@@ -356,7 +362,7 @@
                                     .Replace("Editar", "<span class='glyphicon glyphicon-edit' title='Editar'></span> Editar")
                             )
                         }
-                        else if (Model.NmOrigen == "delete")
+                        else if (Model.NmOrigen == "delete" && !User.IsInRole("SectorEditor"))
                         {
                             <form action="/Persona/Delete/@Model.PersonaID" method="post" style="float: right; margin-left: .5em;">
                                 @Html.AntiForgeryToken()
@@ -384,12 +390,15 @@
                                 break;
 
                             case "delete":
-                                <form action="/Persona/Delete/@Model.PersonaID" method="post" style="float: right; margin-left: .5em;">
-                                    @Html.AntiForgeryToken()
-                                    <button type="submit" class="btn btn-danger">
-                                        <span class='glyphicon glyphicon-trash' title='Eliminar'></span> Eliminar
-                                    </button>
-                                </form>
+                                if (!User.IsInRole("SectorEditor"))
+                                {
+                                    <form action="/Persona/Delete/@Model.PersonaID" method="post" style="float: right; margin-left: .5em;">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-danger">
+                                            <span class='glyphicon glyphicon-trash' title='Eliminar'></span> Eliminar
+                                        </button>
+                                    </form>
+                                }
                                 break;
                         }
                         break;

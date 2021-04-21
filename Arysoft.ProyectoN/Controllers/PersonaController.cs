@@ -19,7 +19,7 @@ namespace Arysoft.ProyectoN.Controllers
         private ApplicationDbContext db = new ApplicationDbContext();
 
         // GET: Persona
-        [Authorize(Roles = "Admin, Editor, Auditor, Consultant, SectorEditor")]
+        [Authorize(Roles = "Admin, Editor, SectorEditor, Auditor, Consultant")]
         public async Task<ActionResult> Index(string buscar, string filtro, string orden, string afinidad, string SectorID, string SeccionID, string PromotorID,
             string CalleID, string ColoniaID, string bardaLona, string sectorTipo, string votanteSeguro, string status, string verificada,
             string filtroEspecifico, string yaVoto, string busquedaAvanzada, string llamadaOrigen,
@@ -30,6 +30,8 @@ namespace Arysoft.ProyectoN.Controllers
             Guid calleID = (CalleID != null && CalleID != Guid.Empty.ToString()) ? new Guid(CalleID) : Guid.Empty;
             Guid coloniaID = (ColoniaID != null && ColoniaID != Guid.Empty.ToString()) ? new Guid(ColoniaID) : Guid.Empty;
             Guid promotorID = (PromotorID != null && PromotorID != Guid.Empty.ToString()) ? new Guid(PromotorID) : Guid.Empty;
+
+            bool primeraVez = false;
 
             if (User.IsInRole("SectorEditor"))
             {
@@ -51,7 +53,10 @@ namespace Arysoft.ProyectoN.Controllers
                 pagina = 1;
                 buscar = buscar.Trim();
             }
-            else { buscar = filtro ?? string.Empty; }
+            else { 
+                buscar = filtro ?? string.Empty;
+                primeraVez = string.IsNullOrEmpty(buscar);
+            }
             ViewBag.Filtro = buscar;
 
             db.Database.CommandTimeout = 180;
@@ -61,20 +66,24 @@ namespace Arysoft.ProyectoN.Controllers
                 .Include(p => p.Seccion.Sector)
                 .Include(p => p.PersonasAfines)
                 .Include(p => p.UbicacionVive)
+                .Include(p => p.UbicacionVive.Colonia)
+                .Include(p => p.UbicacionVive.Calle)
                 .Include(p => p.UbicacionVota)
+                .Include(p => p.UbicacionVota.Colonia)
+                .Include(p => p.UbicacionVota.Calle)
                 .Include(p => p.Voto)
                 .Include(p => p.Voto.Casilla)
-                .Include(p => p.Notas)                
-                .Where(p => p.Status == StatusTipo.Activo || p.Status == StatusTipo.Baja);
+                .Include(p => p.Notas)
+                .Where(p => p.Status != StatusTipo.Ninguno); //== StatusTipo.Activo || p.Status == StatusTipo.Baja);
             var personasList = new List<Persona>();
 
             //if (!int.TryParse(buscar, out int seccion)) { seccion = 0; } else { buscar = string.Empty; }
 
             // Busqueda BASE DE DATOS
-            if (string.IsNullOrEmpty(status))
-            {
-                status = StatusTipo.Activo.ToString();
-            }
+            //if (string.IsNullOrEmpty(status))
+            //{
+            //    status = StatusTipo.Activo.ToString();
+            //}
 
             if (Request.IsAjaxRequest() && llamadaOrigen == "to-estatal") //HACK: xBlaze: Para encontrar los de la segunda etapa - QUITAR LUEGO!!
             {
@@ -99,17 +108,35 @@ namespace Arysoft.ProyectoN.Controllers
                 afinidad = string.IsNullOrEmpty(afinidad) ? AfinidadTipo.Ninguno.ToString() : afinidad;
                 votanteSeguro = string.IsNullOrEmpty(votanteSeguro) ? BoolTipo.Ninguno.ToString() : votanteSeguro;
                 bardaLona = string.IsNullOrEmpty(bardaLona) ? "0" : bardaLona;
-                status = string.IsNullOrEmpty(status) ? StatusTipo.Ninguno.ToString() : status;
+                //status = string.IsNullOrEmpty(status) ? StatusTipo.Ninguno.ToString() : status;
                 verificada = string.IsNullOrEmpty(verificada) ? BoolTipo.Ninguno.ToString() : verificada;
                 yaVoto = string.IsNullOrEmpty(yaVoto) ? BoolTipo.Ninguno.ToString() : yaVoto;
-                
+
+                // Valida la consulta por el status, de acuerdo al Rol que tenga el usuario
+                if (string.IsNullOrEmpty(status))
+                {
+                    status = StatusTipo.Ninguno.ToString();
+                }
+                else if (status == StatusTipo.Eliminado.ToString() && !User.IsInRole("Admin"))
+                {
+                    status = StatusTipo.Ninguno.ToString();
+                }
+                else if (User.IsInRole("Editor") || User.IsInRole("SectorEditor"))
+                { 
+                    // no hacer nada
+                }
+                else if (User.IsInRole("Consultant"))
+                {
+                    status = StatusTipo.Activo.ToString();
+                }
+
                 personas = personas.Where(p =>
                     (
                         (!hayPalabras)
                         || (from w in wordsToMatch where p.Nombres.Contains(w) select w).ToList().Count > 0
                         || (from w in wordsToMatch where p.ApellidoPaterno.Contains(w) select w).ToList().Count > 0
                         || (from w in wordsToMatch where p.ApellidoMaterno.Contains(w) select w).ToList().Count > 0
-                        || (from w in wordsToMatch where p.CorreoElectronico.Contains(w) select w).ToList().Count > 0
+                    //|| (from w in wordsToMatch where p.CorreoElectronico.Contains(w) select w).ToList().Count > 0
                     )
                     //(
                     //    !hayPalabras
@@ -128,7 +155,7 @@ namespace Arysoft.ProyectoN.Controllers
                     && (calleID == Guid.Empty ? true : p.UbicacionVive.CalleID == calleID || p.UbicacionVota.CalleID == calleID)
                     && (coloniaID == Guid.Empty ? true : p.UbicacionVive.ColoniaID == coloniaID || p.UbicacionVota.ColoniaID == coloniaID)
                     && (promotorID == Guid.Empty ? true : p.PersonaPromotorID == promotorID)
-                    && (bardaLona == "0" ? true : 
+                    && (bardaLona == "0" ? true :
                             bardaLona == "1" ? p.TieneBarda == BoolTipo.Si :
                             bardaLona == "2" ? p.TieneLona == BoolTipo.Si :
                             bardaLona == "3" ? (p.TieneBarda == BoolTipo.Si || p.TieneLona == BoolTipo.Si) :
@@ -140,6 +167,21 @@ namespace Arysoft.ProyectoN.Controllers
                         p.Voto == null ? yaVoto == BoolTipo.No.ToString() :
                         p.Voto.YaVoto.ToString() == yaVoto.ToString())
                 );
+            }
+            else 
+            {   
+                if (User.IsInRole("Admin"))
+                {
+                    personas = personas.Where(p => p.Status != StatusTipo.Ninguno);
+                }
+                else if (User.IsInRole("Editor") || User.IsInRole("SectorEditor"))
+                {
+                    personas = personas.Where(p => p.Status == StatusTipo.Activo || p.Status == StatusTipo.Baja);
+                }
+                else if (User.IsInRole("Consultant"))
+                {
+                    personas = personas.Where(p => p.Status == StatusTipo.Activo);
+                }
             }
 
             // Si se llama para el reporte estatal, por default ordenarlo por sección
@@ -222,7 +264,15 @@ namespace Arysoft.ProyectoN.Controllers
                     break;
             }
 
-            personasList = await personas.ToListAsync();
+            // Realizar la consulta a la BDD
+            if (primeraVez)
+            {
+                personasList = await personas.Take(Comun.ELEMENTOS_PAGINA).ToListAsync();
+            }
+            else
+            {
+                personasList = await personas.ToListAsync();
+            }            
 
             // Busqueda especifica en memoria
 
@@ -249,7 +299,7 @@ namespace Arysoft.ProyectoN.Controllers
             ViewBag.BusquedaAvanzada = string.IsNullOrEmpty(busquedaAvanzada) ? "0" : busquedaAvanzada;
 
             ViewBag.SectorID = await ObtenerListaSectoresAsync(sectorID);
-            ViewBag.SeccionID = await ObtenerListaSeccionesAsync(seccionID);
+            ViewBag.SeccionID = await ObtenerListaSeccionesAsync(seccionID, AfinidadTipo.PorSector);
             ViewBag.CalleID = await ObtenerListaCallesAsync(calleID);
             ViewBag.ColoniaID = await ObtenerListaColoniasAsync(coloniaID);
             ViewBag.PromotorID = await ObtenerListaPromotoresAsync(promotorID);
@@ -271,7 +321,7 @@ namespace Arysoft.ProyectoN.Controllers
             ViewBag.Count = personasList.Count();
 
             int numeroPagina = (pagina ?? 1);
-            int elementosPagina = 50;
+            int elementosPagina = Comun.ELEMENTOS_PAGINA;
 
             var personasPagedList = personasList.ToPagedList(numeroPagina, elementosPagina);
 
@@ -311,6 +361,9 @@ namespace Arysoft.ProyectoN.Controllers
                 return RedirectToAction("Index");
             }
             Persona persona = await db.Personas
+                .Include(p => p.AuditoriasRealizadas)
+                .Include(p => p.AuditoriasRealizadas.Select(a => a.Auditoria))
+                .Include(p => p.AuditoriasRealizadas.Select(a => a.Auditoria.Notas))
                 .Include(p => p.PersonasAfines)
                 .Include(p => p.PersonasAfines.Select(pa => pa.Notas))
                 .Include(p => p.PersonasAfines.Select(pa => pa.Seccion))
@@ -409,6 +462,9 @@ namespace Arysoft.ProyectoN.Controllers
 
             // Persona persona = await db.Personas.FindAsync(id);
             Persona persona = await db.Personas
+                .Include(p => p.AuditoriasRealizadas)
+                .Include(p => p.AuditoriasRealizadas.Select(a => a.Auditoria))
+                .Include(p => p.AuditoriasRealizadas.Select(a => a.Auditoria.Notas))
                 .Include(p => p.PersonasAfines)
                 .Include(p => p.PersonasAfines.Select(pa => pa.Notas))
                 .Include(p => p.PersonasAfines.Select(pa => pa.Seccion))
@@ -440,9 +496,16 @@ namespace Arysoft.ProyectoN.Controllers
                 return RedirectToAction("Index");
             }
 
-            if (User.IsInRole("SectorEditor") && persona.Status != StatusTipo.Ninguno && persona.Seccion.SectorID != User.Identity.GetSectorId())
+            // Valida para un Editor por Sector que solo pueda modificar a su sector, a sus movilizadores y al 1x10 de sus movilizadores
+            if (User.IsInRole("SectorEditor")
+                && persona.Status != StatusTipo.Ninguno 
+                && !(persona.Seccion.SectorID == User.Identity.GetSectorId() 
+                    || persona.SectorBrigadaID == User.Identity.GetSectorId()
+                    || (persona.Afinidad == AfinidadTipo.PorAfiliado 
+                        && persona.Promotor.SectorBrigadaID == User.Identity.GetSectorId())
+                    ))
             {
-                TempData["MessageBox"] = "No se puede editar una persona que se encuentra en otro Sector asignado al Usuario.";
+                TempData["MessageBox"] = "No se puede editar una persona que se encuentra en otro Sector diferente al asignado al Usuario.";
                 return RedirectToAction("Index");
             }
 
@@ -468,7 +531,7 @@ namespace Arysoft.ProyectoN.Controllers
             }
             else 
             {
-                ViewBag.SeccionID = await ObtenerListaSeccionesAsync(persona.SeccionID ?? Guid.Empty); // new SelectList(db.Secciones.OrderBy(s => s.Numero), "SeccionID", "Numero", persona.SeccionID);
+                ViewBag.SeccionID = await ObtenerListaSeccionesAsync(persona.SeccionID ?? Guid.Empty, persona.Afinidad); // new SelectList(db.Secciones.OrderBy(s => s.Numero), "SeccionID", "Numero", persona.SeccionID);
             }
             ViewBag.SectorBrigadaID = await ObtenerListaSectoresAsync(persona.SectorBrigadaID ?? (User.IsInRole("SectorEditor") ? User.Identity.GetSectorId() : Guid.Empty)); //Guid.Empty); //new SelectList(db.Sectores.OrderBy(s => s.Nombre), "SectorID", "Nombre", persona.SectorBrigadaID);
 
@@ -520,7 +583,7 @@ namespace Arysoft.ProyectoN.Controllers
         [Authorize(Roles = "Admin, Editor, SectorEditor")]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> Edit([Bind(Include = "PersonaID,SectorBrigadaID,SeccionID,PersonaPromotorID,CasillaID,Nombres,ApellidoPaterno,ApellidoMaterno,VotaEnDomicilio,Telefono,Celular,CorreoElectronico,Afinidad,VotanteSeguro,TieneBarda,TieneLona,RepresentanteTipo,RepresentanteAsistencia,RepresentanteCapacitacion,FechaAlta,Verificada,FechaNacimiento,Whatsapp,Status,UserNameActualizacion,FechaActualizacion,CalleID,ColoniaID,NumExterior,NumInterior,Descripcion,Latitud,Longitud,VotaCalleID,VotaColoniaID,VotaNumExterior,VotaNumInterior,VotaDescripcion,VotaLatitud,VotaLongitud")] PersonaEditViewModel persona, string notaCheckbox, string submitButton)
+        public async Task<ActionResult> Edit([Bind(Include = "PersonaID,SectorBrigadaID,SeccionID,PersonaPromotorID,CasillaID,Nombres,ApellidoPaterno,ApellidoMaterno,VotaEnDomicilio,Telefono,Celular,CorreoElectronico,Afinidad,VotanteSeguro,TieneBarda,TieneLona,RepresentanteTipo,RepresentanteAsistencia,RepresentanteCapacitacion,FechaAlta,Verificada,FechaNacimiento,Sexo,Whatsapp,Status,UserNameActualizacion,FechaActualizacion,CalleID,ColoniaID,NumExterior,NumInterior,Descripcion,Latitud,Longitud,VotaCalleID,VotaColoniaID,VotaNumExterior,VotaNumInterior,VotaDescripcion,VotaLatitud,VotaLongitud")] PersonaEditViewModel persona, string notaCheckbox, string submitButton)
         {
             bool esNuevo = persona.Status == StatusTipo.Ninguno;
             Guid CalleID, ColoniaID, VotaCalleID, VotaColoniaID, ubicacionID, votaUbicacionID;
@@ -613,7 +676,7 @@ namespace Arysoft.ProyectoN.Controllers
             }
             else
             {
-                ViewBag.SeccionID = await ObtenerListaSeccionesAsync(persona.SeccionID ?? Guid.Empty); // new SelectList(db.Secciones.OrderBy(s => s.Numero), "SeccionID", "Numero", persona.SeccionID);
+                ViewBag.SeccionID = await ObtenerListaSeccionesAsync(persona.SeccionID ?? Guid.Empty, persona.Afinidad); // new SelectList(db.Secciones.OrderBy(s => s.Numero), "SeccionID", "Numero", persona.SeccionID);
             }
             //ViewBag.SectorBrigadaID = await ObtenerListaSectoresAsync(persona.SectorBrigadaID ?? Guid.Empty); // new SelectList(db.Sectores.OrderBy(s => s.Nombre), "SectorID", "Nombre", persona.SectorBrigadaID);
             ViewBag.SectorBrigadaID = await ObtenerListaSectoresAsync(persona.SectorBrigadaID ?? (User.IsInRole("SectorEditor") ? User.Identity.GetSectorId() : Guid.Empty));
@@ -670,6 +733,9 @@ namespace Arysoft.ProyectoN.Controllers
             //Persona persona = await db.Personas.FindAsync(id);
 
             Persona persona = await db.Personas
+                .Include(p => p.AuditoriasRealizadas)
+                .Include(p => p.AuditoriasRealizadas.Select(a => a.Auditoria))
+                .Include(p => p.AuditoriasRealizadas.Select(a => a.Auditoria.Notas))
                 .Include(p => p.PersonasAfines)
                 .Include(p => p.PersonasAfines.Select(pa => pa.Notas))
                 .Include(p => p.PersonasAfines.Select(pa => pa.Seccion))
@@ -1004,7 +1070,7 @@ namespace Arysoft.ProyectoN.Controllers
         {
             List<SelectListItem> listado = new List<SelectListItem>();
 
-            listado.Add(new SelectListItem { Text = "(promotor)", Value = Guid.Empty.ToString() });
+            listado.Add(new SelectListItem { Text = "(movilizador)", Value = Guid.Empty.ToString() });
 
             foreach (var item in await (db.Personas
                 .Where(p => (p.Status == StatusTipo.Activo) && (p.Afinidad == AfinidadTipo.Movilizador || p.Afinidad == AfinidadTipo.Simpatizante))
@@ -1020,18 +1086,18 @@ namespace Arysoft.ProyectoN.Controllers
             return listado;
         } // ObtenerListaPromotores
 
-        private async Task<List<SelectListItem>> ObtenerListaSeccionesAsync(Guid selectedID)
+        private async Task<List<SelectListItem>> ObtenerListaSeccionesAsync(Guid selectedID, AfinidadTipo afinidad)
         {
             Guid sectorID = Guid.Empty;
 
-            if (User.IsInRole("SectorEditor"))
+            if (User.IsInRole("SectorEditor") && afinidad == AfinidadTipo.PorSector)
             {
                 sectorID = User.Identity.GetSectorId();
             }
 
             var listado = new SelectList(await (db.Secciones
                 .Where(s => s.Status == StatusTipo.Activo
-                    && sectorID == Guid.Empty ? true : s.SectorID == sectorID)
+                    && (sectorID == Guid.Empty ? true : s.SectorID == sectorID))
                 .OrderBy(s => s.Numero)).ToListAsync(), "SeccionID", "Numero", selectedID).ToList();
 
             listado.Insert(0, new SelectListItem { Text = "(sección)", Value = Guid.Empty.ToString() });

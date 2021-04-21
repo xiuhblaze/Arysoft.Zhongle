@@ -11,6 +11,7 @@ public static class Comun
     // CONSTANTES
 
     public const string TITULO_APP = "PROYECTO N21";
+    public const int ELEMENTOS_PAGINA = 50;
 
     // PERSONA
 

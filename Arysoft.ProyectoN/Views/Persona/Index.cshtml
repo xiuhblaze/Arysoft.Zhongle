@@ -578,7 +578,7 @@
                         @if (item.Promotor != null)
                         {
                             <br />
-                            <small class="text-muted" title="Promotor (invitado por)">
+                            <small class="text-muted" title="Registrado por el movilizador:">
                                 @Html.DisplayFor(modelItem => item.Promotor.NombreCompleto)
                             </small>
                         }
@@ -659,8 +659,8 @@
                         @item.Afinidad.GetDisplayName()
                         @if (item.Afinidad == AfinidadTipo.Movilizador || item.Afinidad == AfinidadTipo.Simpatizante)
                         {
-                            int porSector = item.PersonasAfines.Where(p => p.Afinidad == AfinidadTipo.PorSector).Count();
-                            int porAfiliado = item.PersonasAfines.Where(p => p.Afinidad == AfinidadTipo.PorAfiliado).Count();
+                            int porSector = item.PersonasAfines.Where(p => p.Afinidad == AfinidadTipo.PorSector && p.VotanteSeguro == BoolTipo.Si).Count();
+                            int porAfiliado = item.PersonasAfines.Where(p => p.Afinidad == AfinidadTipo.PorAfiliado && p.VotanteSeguro == BoolTipo.Si).Count();
                             <br />
                             <span class="badge" title="@AfinidadTipo.PorSector.GetDisplayName()">@porSector</span>
                             <span class="badge" title="@AfinidadTipo.PorAfiliado.GetDisplayName()">@porAfiliado</span>

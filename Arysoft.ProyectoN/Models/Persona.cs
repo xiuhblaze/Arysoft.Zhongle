@@ -28,7 +28,7 @@ namespace Arysoft.ProyectoN.Models
         /// <summary>
         /// Obtiene o establece el afiliado que invito a la persona
         /// </summary>
-        [Display(Name = "Promotor")]
+        [Display(Name = "Movilizador")]
         public Guid? PersonaPromotorID { get; set; }
 
         public Guid? UbicacionViveID { get; set; }

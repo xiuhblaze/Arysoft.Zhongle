@@ -34,7 +34,9 @@ namespace Arysoft.ProyectoN.Controllers
             else { buscar = filtro ?? string.Empty; }
             ViewBag.Filtro = buscar;
 
-            var auditorias = db.Auditorias.Include(a => a.Responsable).Where(a => a.Status != AuditoriaStatusTipo.Ninguno);
+            var auditorias = db.Auditorias
+                .Include(a => a.Responsable)
+                .Where(a => a.Status != AuditoriaStatusTipo.Ninguno);
 
             if (!string.IsNullOrEmpty(buscar) || !string.IsNullOrEmpty(status))
             {
@@ -106,7 +108,21 @@ namespace Arysoft.ProyectoN.Controllers
                 if (Request.IsAjaxRequest()) { return Content("noid"); }
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            Auditoria auditoria = db.Auditorias.Find(id);
+            Auditoria auditoria = db.Auditorias
+                .Include(a => a.PersonasAuditadas)
+                .Include(a => a.PersonasAuditadas.Select(p => p.Persona))
+                .Include(a => a.PersonasAuditadas.Select(p => p.Persona.Seccion))
+                .Include(a => a.PersonasAuditadas.Select(p => p.Persona.Seccion.Sector))
+                .Include(a => a.PersonasAuditadas.Select(p => p.Persona.Promotor))
+                .Include(a => a.PersonasAuditadas.Select(p => p.Persona.UbicacionVive))
+                .Include(a => a.PersonasAuditadas.Select(p => p.Persona.UbicacionVive.Calle))
+                .Include(a => a.PersonasAuditadas.Select(p => p.Persona.UbicacionVive.Colonia))
+                .Include(a => a.PersonasAuditadas.Select(p => p.Persona.UbicacionVota))
+                .Include(a => a.PersonasAuditadas.Select(p => p.Persona.UbicacionVota.Calle))
+                .Include(a => a.PersonasAuditadas.Select(p => p.Persona.UbicacionVota.Colonia))
+                .Include(a => a.PersonasAuditadas.Select(p => p.Persona.Notas))
+                .Where(a => a.AuditoriaID == id)
+                .FirstOrDefault();
             if (auditoria == null)
             {
                 TempData["MessageBox"] = "No se encontró el registro del identificador.";
@@ -165,7 +181,21 @@ namespace Arysoft.ProyectoN.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            Auditoria auditoria = db.Auditorias.Find(id);
+            Auditoria auditoria = db.Auditorias
+                .Include(a => a.PersonasAuditadas)
+                .Include(a => a.PersonasAuditadas.Select(p => p.Persona))
+                .Include(a => a.PersonasAuditadas.Select(p => p.Persona.Seccion))
+                .Include(a => a.PersonasAuditadas.Select(p => p.Persona.Seccion.Sector))
+                .Include(a => a.PersonasAuditadas.Select(p => p.Persona.Promotor))
+                .Include(a => a.PersonasAuditadas.Select(p => p.Persona.UbicacionVive))
+                .Include(a => a.PersonasAuditadas.Select(p => p.Persona.UbicacionVive.Calle))
+                .Include(a => a.PersonasAuditadas.Select(p => p.Persona.UbicacionVive.Colonia))
+                .Include(a => a.PersonasAuditadas.Select(p => p.Persona.UbicacionVota))
+                .Include(a => a.PersonasAuditadas.Select(p => p.Persona.UbicacionVota.Calle))
+                .Include(a => a.PersonasAuditadas.Select(p => p.Persona.UbicacionVota.Colonia))
+                .Include(a => a.PersonasAuditadas.Select(p => p.Persona.Notas))
+                .Where(a => a.AuditoriaID == id)
+                .FirstOrDefault();
             if (auditoria == null)
             {
                 return HttpNotFound();
@@ -378,7 +408,20 @@ namespace Arysoft.ProyectoN.Controllers
                 if(Request.IsAjaxRequest()) { return Content("notid"); }
             }
 
-            AuditoriaPersona ap = db.AuditoriaPersonas.Find(id);
+            AuditoriaPersona ap = db.AuditoriaPersonas
+                .Include(a => a.Persona)
+                .Include(a => a.Persona.Seccion)
+                .Include(a => a.Persona.Seccion.Sector)
+                .Include(a => a.Persona.Promotor)
+                .Include(a => a.Persona.UbicacionVive)
+                .Include(a => a.Persona.UbicacionVive.Calle)
+                .Include(a => a.Persona.UbicacionVive.Colonia)
+                .Include(a => a.Persona.UbicacionVota)
+                .Include(a => a.Persona.UbicacionVota.Calle)
+                .Include(a => a.Persona.UbicacionVota.Colonia)
+                .Include(a => a.Persona.Notas)
+                .Where(a => a.AuditoriaPersonaID == id)
+                .FirstOrDefault();
 
             if (ap == null)
             {
@@ -441,8 +484,24 @@ namespace Arysoft.ProyectoN.Controllers
 
                 db.SaveChanges();
             }
-            
-            return PartialView("_listaPersonas", auditoria);
+
+            Auditoria auditoriaResult = db.Auditorias
+                .Include(a => a.PersonasAuditadas)
+                .Include(a => a.PersonasAuditadas.Select(p => p.Persona))
+                .Include(a => a.PersonasAuditadas.Select(p => p.Persona.Seccion))
+                .Include(a => a.PersonasAuditadas.Select(p => p.Persona.Seccion.Sector))
+                .Include(a => a.PersonasAuditadas.Select(p => p.Persona.Promotor))
+                .Include(a => a.PersonasAuditadas.Select(p => p.Persona.UbicacionVive))
+                .Include(a => a.PersonasAuditadas.Select(p => p.Persona.UbicacionVive.Calle))
+                .Include(a => a.PersonasAuditadas.Select(p => p.Persona.UbicacionVive.Colonia))
+                .Include(a => a.PersonasAuditadas.Select(p => p.Persona.UbicacionVota))
+                .Include(a => a.PersonasAuditadas.Select(p => p.Persona.UbicacionVota.Calle))
+                .Include(a => a.PersonasAuditadas.Select(p => p.Persona.UbicacionVota.Colonia))
+                .Include(a => a.PersonasAuditadas.Select(p => p.Persona.Notas))
+                .Where(a => a.AuditoriaID == id)
+                .FirstOrDefault();
+
+            return PartialView("_listaPersonas", auditoriaResult);
         } // AgregarPersonas
 
         [Authorize(Roles = "Admin, Editor, Auditor")]
@@ -453,7 +512,22 @@ namespace Arysoft.ProyectoN.Controllers
                 if (Request.IsAjaxRequest()) { return Content("notid"); }
             }
 
-            AuditoriaPersona ap = db.AuditoriaPersonas.Find(id);
+            // AuditoriaPersona ap = db.AuditoriaPersonas.Find(id);
+
+            AuditoriaPersona ap = db.AuditoriaPersonas
+                .Include(a => a.Persona)
+                .Include(a => a.Persona.Seccion)
+                .Include(a => a.Persona.Seccion.Sector)
+                .Include(a => a.Persona.Promotor)
+                .Include(a => a.Persona.UbicacionVive)
+                .Include(a => a.Persona.UbicacionVive.Calle)
+                .Include(a => a.Persona.UbicacionVive.Colonia)
+                .Include(a => a.Persona.UbicacionVota)
+                .Include(a => a.Persona.UbicacionVota.Calle)
+                .Include(a => a.Persona.UbicacionVota.Colonia)
+                .Include(a => a.Persona.Notas)
+                .Where(a => a.AuditoriaPersonaID == id)
+                .FirstOrDefault();
 
             if (ap == null)
             {
@@ -479,7 +553,22 @@ namespace Arysoft.ProyectoN.Controllers
                 if (Request.IsAjaxRequest()) { return Content("notid"); }
             }
 
-            AuditoriaPersona ap = db.AuditoriaPersonas.Find(id);
+            // AuditoriaPersona ap = db.AuditoriaPersonas.Find(id);
+
+            AuditoriaPersona ap = db.AuditoriaPersonas
+                .Include(a => a.Persona)
+                .Include(a => a.Persona.Seccion)
+                .Include(a => a.Persona.Seccion.Sector)
+                .Include(a => a.Persona.Promotor)
+                .Include(a => a.Persona.UbicacionVive)
+                .Include(a => a.Persona.UbicacionVive.Calle)
+                .Include(a => a.Persona.UbicacionVive.Colonia)
+                .Include(a => a.Persona.UbicacionVota)
+                .Include(a => a.Persona.UbicacionVota.Calle)
+                .Include(a => a.Persona.UbicacionVota.Colonia)
+                .Include(a => a.Persona.Notas)
+                .Where(a => a.AuditoriaPersonaID == id)
+                .FirstOrDefault();
 
             if (ap == null)
             {
@@ -510,7 +599,21 @@ namespace Arysoft.ProyectoN.Controllers
             db.Entry(ap).State = EntityState.Modified;
             db.SaveChanges();
 
-            Auditoria auditoria = db.Auditorias.Find(ap.AuditoriaID);
+            Auditoria auditoria = db.Auditorias
+                .Include(a => a.PersonasAuditadas)
+                .Include(a => a.PersonasAuditadas.Select(p => p.Persona))
+                .Include(a => a.PersonasAuditadas.Select(p => p.Persona.Seccion))
+                .Include(a => a.PersonasAuditadas.Select(p => p.Persona.Seccion.Sector))
+                .Include(a => a.PersonasAuditadas.Select(p => p.Persona.Promotor))
+                .Include(a => a.PersonasAuditadas.Select(p => p.Persona.UbicacionVive))
+                .Include(a => a.PersonasAuditadas.Select(p => p.Persona.UbicacionVive.Calle))
+                .Include(a => a.PersonasAuditadas.Select(p => p.Persona.UbicacionVive.Colonia))
+                .Include(a => a.PersonasAuditadas.Select(p => p.Persona.UbicacionVota))
+                .Include(a => a.PersonasAuditadas.Select(p => p.Persona.UbicacionVota.Calle))
+                .Include(a => a.PersonasAuditadas.Select(p => p.Persona.UbicacionVota.Colonia))
+                .Include(a => a.PersonasAuditadas.Select(p => p.Persona.Notas))
+                .Where(a => a.AuditoriaID == ap.AuditoriaID)
+                .FirstOrDefault();
 
             return PartialView("_listaPersonas", auditoria);
 
@@ -547,7 +650,10 @@ namespace Arysoft.ProyectoN.Controllers
             char[] separador = new char[] { ',' };
             string[] identificadores = ids.Split(separador, StringSplitOptions.RemoveEmptyEntries);
 
-            foreach (var item in db.AuditoriaPersonas.Where(ap => identificadores.Contains(ap.AuditoriaPersonaID.ToString())))
+            foreach (var item in db.AuditoriaPersonas
+                .Include(a => a.Auditoria)
+                .Include(a => a.Persona)
+                .Where(ap => identificadores.Contains(ap.AuditoriaPersonaID.ToString())))
             {
                 item.FechaAuditoria = fecha;
                 item.Observaciones = observaciones;
@@ -560,15 +666,15 @@ namespace Arysoft.ProyectoN.Controllers
                     + (item.VotanteSeguro == BoolTipo.Si ? "VOTO SEGURO" : "NO SEGURO")
                     + " (ver auditoria " + item.Auditoria.Folio.ToString().PadLeft(3, '0') + "): "
                     + observaciones;
-                    AgregarNota(item.PersonaID, texto, ControllerContext.HttpContext.User.Identity.Name, PropietarioTipo.Persona);
+                    AgregarNota(item.PersonaID, texto, User.Identity.Name, PropietarioTipo.Persona);
 
                     item.Persona.VotanteSeguro = item.VotanteSeguro;
-                    item.Persona.UserNameActualizacion = ControllerContext.HttpContext.User.Identity.Name;
+                    item.Persona.UserNameActualizacion = User.Identity.Name;
                     item.Persona.FechaActualizacion = DateTime.Now;
                     db.Entry(item.Persona).State = EntityState.Modified;
                 }
 
-                item.UserNameActualizacion = ControllerContext.HttpContext.User.Identity.Name;
+                item.UserNameActualizacion = User.Identity.Name;
                 item.FechaActualizacion = DateTime.Now;
                 db.Entry(item).State = EntityState.Modified;
 
@@ -630,8 +736,16 @@ namespace Arysoft.ProyectoN.Controllers
             ViewBag.OrdenSeccion = orden == "seccion" ? "seccion_desc" : "seccion";
 
             var personas = db.Personas
-                .Include(s => s.Seccion)
-                .Include(s => s.Seccion.Sector)
+                .Include(p => p.Seccion)
+                .Include(p => p.Seccion.Sector)
+                .Include(p => p.UbicacionVive)
+                .Include(p => p.UbicacionVive.Calle)
+                .Include(p => p.UbicacionVive.Colonia)
+                .Include(p => p.UbicacionVota)
+                .Include(p => p.UbicacionVota.Calle)
+                .Include(p => p.UbicacionVota.Colonia)
+                .Include(p => p.PersonasAfines)
+                .Include(p => p.Notas)
                 .Where(p => p.Status == StatusTipo.Activo || p.Status == StatusTipo.Baja);
             var personasList = new List<Persona>();
 
@@ -809,6 +923,7 @@ namespace Arysoft.ProyectoN.Controllers
             listado.Add(new SelectListItem { Text = "(colonia)", Value = Guid.Empty.ToString() });
 
             foreach (var item in db.Colonias
+                .Include(c => c.Poblacion)
                 .Where(p => p.Status == StatusTipo.Activo)
                 .OrderBy(p => p.Nombre))
             {
