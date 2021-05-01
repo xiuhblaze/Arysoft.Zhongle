@@ -7,6 +7,7 @@ using System.Net;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
+using System.IO;
 using Arysoft.ProyectoN.Models;
 
 namespace Arysoft.ProyectoN.Controllers
@@ -17,12 +18,12 @@ namespace Arysoft.ProyectoN.Controllers
         private ApplicationDbContext db = new ApplicationDbContext();
 
         // GET: Partido
-        [Authorize(Roles = "Admin, Editor, Consultant")]
+        [Authorize(Roles = "Admin, Editor, SectorEditor, Consultant")]
         public async Task<ActionResult> Index(string buscar, string filtro, string orden)
         {
             ViewBag.Orden = orden;
             ViewBag.OrdenNombre = string.IsNullOrEmpty(orden) ? "nombre_desc" : "";
-            ViewBag.OrdenCandidato = orden == "candidato" ? "candidato_desc" : "candidato";
+            ViewBag.OrdenSiglas = orden == "siglas" ? "siglas_desc" : "siglas";
             ViewBag.OrdenVotos = orden == "votos" ? "votos_desc" : "votos";
 
             if (buscar != null)
@@ -33,14 +34,29 @@ namespace Arysoft.ProyectoN.Controllers
             else { buscar = filtro ?? string.Empty; }
             ViewBag.Filtro = buscar;
 
-            var partidos = db.Partidos.Where(p => p.Status != StatusTipo.Ninguno);
+            var partidos = db.Partidos
+                .Where(p => p.Status != StatusTipo.Ninguno);
 
             if (!string.IsNullOrEmpty(buscar))
             {
                 partidos = partidos.Where(p => p.Nombre.Contains(buscar)
                     || p.Siglas.Contains(buscar)
-                    || p.Candidato.Contains(buscar)
+                    || p.Candidatos.Select(c => c.Nombre.Contains(buscar)).Count() > 0
                 );
+            }
+            else {
+                if (User.IsInRole("Admin"))
+                {
+                    partidos = partidos.Where(p => p.Status != StatusTipo.Ninguno);
+                }
+                else if (User.IsInRole("Editor") || User.IsInRole("SectorEditor"))
+                {
+                    partidos = partidos.Where(p => p.Status == StatusTipo.Activo || p.Status == StatusTipo.Baja);
+                }
+                else if (User.IsInRole("Consultant"))
+                {
+                    partidos = partidos.Where(p => p.Status == StatusTipo.Activo);
+                }
             }
 
             switch (orden)
@@ -48,11 +64,11 @@ namespace Arysoft.ProyectoN.Controllers
                 case "nombre_desc":
                     partidos = partidos.OrderByDescending(p => p.Nombre);
                     break;
-                case "candidato":
-                    partidos = partidos.OrderBy(p => p.Candidato);
+                case "siglas":
+                    partidos = partidos.OrderBy(p => p.Siglas);
                     break;
-                case "candidato_desc":
-                    partidos = partidos.OrderBy(p => p.Candidato);
+                case "siglas_desc":
+                    partidos = partidos.OrderBy(p => p.Siglas);
                     break;
                 default:
                     partidos = partidos.OrderBy(p => p.Nombre);
@@ -63,33 +79,29 @@ namespace Arysoft.ProyectoN.Controllers
         } // Index
 
         // GET: Partido/Details/5
-        [Authorize(Roles = "Admin, Editor, Consultant")]
+        [Authorize(Roles = "Admin, Editor, SectorEditor, Consultant")]
         public async Task<ActionResult> Details(Guid? id)
         {
             if (id == null)
             {
                 TempData["MessageBox"] = "No se recibió el identificador.";
-                if (Request.IsAjaxRequest())
-                {
-                    return Content("noid");
-                }
+                if (Request.IsAjaxRequest()) { return Content("noid"); }
                 return RedirectToAction("Index");
             }
-
-            Partido partido = await db.Partidos.FindAsync(id);
-
+            Partido partido = await db.Partidos
+                .Include(p => p.Candidatos)
+                .FirstOrDefaultAsync(p => p.PartidoID == id);
             if (partido == null)
             {
                 TempData["MessageBox"] = "No se encontró el registro del identificador.";
-                if (Request.IsAjaxRequest())
-                {
-                    return Content("nofound");
-                }
+                if (Request.IsAjaxRequest()) { return Content("nofound"); }
                 return RedirectToAction("Index");
             }
 
+            partido.SoloLectura = true;
             if (Request.IsAjaxRequest())
             {
+                partido.Origen = "details";
                 return PartialView("_details", partido);
             }
 
@@ -100,16 +112,16 @@ namespace Arysoft.ProyectoN.Controllers
         [Authorize(Roles = "Admin, Editor")]
         public async Task<ActionResult> Create()
         {
-            await EliminarRegistrosTemporalesAsync(ControllerContext.HttpContext.User.Identity.Name);
+            await EliminarRegistrosTemporalesAsync(User.Identity.Name);
 
             Partido partido = new Partido
             {
                 PartidoID = Guid.NewGuid(),
                 Nombre = string.Empty,
                 Siglas = string.Empty,
-                Candidato = string.Empty,
+                ArchivoLogotipo = string.Empty,
                 Status = StatusTipo.Ninguno,
-                UserNameActualizacion = ControllerContext.HttpContext.User.Identity.Name,
+                UserNameActualizacion = User.Identity.Name,
                 FechaActualizacion = DateTime.Now
             };
 
@@ -127,24 +139,6 @@ namespace Arysoft.ProyectoN.Controllers
             }
         } // Create
 
-        //// POST: Partido/Create
-        //// Para protegerse de ataques de publicación excesiva, habilite las propiedades específicas a las que desea enlazarse. Para obtener 
-        //// más información vea https://go.microsoft.com/fwlink/?LinkId=317598.
-        //[HttpPost]
-        //[ValidateAntiForgeryToken]
-        //public async Task<ActionResult> Create([Bind(Include = "PartidoID,Nombre,Siglas,Candidato,Status")] Partido partido)
-        //{
-        //    if (ModelState.IsValid)
-        //    {
-        //        partido.PartidoID = Guid.NewGuid();
-        //        db.Partidos.Add(partido);
-        //        await db.SaveChangesAsync();
-        //        return RedirectToAction("Index");
-        //    }
-
-        //    return View(partido);
-        //} // Create
-
         // GET: Partido/Edit/5
         [Authorize(Roles = "Admin, Editor")]
         public async Task<ActionResult> Edit(Guid? id)
@@ -155,15 +149,18 @@ namespace Arysoft.ProyectoN.Controllers
                 TempData["MessageBox"] = "No se recibió el identificador.";
                 return RedirectToAction("Index");
             }
-            Partido partido = await db.Partidos.FindAsync(id);
+            Partido partido = await db.Partidos
+                .Include(p => p.Candidatos)
+                .FirstOrDefaultAsync(p => p.PartidoID == id);
             if (partido == null)
             {
                 //return HttpNotFound();
                 TempData["MessageBox"] = "No se encontró el registro.";
                 return RedirectToAction("Index");
             }
+            partido.SoloLectura = false;
             return View(partido);
-        }
+        } // Edit
 
         // POST: Partido/Edit/5
         // Para protegerse de ataques de publicación excesiva, habilite las propiedades específicas a las que desea enlazarse. Para obtener 
@@ -171,7 +168,7 @@ namespace Arysoft.ProyectoN.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Admin, Editor")]
-        public async Task<ActionResult> Edit([Bind(Include = "PartidoID,Nombre,Siglas,Candidato,Status,UserNameActualizacion,FechaActualizacion")] Partido partido)
+        public async Task<ActionResult> Edit([Bind(Include = "PartidoID,Nombre,Siglas,Status,UserNameActualizacion,FechaActualizacion")] Partido partido, HttpPostedFileBase archivo)
         {
             bool esNuevo = partido.Status == StatusTipo.Ninguno;
 
@@ -182,7 +179,11 @@ namespace Arysoft.ProyectoN.Controllers
 
             if (ModelState.IsValid)
             {
-                partido.UserNameActualizacion = ControllerContext.HttpContext.User.Identity.Name;
+                if (archivo != null)
+                {
+                    partido.ArchivoLogotipo = GuardarArchivo(archivo, partido.PartidoID.ToString(), "logotipo" + Path.GetExtension(archivo.FileName).ToLower());
+                }
+                partido.UserNameActualizacion = User.Identity.Name;
                 partido.FechaActualizacion = DateTime.Now;
 
                 db.Entry(partido).State = EntityState.Modified;
@@ -193,8 +194,10 @@ namespace Arysoft.ProyectoN.Controllers
 
                 return RedirectToAction("Index");
             }
+            partido.SoloLectura = false;
+
             return View(partido);
-        }
+        } // Edit
 
         // GET: Partido/Delete/5
         public async Task<ActionResult> Delete(Guid? id)
@@ -236,6 +239,20 @@ namespace Arysoft.ProyectoN.Controllers
         }
 
         // METODOS PRIVADOS
+
+        private string GuardarArchivo(HttpPostedFileBase control, string carpeta, string nombre)
+        {   
+            var path = Path.Combine(Server.MapPath("~/Archivos/Partidos"), carpeta);
+            var extencion = Path.GetExtension(control.FileName).ToLower();
+
+            if (string.IsNullOrEmpty(nombre)) nombre = Path.GetFileNameWithoutExtension(control.FileName);
+            nombre = nombre.CleanInvalidFileNameChars();
+            if (!Directory.Exists(path)) { Directory.CreateDirectory(path); }
+
+            control.SaveAs(Path.Combine(path, nombre + extencion));
+
+            return nombre + extencion;
+        } // GuardarArchivo
 
         private async Task EliminarRegistrosTemporalesAsync(string userName)
         {

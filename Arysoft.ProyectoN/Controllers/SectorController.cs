@@ -60,11 +60,11 @@ namespace Arysoft.ProyectoN.Controllers
             }
 
             // Filtra por el rol asignado al usuario, para solo mostrar registros de acuerdo a su nivel
-            if (ControllerContext.HttpContext.User.IsInRole("Consultant"))
+            if (User.IsInRole("Consultant"))
             {
                 sectores = sectores.Where(s => s.Status == StatusTipo.Activo);
             }
-            else if (ControllerContext.HttpContext.User.IsInRole("Editor"))
+            else if (User.IsInRole("Editor"))
             {
                 sectores = sectores.Where(s => s.Status == StatusTipo.Activo || s.Status == StatusTipo.Baja);
             }

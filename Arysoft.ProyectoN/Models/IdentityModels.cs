@@ -70,7 +70,7 @@ namespace Arysoft.ProyectoN.Models
     public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     {
         public DbSet<Auditoria> Auditorias { get; set; }
-        public DbSet<Calle> Calles { get; set; }
+        public DbSet<Calle> Calles { get; set; }        
         public DbSet<Casilla> Casillas { get; set; }
         public DbSet<Colonia> Colonias { get; set; }
         public DbSet<Nota> Notas { get; set; }
@@ -81,8 +81,10 @@ namespace Arysoft.ProyectoN.Models
         public DbSet<Ubicacion> Ubicaciones { get; set; }
         public DbSet<AuditoriaPersona> AuditoriaPersonas { get; set; }
         public DbSet<Voto> Votos { get; set; }
-        public DbSet<ResultadoCasilla> ResultadoCasillas { get; set; }
+        // public DbSet<ResultadoCasilla> ResultadoCasillas { get; set; }
+
         public DbSet<Partido> Partidos { get; set; }
+        public DbSet<Candidato> Candidatos { get; set; }
 
         public DbSet<PersonaTmp> PersonasTmp { get; set; }
         public DbSet<PersonaIne> PersonasIne { get; set; }
@@ -126,6 +128,13 @@ namespace Arysoft.ProyectoN.Models
                 .Map(l => l.MapLeftKey("ColoniaID")
                     .MapRightKey("SeccionID")
                     .ToTable("ColoniasSecciones"));
+
+            // Relación muchos a muchos sin modelo especificado Partidos <-> Candidatos
+            modelBuilder.Entity<Partido>()
+                .HasMany(p => p.Candidatos).WithMany(c => c.Partidos)
+                .Map(l => l.MapLeftKey("PartidoID")
+                    .MapRightKey("CandidatoID")
+                    .ToTable("PartidosCandidatos"));
 
             //modelBuilder.Entity<Persona>()
             //    .HasOptional(p => p.Voto)

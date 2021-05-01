@@ -48,15 +48,15 @@ namespace Arysoft.ProyectoN.Controllers
             }
             else 
             {
-                if (ControllerContext.HttpContext.User.IsInRole("Admin"))
+                if (User.IsInRole("Admin"))
                 {
                     calles = calles.Where(m => m.Status != StatusTipo.Ninguno);
                 }
-                else if (ControllerContext.HttpContext.User.IsInRole("Editor"))
+                else if (User.IsInRole("Editor"))
                 {
                     calles = calles.Where(m => m.Status == StatusTipo.Activo || m.Status == StatusTipo.Baja);
                 }
-                else if (ControllerContext.HttpContext.User.IsInRole("Consultant"))
+                else if (User.IsInRole("Consultant"))
                 {
                     calles = calles.Where(m => m.Status == StatusTipo.Activo);
                 }
@@ -190,7 +190,7 @@ namespace Arysoft.ProyectoN.Controllers
 
             if (ModelState.IsValid)
             {
-                calle.UserNameActualizacion = ControllerContext.HttpContext.User.Identity.Name;
+                calle.UserNameActualizacion = User.Identity.Name;
                 calle.FechaActualizacion = DateTime.Now;
                 db.Entry(calle).State = EntityState.Modified;
                 await db.SaveChangesAsync();

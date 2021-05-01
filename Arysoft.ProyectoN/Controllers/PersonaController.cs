@@ -31,7 +31,7 @@ namespace Arysoft.ProyectoN.Controllers
             Guid coloniaID = (ColoniaID != null && ColoniaID != Guid.Empty.ToString()) ? new Guid(ColoniaID) : Guid.Empty;
             Guid promotorID = (PromotorID != null && PromotorID != Guid.Empty.ToString()) ? new Guid(PromotorID) : Guid.Empty;
 
-            bool primeraVez = false;
+            //bool primeraVez = false;
 
             if (User.IsInRole("SectorEditor"))
             {
@@ -55,7 +55,7 @@ namespace Arysoft.ProyectoN.Controllers
             }
             else { 
                 buscar = filtro ?? string.Empty;
-                primeraVez = string.IsNullOrEmpty(buscar);
+                //primeraVez = string.IsNullOrEmpty(buscar);
             }
             ViewBag.Filtro = buscar;
 
@@ -265,14 +265,14 @@ namespace Arysoft.ProyectoN.Controllers
             }
 
             // Realizar la consulta a la BDD
-            if (primeraVez)
-            {
-                personasList = await personas.Take(Comun.ELEMENTOS_PAGINA).ToListAsync();
-            }
-            else
-            {
+            //if (primeraVez)
+            //{
+            //    personasList = await personas.Take(Comun.ELEMENTOS_PAGINA).ToListAsync();
+            //}
+            //else
+            //{
                 personasList = await personas.ToListAsync();
-            }            
+            //}            
 
             // Busqueda especifica en memoria
 
@@ -533,7 +533,26 @@ namespace Arysoft.ProyectoN.Controllers
             {
                 ViewBag.SeccionID = await ObtenerListaSeccionesAsync(persona.SeccionID ?? Guid.Empty, persona.Afinidad); // new SelectList(db.Secciones.OrderBy(s => s.Numero), "SeccionID", "Numero", persona.SeccionID);
             }
-            ViewBag.SectorBrigadaID = await ObtenerListaSectoresAsync(persona.SectorBrigadaID ?? (User.IsInRole("SectorEditor") ? User.Identity.GetSectorId() : Guid.Empty)); //Guid.Empty); //new SelectList(db.Sectores.OrderBy(s => s.Nombre), "SectorID", "Nombre", persona.SectorBrigadaID);
+
+            if (persona.Status == StatusTipo.Ninguno && User.IsInRole("SectorEditor"))
+            {
+                persona.SectorBrigadaID = User.Identity.GetSectorId();
+                var sector = await db.Sectores.FindAsync(User.Identity.GetSectorId());
+                if (sector != null)
+                {
+                    ViewBag.SectorBrigadaNombre = sector.Nombre;
+                }
+                else 
+                {
+                    ViewBag.SectorBrigadaNombre = string.Empty;
+                }
+
+                
+            }
+            else
+            {
+                ViewBag.SectorBrigadaID = await ObtenerListaSectoresAsync(persona.SectorBrigadaID ?? (User.IsInRole("SectorEditor") ? User.Identity.GetSectorId() : Guid.Empty)); //Guid.Empty); //new SelectList(db.Sectores.OrderBy(s => s.Nombre), "SectorID", "Nombre", persona.SectorBrigadaID);
+            }
 
             if (persona.UbicacionVive == null)
             {
@@ -948,11 +967,15 @@ namespace Arysoft.ProyectoN.Controllers
         public async Task<ActionResult> Total1x10()
         {
             int totalMovilizadores = await (from p in db.Personas
-                                      where p.Afinidad == AfinidadTipo.Movilizador && p.Status == StatusTipo.Activo
+                                      where p.Afinidad == AfinidadTipo.Movilizador 
+                                        && p.Status == StatusTipo.Activo
+                                        && p.VotanteSeguro == BoolTipo.Si
                                       select p).CountAsync();
 
             int totalAfines = await (from p in db.Personas
-                               where p.Afinidad == AfinidadTipo.PorAfiliado && p.Status == StatusTipo.Activo
+                               where p.Afinidad == AfinidadTipo.PorAfiliado 
+                                && p.Status == StatusTipo.Activo
+                                && p.VotanteSeguro == BoolTipo.Si
                                select p).CountAsync();
 
             return Json(new {

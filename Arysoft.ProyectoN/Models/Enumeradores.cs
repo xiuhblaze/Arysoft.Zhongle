@@ -195,3 +195,32 @@ public enum EstadoCivilTipo
     Viudo,
     Concubinato
 } // EstadoCivilTipo
+
+/// <summary>
+/// Indica el tipo de candidato que se esta registrando en el sistema
+/// </summary>
+public enum CandidatoTipo
+{
+    [Display(Name = "(seleccionar tipo)")]
+    Ninguno,
+    Partido,
+    [Display(Name = "Coalición")]
+    Coalicion,
+    Independiente
+} // CandidatoTipo
+
+public enum CampannaTipo
+{
+    [Display(Name = "(seleccionar tipo)")]
+    Ninguno,
+    [Display(Name = "Presidente Municipal")]
+    Municipal,
+    [Display(Name = "Diputado Local")]
+    DiputadoLocal,
+    [Display(Name = "Diputado Federal")]
+    DiputadoFederal,
+    [Display(Name = "Senador")]
+    Senador,
+    [Display(Name = "Gobernador")]
+    Gobernador
+}

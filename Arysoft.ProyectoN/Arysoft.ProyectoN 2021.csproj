@@ -577,7 +577,6 @@
     <Compile Include="Controllers\RolesAdminController.cs" />
     <Compile Include="Controllers\SeccionController.cs" />
     <Compile Include="Controllers\SectorController.cs" />
-    <Compile Include="Controllers\TestController.cs" />
     <Compile Include="Controllers\UserAdminController.cs" />
     <Compile Include="Extensions\DateTimeExtensions.cs" />
     <Compile Include="Extensions\EnumExtensions.cs" />
@@ -592,6 +591,7 @@
     <Compile Include="Models\Auditoria.cs" />
     <Compile Include="Models\Calle.cs" />
     <Compile Include="Models\CalleViewModels.cs" />
+    <Compile Include="Models\Candidato.cs" />
     <Compile Include="Models\Nota.cs" />
     <Compile Include="Models\Partido.cs" />
     <Compile Include="Models\Persona.cs" />

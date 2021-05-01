@@ -334,8 +334,9 @@
                                     @Html.LabelFor(model => model.SectorBrigadaID, "Apoya al sector", htmlAttributes: new { @class = "control-label col-md-2" })
                                     <div class="col-md-10">
                                         @if (sectorDisabled == "disabled")
-                                        {
-                                            @Html.DropDownList("SectorBrigadaID", null, htmlAttributes: new { @class = "form-control", @disabled = "disabled" })
+                                        {   
+                                            @Html.HiddenFor(model => model.SectorBrigadaID)
+                                            <span class="help-block text-muted" style="padding-top: 4px;">@Html.Raw(ViewBag.SectorBrigadaNombre)</span>
                                         }
                                         else
                                         {
