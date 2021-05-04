@@ -193,16 +193,16 @@ namespace Arysoft.ProyectoN.Controllers
             var tabla = new List<object>();
             var partidos = await db.Partidos.Where(p => p.Status == StatusTipo.Activo).ToListAsync();
             
-            foreach (Partido partido in partidos)
-            {
-                int total = await db.ResultadoCasillas.Where(r => r.PartidoID == partido.PartidoID).SumAsync(r => r.Total);
+            //foreach (Partido partido in partidos)
+            //{
+            //    int total = await db.ResultadoCasillas.Where(r => r.PartidoID == partido.PartidoID).SumAsync(r => r.Total);
 
-                tabla.Add(new
-                {
-                    Partido = partido.Siglas,
-                    Total = total
-                });
-            }
+            //    tabla.Add(new
+            //    {
+            //        Partido = partido.Siglas,
+            //        Total = total
+            //    });
+            //}
 
             return Json(tabla, JsonRequestBehavior.AllowGet);
         } // ResultadosTotales

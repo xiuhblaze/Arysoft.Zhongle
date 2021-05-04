@@ -168,7 +168,7 @@ namespace Arysoft.ProyectoN.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Admin, Editor")]
-        public async Task<ActionResult> Edit([Bind(Include = "PartidoID,Nombre,Siglas,Status,UserNameActualizacion,FechaActualizacion")] Partido partido, HttpPostedFileBase archivo)
+        public async Task<ActionResult> Edit([Bind(Include = "PartidoID,Nombre,Siglas,ArchivoLogotipo,Status,UserNameActualizacion,FechaActualizacion")] Partido partido, HttpPostedFileBase archivo)
         {
             bool esNuevo = partido.Status == StatusTipo.Ninguno;
 
@@ -181,7 +181,7 @@ namespace Arysoft.ProyectoN.Controllers
             {
                 if (archivo != null)
                 {
-                    partido.ArchivoLogotipo = GuardarArchivo(archivo, partido.PartidoID.ToString(), "logotipo" + Path.GetExtension(archivo.FileName).ToLower());
+                    partido.ArchivoLogotipo = GuardarArchivo(archivo, partido.PartidoID.ToString(), "logotipo");
                 }
                 partido.UserNameActualizacion = User.Identity.Name;
                 partido.FechaActualizacion = DateTime.Now;
@@ -200,34 +200,94 @@ namespace Arysoft.ProyectoN.Controllers
         } // Edit
 
         // GET: Partido/Delete/5
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult> Delete(Guid? id)
         {
             if (id == null)
             {
                 TempData["MessageBox"] = "No se recibió el identificador.";
+                if (Request.IsAjaxRequest()) { return Content("notid"); }
                 return RedirectToAction("Index");
                 //return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            Partido partido = await db.Partidos.FindAsync(id);
+            Partido partido = await db.Partidos
+                .Include(p => p.Candidatos)
+                .FirstOrDefaultAsync(p => p.PartidoID == id);
             if (partido == null)
             {
                 TempData["MessageBox"] = "No se encontró el registro.";
+                if (Request.IsAjaxRequest()) { return Content("notfound"); }
                 return RedirectToAction("Index");
                 //return HttpNotFound();
             }
+            partido.SoloLectura = true;
+            if (Request.IsAjaxRequest())
+            {
+                partido.Origen = "delete";
+                return PartialView("_details", partido);
+            }
             return View(partido);
-        }
+        } // Delete
 
         // POST: Partido/Delete/5
+        [Authorize(Roles = "Admin")]
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> DeleteConfirmed(Guid id)
         {
             Partido partido = await db.Partidos.FindAsync(id);
-            db.Partidos.Remove(partido);
+
+            if (partido.Status == StatusTipo.Activo)
+            {
+                partido.Status = StatusTipo.Baja;
+                partido.UserNameActualizacion = User.Identity.Name;
+                partido.FechaActualizacion = DateTime.Now;
+                db.Entry(partido).State = EntityState.Modified;
+            }
+            else if (partido.Status == StatusTipo.Baja)
+            {
+                partido.Status = StatusTipo.Eliminado;
+                partido.UserNameActualizacion = User.Identity.Name;
+                partido.FechaActualizacion = DateTime.Now;
+                db.Entry(partido).State = EntityState.Modified;
+            }
+            else
+            {
+                db.Partidos.Remove(partido);
+            }
             await db.SaveChangesAsync();
             return RedirectToAction("Index");
-        }
+        } // DeleteConfirmed
+
+        // POST: Calle/Activar/5
+        [Authorize(Roles = "Admin")]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<ActionResult> Activar(Guid id)
+        {
+            Partido partido = await db.Partidos.FindAsync(id);
+            if (partido == null)
+            {
+                TempData["MessageBox"] = "No se encontró el registro del identificador.";
+                return RedirectToAction("Index");
+            }
+            partido.Status = StatusTipo.Activo;
+            partido.UserNameActualizacion = User.Identity.Name;
+            partido.FechaActualizacion = DateTime.Now;
+            db.Entry(partido).State = EntityState.Modified;
+            try
+            {
+                await db.SaveChangesAsync();
+            }
+            catch (Exception e)
+            {
+                TempData["MessageBox"] = "A ocurrido una excepción: " + e.Message;
+                return RedirectToAction("Index");
+            }
+            TempData["MessageBox"] = "El partido ha sido reactivado.";
+
+            return RedirectToAction("Index");
+        } // Activar
 
         protected override void Dispose(bool disposing)
         {

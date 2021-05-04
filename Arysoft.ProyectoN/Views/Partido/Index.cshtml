@@ -6,14 +6,14 @@
     ViewBag.Title = "Partidos";
 }
 
-<div id="defaultModal" class="modal fade" tabindex="-1" role="dialog" style="display: none;">
+<div id="detailsModal" class="modal fade" tabindex="-1" role="dialog" style="display: none;">
     <div class="modal-dialog modal-lg">
-        <div class="modal-content" id="default-modal-content">
+        <div class="modal-content" id="detalles-modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                <h4 class="modal-title">Partido</h4>
+                <h4 class="modal-title">Detalles</h4>
             </div>
-            <div id="default-modal-body"></div>
+            <div id="detalles-modal-body"></div>
         </div><!-- /.modal-content -->
     </div><!-- /.modal-dialog -->
 </div><!-- /.modal -->
@@ -70,18 +70,15 @@
                             })
                     </th>
                     <th>
-                        @Html.DisplayNameFor(model => model.Siglas)
-                    </th>
-                    <th>
-                        @Html.ActionLink("Candidato", "Index",
+                        @Html.ActionLink("Siglas", "Index",
                             new
                             {
-                                orden = ViewBag.OrdenCandidato,
+                                orden = ViewBag.OrdenSiglas,
                                 filtro = ViewBag.Filtro
                             })
                     </th>
                     <th>
-                        Votos
+                        @Html.DisplayNameFor(model => model.Candidatos)
                     </th>
                     <th></th>
                 </tr>
@@ -90,20 +87,33 @@
 
                 @foreach (var item in Model)
                 {
-                    <tr>
+                    string classRow = "";
+                    string classStatusIcon = "";
+
+                    switch (item.Status)
+                    {
+                        case StatusTipo.Activo:
+                            classStatusIcon = "<span class='glyphicon glyphicon-ok glyphicon-table-action-size text-success'></span>";
+                            break;
+
+                        case StatusTipo.Baja:
+                            classRow = "text-muted";
+                            classStatusIcon = "<span class='glyphicon glyphicon-save glyphicon-table-action-size text-warning'></span>";
+                            break;
+
+                        case StatusTipo.Eliminado:
+                            classRow = "text-danger danger";
+                            classStatusIcon = "<span class='glyphicon glyphicon-remove glyphicon-table-action-size text-danger'></span>";
+                            break;
+                    }
+
+                    if (!string.IsNullOrEmpty(item.ArchivoLogotipo))
+                    {   
+                        classStatusIcon += " <span class='glyphicon glyphicon-picture glyphicon-table-action-size text-info' title='Contiene logotipo'></span>";
+                    }
+                    <tr class="@classRow">
                         <td>
-                            @switch (item.Status)
-                            {
-                                case StatusTipo.Activo:
-                                    <span class="glyphicon glyphicon-ok-circle glyphicon-table-action-size text-success" title="@item.Status.GetDisplayName()"></span>
-                                    break;
-                                case StatusTipo.Baja:
-                                    <span class="glyphicon glyphicon-remove-circle glyphicon-table-action-size text-warning" title="@item.Status.GetDisplayName()"></span>
-                                    break;
-                                case StatusTipo.Eliminado:
-                                    <span class="glyphicon glyphicon-ban-circle glyphicon-table-action-size text-danger" title="@item.Status.GetDisplayName()"></span>
-                                    break;
-                            }
+                            @Html.Raw(classStatusIcon)
                         </td>
                         <td style="cursor: pointer" onclick="getDetails('@item.PartidoID')">
                             @Html.DisplayFor(modelItem => item.Nombre)
@@ -112,31 +122,25 @@
                             @Html.DisplayFor(modelItem => item.Siglas)
                         </td>
                         <td style="cursor: pointer" onclick="getDetails('@item.PartidoID')">
-                            @Html.DisplayFor(modelItem => item.Candidato)
-                        </td>
-                        <td style="cursor: pointer" onclick="getDetails('@item.PartidoID')">
-                            0
+                            @Html.DisplayFor(modelItem => item.Candidatos.Count)
                         </td>
                         <td class="text-right">
-                            @if (User.IsInRole("Admin"))
+                            @if ((User.IsInRole("Admin") || User.IsInRole("Editor"))
+                            && item.Status != StatusTipo.Eliminado)
                             {
                                 @Html.Raw(
-                                         @Html.ActionLink("Editar", "Edit", new { id = item.PartidoID }).ToHtmlString()
-                                             .Replace("Editar", "<span class='glyphicon glyphicon-edit glyphicon-table-action-size' title='Editar'></span>")
-                                         )
+                                    @Html.ActionLink("Editar", "Edit", new { id = item.PartidoID }).ToHtmlString()
+                                        .Replace("Editar", "<span class='glyphicon glyphicon-edit glyphicon-table-action-size' title='Editar'></span>")
+                                )
                             }
-
-                            @*@Html.Raw(
-                                     @Html.ActionLink("Detalles", "Details", new { id = item.PartidoID }).ToHtmlString()
-                                         .Replace("Detalles", "<span class='glyphicon glyphicon-new-window glyphicon-table-action-size' title='Detalles'></span>")
-                                 )*@
-
-                            @if (User.IsInRole("Admin"))
+                            <a href="#" onclick="getDetails('@item.PartidoID'); return false;">
+                                <span class='glyphicon glyphicon-new-window glyphicon-table-action-size' title='Detalles'></span>
+                            </a>
+                            @if (User.IsInRole("Admin") && item.Status != StatusTipo.Eliminado)
                             {
-                                @Html.Raw(
-                                         @Html.ActionLink("Eliminar", "Delete", new { id = item.PartidoID }).ToHtmlString()
-                                             .Replace("Eliminar", "<span class='glyphicon glyphicon-trash glyphicon-table-action-size' title='Eliminar'></span>")
-                                     )
+                                <a href="#" onclick="getDelete('@item.PartidoID'); return false;" class="text-danger">
+                                    <span class='glyphicon glyphicon-trash glyphicon-table-action-size' title='Eliminar'></span>
+                                </a>
                             }
                         </td>
                     </tr>
@@ -152,12 +156,12 @@
 
     <script>
 
-        var modalDetailsOriginalContent = $('#default-modal-content').html();
+        var modalDetailsOriginalContent = $('#detalles-modal-content').html();
 
         function getDetails(id) {
             var url = '@Url.Action("Details", "Partido")/' + id;
 
-            $('#defaultModal').modal('show');
+            $('#detailsModal').modal('show');
 
             $.ajax({
                 cache: false,
@@ -172,16 +176,16 @@
                     switch (vista) {
                         case "notid":
                             alert('No se recibió un identificador del partido');
-                            $('#defaultModal').modal('hide');
-                            $('#default-modal-content').html(modalDetailsOriginalContent);
+                            $('#detailsModal').modal('hide');
+                            $('#detalles-modal-content').html(modalDetailsOriginalContent);
                             break;
                         case "notfound":
                             alert('No se encontró el partido solicitado');
-                            $('#defaultModal').modal('hide');
-                            $('#default-modal-content').html(modalDetailsOriginalContent);
+                            $('#detailsModal').modal('hide');
+                            $('#detalles-modal-content').html(modalDetailsOriginalContent);
                             break;
                         default:
-                            $('#default-modal-content').html(vista);
+                            $('#detalles-modal-content').html(vista);
                             break;
                     }
                 },
@@ -191,9 +195,45 @@
             });
         } // getDetails
 
+        function getDelete(id) {
+            var url = '@Url.Action("Delete", "Partido")/' + id;
+
+            $('#detailsModal').modal('show');
+            $.ajax({
+                cache: false,
+                async: true,
+                type: 'get',
+                url: url,
+                data: {},
+                beforeSend: function () {
+                    $('#detalles-modal-body').html('<p class="text-center" style="margin: 50px;"><img src="@Url.Content("~/Images/ajax-loader.gif")" /></p>');
+                },
+                success: function(vista) {
+                    switch (vista) {
+                        case "notid":
+                            alert('No se recibió un identificador del partido');
+                            $('#detailsModal').modal('hide');
+                            $('#detalles-modal-content').html(modalDetailsOriginalContent);
+                            break;
+                        case "notfound":
+                            alert('No se encontró el partido solicitado');
+                            $('#detailsModal').modal('hide');
+                            $('#detalles-modal-content').html(modalDetailsOriginalContent);
+                            break;
+                        default:
+                            $('#detalles-modal-content').html(vista);
+                            break;
+                    }
+                },
+                error: function (xhr, status, error) {
+                    alert('A ocurrido una excepción: ' + status + '\n error: ' + error);
+                }
+            });
+        } // getDelete
+
         $(document).ready(function () {
-            
-            $('#defaultModal').on('hidden.bs.modal', function (e) {
+
+            $('#detailsModal').on('hidden.bs.modal', function (e) {
 
                 $('#detalles-modal-content').html(modalDetailsOriginalContent);
             })

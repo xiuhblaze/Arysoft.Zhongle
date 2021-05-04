@@ -1,5 +1,13 @@
 ﻿@model Arysoft.ProyectoN.Models.Partido
 
+@{
+    string imagePath = string.Empty;
+
+    if (!string.IsNullOrEmpty(Model.ArchivoLogotipo))
+    {
+        imagePath = Path.Combine("\\Archivos\\Partidos", Model.PartidoID.ToString(), Model.ArchivoLogotipo);
+    }
+ }
 <div class="modal-header">
     <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
     <h4 class="modal-title">
@@ -8,49 +16,102 @@
 </div>
 
 <div class="modal-body">
+    @if (Model.Origen == "delete")
+    {
+        string title = "";
+        switch (Model.Status)
+        {
+            case StatusTipo.Activo:
+                title = "¿Está seguro de dar de baja este partido?";
+                break;
+            case StatusTipo.Baja:
+                title = "¿Está seguro de eliminar este partido?";
+                break;
+            case StatusTipo.Eliminado:
+                title = "Partido eliminado";
+                break;
+        }
+        <div class="row">
+            <div class="col-md-12">
+                <h5 class="text-danger">@title</h5>
+            </div>
+        </div>
+    }
+    <div class="row">
+        <div class="col-md-8">
+            <dl class="dl-horizontal">
+                <dt>
+                    @Html.DisplayNameFor(model => model.Nombre)
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.Nombre)
+                </dd>
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.Siglas)
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.Siglas)
+                </dd>
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.Candidatos)
+                </dt>
+
+                <dd>
+                    @foreach (var item in Model.Candidatos)
+                    {
+                        <span class="label label-info">@item.Nombre</span>
+                    }
+                </dd>
+            </dl>
+        </div>
+        <div class="col-md-4">
+            @if (File.Exists(Server.MapPath(imagePath)))
+            {
+                <img src="@imagePath" alt="" class="img-responsive" style="margin-bottom: 1em;" />
+            }
+
+            @switch (Model.Status)
+            {
+                case StatusTipo.Activo:
+                    <div class="alert alert-success text-center">
+                        <h4 style="margin-bottom: 0;">
+                            <span class="glyphicon glyphicon-ok"></span>
+                            Activo
+                        </h4>
+                    </div>
+                    break;
+                case StatusTipo.Baja:
+                    <div class="alert alert-warning text-center">
+                        <h4 style="margin-bottom: 0;">
+                            <span class="glyphicon glyphicon-save"></span>
+                            Baja
+                        </h4>
+                    </div>
+                    break;
+                case StatusTipo.Eliminado:
+                    <div class="alert alert-danger text-center">
+                        <h4 style="margin-bottom: 0;">
+                            <span class="glyphicon glyphicon-remove"></span>
+                            Eliminado
+                        </h4>
+                    </div>
+                    break;
+            }
+        </div>
+    </div>
     
-    <dl class="dl-horizontal">
-        <dt>
-            @Html.DisplayNameFor(model => model.Nombre)
-        </dt>
-
-        <dd>
-            @Html.DisplayFor(model => model.Nombre)
-        </dd>
-
-        <dt>
-            @Html.DisplayNameFor(model => model.Siglas)
-        </dt>
-
-        <dd>
-            @Html.DisplayFor(model => model.Siglas)
-        </dd>
-
-        <dt>
-            @Html.DisplayNameFor(model => model.Candidato)
-        </dt>
-
-        <dd>
-            @Html.DisplayFor(model => model.Candidato)
-        </dd>
-
-        <dt>
-            @Html.DisplayNameFor(model => model.Status)
-        </dt>
-
-        <dd>
-            @Html.DisplayFor(model => model.Status)
-        </dd>
-
-    </dl>
 </div>
 <div class="modal-footer">
     <div class="row">
         <div class="col-md-8 text-left text-muted">
-            @*<small>
+            <small>
                 <strong>Actualizado por</strong> @Model.UserNameActualizacion |
                 <strong>Última actualización</strong> @Model.FechaActualizacion.ToShortDateString()
-            </small>*@
+            </small>
         </div>
         <div class="col-md-4 text-right">
             <button type="button" class="btn btn-default" data-dismiss="modal">
@@ -63,20 +124,46 @@
                 switch (Model.Status)
                 {
                     case StatusTipo.Activo:
-                        @Html.Raw(
+                        if (Model.Origen == "details")
+                        {
+                            @Html.Raw(
                                  @Html.ActionLink("Editar", "Edit", new { id = Model.PartidoID }, new { @class = "btn btn-primary" }).ToHtmlString()
-                                     .Replace("Editar", "<span class='glyphicon glyphicon-edit' title='Editar'></span> Editar")
-                             )
+                                     .Replace("Editar", "<span class='glyphicon glyphicon-edit' title='Editar'></span> Editar"))
+                        }
+                        else if (Model.Origen == "delete")
+                        {
+                            <form action="/Partido/Delete/@Model.PartidoID" method="post" style="float: right; margin-left: .5em;">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn btn-warning">
+                                    <span class='glyphicon glyphicon-trash' title='Dar de Baja'></span> Baja
+                                </button>
+                            </form>
+                        }
                         break;
+
                     case StatusTipo.Baja:
-                        @Html.Raw(
-                                 @Html.ActionLink("[activar]", "Activar", new { id = Model.PartidoID }, new { @class = "btn btn-success" }).ToHtmlString()
-                                     .Replace("[activar]", "<span class='glyphicon glyphicon-ok' title='Reactivar casilla'></span> Reactivar")
-                             )
+                        switch (Model.Origen)
+                        {
+                            case "details":
+                                <form action="/Partido/Activar/@Model.PartidoID" method="post" style="float: right; margin-left: .5em;">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn btn-success">
+                                        <span class='glyphicon glyphicon-ok' title='Reactivar'></span> Reactivar
+                                    </button>
+                                </form>
+                                break;
+
+                            case "delete":
+                                <form action="/Partido/Delete/@Model.PartidoID" method="post" style="float: right; margin-left: .5em;">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn btn-danger">
+                                        <span class='glyphicon glyphicon-trash' title='Eliminar'></span> Eliminar
+                                    </button>
+                                </form>
+                                break;
+                        }
                         break;
                 }
             }
         </div>
     </div>
-
-</div>

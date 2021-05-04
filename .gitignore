@@ -9,6 +9,9 @@
 *.userosscache
 *.sln.docstates
 
+## Carpeta donde se guardan archivos publicados en el sistema
+Arysoft.ProyectoN/Archivos/
+
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
 

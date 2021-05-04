@@ -249,14 +249,14 @@ namespace Arysoft.ProyectoN.Controllers
             if (calle.Status == StatusTipo.Activo)
             {
                 calle.Status = StatusTipo.Baja;
-                calle.UserNameActualizacion = ControllerContext.HttpContext.User.Identity.Name;
+                calle.UserNameActualizacion = User.Identity.Name;
                 calle.FechaActualizacion = DateTime.Now;
                 db.Entry(calle).State = EntityState.Modified;                
             }
             else if (calle.Status == StatusTipo.Baja)
             {
                 calle.Status = StatusTipo.Eliminado;
-                calle.UserNameActualizacion = ControllerContext.HttpContext.User.Identity.Name;
+                calle.UserNameActualizacion = User.Identity.Name;
                 calle.FechaActualizacion = DateTime.Now;
                 db.Entry(calle).State = EntityState.Modified;                
             }
@@ -282,7 +282,7 @@ namespace Arysoft.ProyectoN.Controllers
                 return RedirectToAction("Index");
             }
             calle.Status = StatusTipo.Activo;
-            calle.UserNameActualizacion = ControllerContext.HttpContext.User.Identity.Name;
+            calle.UserNameActualizacion = User.Identity.Name;
             calle.FechaActualizacion = DateTime.Now;
             db.Entry(calle).State = EntityState.Modified;
             try

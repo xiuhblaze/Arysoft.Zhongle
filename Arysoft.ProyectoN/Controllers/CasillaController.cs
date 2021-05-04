@@ -1105,37 +1105,38 @@ namespace Arysoft.ProyectoN.Controllers
             {
                 return Content("casillanotfound");
             }
+            //TODO: Terminar esto
 
-            ResultadoCasilla resultado = await db.ResultadoCasillas
-                .Where(r => r.CasillaID == CasillaID && r.PartidoID == PartidoID)
-                .FirstOrDefaultAsync();
+            //ResultadoCasilla resultado = await db.ResultadoCasillas
+            //    .Where(r => r.CasillaID == CasillaID && r.PartidoID == PartidoID)
+            //    .FirstOrDefaultAsync();
 
-            if (resultado == null)
-            {
-                resultado = new ResultadoCasilla
-                {
-                    ResultadoCasillaID = Guid.NewGuid(),
-                    PartidoID = PartidoID,
-                    CasillaID = CasillaID,
-                    Total = Total
-                };
+            //if (resultado == null)
+            //{
+            //    resultado = new ResultadoCasilla
+            //    {
+            //        ResultadoCasillaID = Guid.NewGuid(),
+            //        PartidoID = PartidoID,
+            //        CasillaID = CasillaID,
+            //        Total = Total
+            //    };
 
-                db.ResultadoCasillas.Add(resultado);
-            }
-            else
-            {
-                resultado.Total = Total;
-                db.Entry(resultado).State = EntityState.Modified;
-            }
+            //    db.ResultadoCasillas.Add(resultado);
+            //}
+            //else
+            //{
+            //    resultado.Total = Total;
+            //    db.Entry(resultado).State = EntityState.Modified;
+            //}
 
-            try
-            {
-                await db.SaveChangesAsync();
-            }
-            catch (Exception e)
-            {
-                return Content(e.Message);
-            }
+            //try
+            //{
+            //    await db.SaveChangesAsync();
+            //}
+            //catch (Exception e)
+            //{
+            //    return Content(e.Message);
+            //}
 
             return Content("success");
         } // EditResultado
