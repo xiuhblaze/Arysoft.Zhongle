@@ -1,0 +1,114 @@
+﻿@model Arysoft.ProyectoN.Models.Candidato
+
+@{
+    ViewBag.Title = "Details";
+}
+
+<h2>Details</h2>
+
+<div>
+    <h4>Candidato</h4>
+    <hr />
+    <dl class="dl-horizontal">
+        <dt>
+            @Html.DisplayNameFor(model => model.Nombre)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Nombre)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Descripcion)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Descripcion)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.ArchivoFotografia)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.ArchivoFotografia)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.VotosTotal)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.VotosTotal)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Campanna)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Campanna)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Tipo)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Tipo)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Coalicion)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Coalicion)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.SiglasCoalicion)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.SiglasCoalicion)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.ArchivoCoalicion)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.ArchivoCoalicion)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Status)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Status)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.UserNameActualizacion)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.UserNameActualizacion)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.FechaActualizacion)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.FechaActualizacion)
+        </dd>
+
+    </dl>
+</div>
+<p>
+    @Html.ActionLink("Edit", "Edit", new { id = Model.CandidatoID }) |
+    @Html.ActionLink("Back to List", "Index")
+</p>

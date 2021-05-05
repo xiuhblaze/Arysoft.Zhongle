@@ -24,7 +24,6 @@ namespace Arysoft.ProyectoN.Controllers
             ViewBag.Orden = orden;
             ViewBag.OrdenNombre = string.IsNullOrEmpty(orden) ? "nombre_desc" : "";
             ViewBag.OrdenSiglas = orden == "siglas" ? "siglas_desc" : "siglas";
-            ViewBag.OrdenVotos = orden == "votos" ? "votos_desc" : "votos";
 
             if (buscar != null)
             {
@@ -44,7 +43,8 @@ namespace Arysoft.ProyectoN.Controllers
                     || p.Candidatos.Select(c => c.Nombre.Contains(buscar)).Count() > 0
                 );
             }
-            else {
+            else 
+            {
                 if (User.IsInRole("Admin"))
                 {
                     partidos = partidos.Where(p => p.Status != StatusTipo.Ninguno);
@@ -253,6 +253,8 @@ namespace Arysoft.ProyectoN.Controllers
             }
             else
             {
+                var path = Path.Combine(Server.MapPath("~/Archivos/Partidos"), partido.PartidoID.ToString());
+                if (Directory.Exists(path)) { Directory.Delete(path, true); }
                 db.Partidos.Remove(partido);
             }
             await db.SaveChangesAsync();
@@ -320,9 +322,14 @@ namespace Arysoft.ProyectoN.Controllers
                             where p.Status == StatusTipo.Ninguno
                             && string.Compare(p.UserNameActualizacion, userName, true) == 0
                             select p).ToListAsync();
-
             foreach (Partido partido in partidos)
             {
+                var path = Path.Combine(Server.MapPath("~/Archivos/Partidos"), partido.PartidoID.ToString());
+
+                if (Directory.Exists(path))
+                {
+                    Directory.Delete(path, true);
+                }
                 db.Partidos.Remove(partido);
             }
 

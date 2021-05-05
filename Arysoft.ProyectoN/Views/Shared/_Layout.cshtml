@@ -84,10 +84,13 @@
                         <ul class="dropdown-menu" role="menu">
                             <li>@Html.ActionLink("Colonias", "Index", "Colonia")</li>
                             <li>@Html.ActionLink("Calles", "Index", "Calle")</li>
+                            @if (User.IsInRole("Admin"))
+                            {
                             <li role="separator" class="divider"></li>
-                            <li class="dropdown-header">Para el PREP</li>
+                            <li class="dropdown-header">PREP</li>
                             <li>@Html.ActionLink("Candidatos", "Index", "Candidato")</li>
                             <li>@Html.ActionLink("Partidos", "Index", "Partido")</li>
+                            }
                         </ul>
                     </li>
                     }

@@ -1,0 +1,169 @@
+﻿@model IEnumerable<Arysoft.ProyectoN.Models.Candidato>
+@using Arysoft.ProyectoN.Models;
+
+@{
+    ViewBag.Title = "Candidatos";
+}
+
+<div id="detailsModal" class="modal fade" tabindex="-1" role="dialog" style="display: none;">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content" id="detalles-modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">Detalles</h4>
+            </div>
+            <div id="detalles-modal-body"></div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+<div class="container">
+    <h2>Candidatos</h2>
+    @using (Html.BeginForm("Index", "Partido", FormMethod.Get))
+    {
+        <div class="row">
+            <div class="col-md-12">
+                <div class="form-inline">
+                    @if (User.IsInRole("Admin") || User.IsInRole("Editor"))
+                    {
+                        @Html.Raw(
+                                 Html.ActionLink("Nuevo", "Create", null, new { @class = "btn btn-link", @title = "Nueva calle" }).ToHtmlString()
+                                     .Replace("Nuevo", "<span class='glyphicon glyphicon-file glyphicon-toolbar-size'></span>")
+                             )
+                    }
+                    <div class="form-group">
+                        <label for="buscar" class="sr-only">Buscar</label>
+                        @Html.TextBox("buscar", ViewBag.Filtro as string, htmlAttributes: new { @class = "form-control", @placeholder = "buscar..." })
+                    </div>
+                    <div class="form-group">
+                        <button type="submit" id="buscarButton" class="btn btn-link" title="Buscar">
+                            <span class="glyphicon glyphicon-search glyphicon-toolbar-size"></span>
+                        </button>
+                        @Html.Raw(
+                                 @Html.ActionLink("Limpiar", "Index", null, new { @class = "btn btn-link" }).ToHtmlString()
+                                 .Replace("Limpiar", "<span class='glyphicon glyphicon-remove glyphicon-toolbar-size' title='Limpiar'></span>")
+                             )
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    <div class="well well-sm" style="margin-top: 10px;">
+        Total de resultados en la consulta: @Model.Count()
+    </div>
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th></th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Nombre)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Descripcion)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.VotosTotal)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Campanna)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Tipo)
+                    </th>
+                    <th>
+                        Coalición/Partido
+                    </th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    string classRow = "";
+                    string classStatusIcon = "";
+
+                    switch (item.Status)
+                    {
+                        case StatusTipo.Activo:
+                            classStatusIcon = "<span class='glyphicon glyphicon-ok glyphicon-table-action-size text-success'></span>";
+                            break;
+
+                        case StatusTipo.Baja:
+                            classRow = "text-muted";
+                            classStatusIcon = "<span class='glyphicon glyphicon-save glyphicon-table-action-size text-warning'></span>";
+                            break;
+
+                        case StatusTipo.Eliminado:
+                            classRow = "text-danger danger";
+                            classStatusIcon = "<span class='glyphicon glyphicon-remove glyphicon-table-action-size text-danger'></span>";
+                            break;
+                    }
+                    <tr class="@classRow">
+                        <td>
+                            @Html.Raw(classStatusIcon)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Nombre)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Descripcion)
+                        </td>                        
+                        <td>
+                            @Html.DisplayFor(modelItem => item.VotosTotal)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Campanna)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Tipo)
+                        </td>
+                        <td>
+                            @switch (item.Tipo)
+                            {
+                                case CandidatoTipo.Partido:
+                                    foreach (Partido partido in item.Partidos)
+                                    {
+                                        <span class="label label-primary" title="@partido.Nombre">@partido.Siglas</span>
+                                    }
+                                    break;
+                                case CandidatoTipo.Coalicion:
+                                    <span class="label label-primary" title="@item.Coalicion">@item.SiglasCoalicion</span>
+                                    foreach (Partido partido in item.Partidos)
+                                    {
+                                        <span class="label label-info" title="@partido.Nombre">@partido.Siglas</span>
+                                    }
+                                    break;
+                                case CandidatoTipo.Independiente:
+                                    <span class="label label-primary" title="@item.Coalicion">@item.SiglasCoalicion</span>
+                                    break;
+                            }
+                        </td>
+                        <td class="text-right">
+                            @if ((User.IsInRole("Admin") || User.IsInRole("Editor"))
+                            && item.Status != StatusTipo.Eliminado)
+                            {
+                                @Html.Raw(
+                                    @Html.ActionLink("Editar", "Edit", new { id = item.CandidatoID }).ToHtmlString()
+                                        .Replace("Editar", "<span class='glyphicon glyphicon-edit glyphicon-table-action-size' title='Editar'></span>")
+                                )
+                            }
+                            <a href="#" onclick="getDetails('@item.CandidatoID'); return false;">
+                                <span class='glyphicon glyphicon-new-window glyphicon-table-action-size' title='Detalles'></span>
+                            </a>
+                            @if (User.IsInRole("Admin") && item.Status != StatusTipo.Eliminado)
+                            {
+                                <a href="#" onclick="getDelete('@item.CandidatoID'); return false;" class="text-danger">
+                                    <span class='glyphicon glyphicon-trash glyphicon-table-action-size' title='Eliminar'></span>
+                                </a>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+    </div>
+</div>
+
+
