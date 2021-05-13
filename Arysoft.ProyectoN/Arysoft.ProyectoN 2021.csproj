@@ -465,6 +465,8 @@
     <Content Include="Views\Candidato\Details.cshtml" />
     <Content Include="Views\Candidato\Edit.cshtml" />
     <Content Include="Views\Candidato\Index.cshtml" />
+    <Content Include="Views\Candidato\_details.cshtml" />
+    <Content Include="Views\Home\MigrarRepresentantes.cshtml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
@@ -607,6 +609,7 @@
     <Compile Include="Models\Persona.cs" />
     <Compile Include="Models\PersonaIne.cs" />
     <Compile Include="Models\PersonaTmp.cs" />
+    <Compile Include="Models\RepresentanteTemp.cs" />
     <Compile Include="Models\ResultadoCasilla.cs" />
     <Compile Include="Models\Seccion.cs" />
     <Compile Include="Models\Colonia.cs" />

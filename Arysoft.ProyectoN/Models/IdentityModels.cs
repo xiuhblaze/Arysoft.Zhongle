@@ -88,6 +88,7 @@ namespace Arysoft.ProyectoN.Models
 
         public DbSet<PersonaTmp> PersonasTmp { get; set; }
         public DbSet<PersonaIne> PersonasIne { get; set; }
+        public DbSet<RepresentanteTemp> RepresentantesTemp { get; set; }
 
         //public DbSet<Representante> Representantes { get; set; }
 

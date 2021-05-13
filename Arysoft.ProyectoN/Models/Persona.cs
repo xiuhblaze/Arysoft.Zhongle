@@ -259,4 +259,25 @@ namespace Arysoft.ProyectoN.Models
                 
     } // PersonaEditViewModel
 
+    public class PersonaSearchModel
+    {
+        public string Buscar { get; set; }
+        public string Orden { get; set; }
+        public string Afinidad { get; set; }
+        public string SectorID { get; set; }
+        public string SeccionID { get; set; }
+        public string PromotorID { get; set; }
+        public string CalleID { get; set; }
+        public string ColoniaID { get; set; }
+        public string BardaLona { get; set; }
+        public string SectorTipo { get; set; }
+        public string VotanteSeguro { get; set; }
+        public string Status { get; set; }
+        public string Verificada { get; set; }
+        public string FiltroEspecifico { get; set; }
+        public string YaVoto { get; set; }
+        public string BusquedaAvanzada { get; set; }
+        public string LlamadaOrigen { get; set; }
+        public int? Pagina { get; set; }
+    } // PersonaSearchModel
 }

@@ -569,8 +569,17 @@ namespace Arysoft.ProyectoN.Controllers
             ViewBag.OrdenSeccion = orden == "seccion" ? "seccion_desc" : "seccion";
 
             var personas = db.Personas
+                .Include(s => s.UbicacionVive)
+                .Include(s => s.UbicacionVive.Colonia)
+                .Include(s => s.UbicacionVive.Calle)
+                .Include(s => s.UbicacionVota)
+                .Include(s => s.UbicacionVota.Colonia)
+                .Include(s => s.UbicacionVota.Calle)
+                .Include(s => s.PersonasAfines)
+                .Include(s => s.Promotor)
                 .Include(s => s.Seccion)
                 .Include(s => s.Sector)
+                .Include(s => s.Notas)
                 .Where(p => p.Status == StatusTipo.Activo);
             //var personasList = new List<Persona>();
 

@@ -162,13 +162,16 @@
                         <button type="button" id="busquedaAvanzadaButton" class="btn btn-link @(ViewBag.BusquedaAvanzada == "1" ? "active" : "")" data-toggle="button" aria-pressed="@(ViewBag.BusquedaAvanzada == "1" ? "true" : "false")" title="Busqueda avanzada">
                             <span class="glyphicon glyphicon-filter"></span>
                         </button>
-                        <button type="submit" id="buscarButton" class="btn btn-link" title="Buscar">
+                        <button type="submit" id="buscarButton" name="enviarButton" value="buscar" class="btn btn-link" title="Buscar">
                             <span class="glyphicon glyphicon-search glyphicon-toolbar-size"></span>
                         </button>
-                        @Html.Raw(
+                        <button type="submit" id="limpiarButton" name="enviarButton" value="limpiar" class="btn btn-link" title="Limpiar">
+                            <span class="glyphicon glyphicon-remove glyphicon-toolbar-size"></span>
+                        </button>
+                        @*@Html.Raw(
                             @Html.ActionLink("Limpiar", "Index", null, new { @class = "btn btn-link" }).ToHtmlString()
                             .Replace("Limpiar", "<span class='glyphicon glyphicon-remove glyphicon-toolbar-size' title='Limpiar'></span>")
-                        )
+                        )*@
                     </div>
                 </div>
             </div>
@@ -230,7 +233,7 @@
                     </div>
 
                     <div class="form-group search-bar-control">
-                        <label for="bardaLona" class="sr-only">Votante seguro</label>
+                        <label for="votanteSeguro" class="sr-only">Votante seguro</label>
                         @Html.DropDownList("votanteSeguro", votanteSeguroList, htmlAttributes: new { @class = "form-control" })
                     </div>
 

@@ -22,16 +22,57 @@ namespace Arysoft.ProyectoN.Controllers
         [Authorize(Roles = "Admin, Editor, SectorEditor, Auditor, Consultant")]
         public async Task<ActionResult> Index(string buscar, string filtro, string orden, string afinidad, string SectorID, string SeccionID, string PromotorID,
             string CalleID, string ColoniaID, string bardaLona, string sectorTipo, string votanteSeguro, string status, string verificada,
-            string filtroEspecifico, string yaVoto, string busquedaAvanzada, string llamadaOrigen,
+            string filtroEspecifico, string yaVoto, string busquedaAvanzada, string llamadaOrigen, string enviarButton, 
             int? pagina)
         {
+            switch (enviarButton)
+            {
+                case "buscar":
+                    // nueva busqueda, utilizar los parametros recibidos
+                    pagina = 1;
+                    buscar = buscar.Trim();                    
+                    // Los parametros se enviaran a la sesión al final del metodo
+                    break;
+                case "limpiar":
+                    Session[Comun.SESION_PERSONAS_FILTRO] = null;
+                    Session.Remove(Comun.SESION_PERSONAS_FILTRO);
+                    return RedirectToAction("Index");
+                    //break;
+                default:
+                    // No viene de una busqueda, revisar si hay un objeto sesión y actualizar los filtros respecto a ellos
+                    if (Session[Comun.SESION_PERSONAS_FILTRO] != null)
+                    {
+                        // Pasar sus valores a los parametros de busqueda
+                        PersonaSearchModel psm = (PersonaSearchModel)Session[Comun.SESION_PERSONAS_FILTRO];
+
+                        buscar = psm.Buscar;
+                        orden = psm.Orden;
+                        afinidad = psm.Afinidad;
+                        SectorID = psm.SectorID;
+                        SeccionID = psm.SeccionID;
+                        PromotorID = psm.PromotorID;
+                        CalleID = psm.CalleID;
+                        ColoniaID = psm.ColoniaID;
+                        bardaLona = psm.BardaLona;
+                        sectorTipo = psm.SectorTipo;
+                        votanteSeguro = psm.VotanteSeguro;
+                        status = psm.Status;
+                        verificada = psm.Verificada;
+                        filtroEspecifico = psm.FiltroEspecifico;
+                        yaVoto = psm.YaVoto;
+                        busquedaAvanzada = psm.BusquedaAvanzada;
+                        llamadaOrigen = psm.LlamadaOrigen;
+                        pagina = pagina == null ? psm.Pagina :
+                            pagina != psm.Pagina ? pagina : psm.Pagina;
+                    }
+                    break;
+            }
+
             Guid sectorID = (SectorID != null && SectorID != Guid.Empty.ToString()) ? new Guid(SectorID) : Guid.Empty;
             Guid seccionID = (SeccionID != null && SeccionID != Guid.Empty.ToString()) ? new Guid(SeccionID) : Guid.Empty;
             Guid calleID = (CalleID != null && CalleID != Guid.Empty.ToString()) ? new Guid(CalleID) : Guid.Empty;
             Guid coloniaID = (ColoniaID != null && ColoniaID != Guid.Empty.ToString()) ? new Guid(ColoniaID) : Guid.Empty;
             Guid promotorID = (PromotorID != null && PromotorID != Guid.Empty.ToString()) ? new Guid(PromotorID) : Guid.Empty;
-
-            //bool primeraVez = false;
 
             if (User.IsInRole("SectorEditor"))
             {
@@ -48,15 +89,15 @@ namespace Arysoft.ProyectoN.Controllers
             ViewBag.OrdenColonia = orden == "colonia" ? "colonia_desc" : "colonia";
             ViewBag.OrdenCalle = orden == "calle" ? "calle_desc" : "calle";
 
-            if (buscar != null)
-            {
-                pagina = 1;
-                buscar = buscar.Trim();
-            }
-            else { 
-                buscar = filtro ?? string.Empty;
-                //primeraVez = string.IsNullOrEmpty(buscar);
-            }
+            // xBlaze: Esto ya lo hace en el switch de enviarButton
+            //if (buscar != null)
+            //{
+            //    pagina = 1;
+            //    buscar = buscar.Trim();
+            //}
+            //else { 
+            //    buscar = filtro ?? string.Empty;
+            //}
             ViewBag.Filtro = buscar;
 
             db.Database.CommandTimeout = 180;
@@ -345,6 +386,29 @@ namespace Arysoft.ProyectoN.Controllers
                 return PartialView("_listaToExcel", personasList);
             }
 
+            // Guarda los filtros de busqueda en un objeto sesión
+            PersonaSearchModel miBusqueda = new PersonaSearchModel { 
+                Buscar = buscar,
+                Orden = orden,
+                Afinidad = afinidad,
+                SectorID = SectorID,
+                SeccionID = SeccionID,
+                PromotorID = PromotorID,
+                CalleID = CalleID,
+                ColoniaID = ColoniaID,
+                BardaLona = bardaLona,
+                SectorTipo = sectorTipo,
+                VotanteSeguro = votanteSeguro,
+                Status = status,
+                Verificada = verificada,
+                FiltroEspecifico = filtroEspecifico,
+                YaVoto = yaVoto,
+                BusquedaAvanzada = busquedaAvanzada,
+                LlamadaOrigen = llamadaOrigen,
+                Pagina = pagina
+            };
+            Session[Comun.SESION_PERSONAS_FILTRO] = miBusqueda;
+            
             return View(personasPagedList); //View(personasList.ToPagedList(numeroPagina, elementosPagina)); //personas.ToList());
         } // Index
 

@@ -62,4 +62,29 @@ public static class StringExtension
         }
     } // CleanInvalidChars
 
+    /// <summary>
+    /// Elimina caracteres que afectan la comparacion de dos cadenas similares
+    /// </summary>
+    /// <param name="s"></param>
+    /// <returns>La cadena sin acentos y en mayusculas</returns>
+    /// <remarks>
+    /// https://lodesharepoint.com/comparar-strings-sin-importar-mayusculas-minusculas-espacios-ni-acentos-en-c
+    /// </remarks>
+    public static string PrepareToCompareString(this string s)
+    {
+        Regex replace_a_Accents = new Regex("[á|à|ä|â]", RegexOptions.Compiled);
+        Regex replace_e_Accents = new Regex("[é|è|ë|ê]", RegexOptions.Compiled);
+        Regex replace_i_Accents = new Regex("[í|ì|ï|î]", RegexOptions.Compiled);
+        Regex replace_o_Accents = new Regex("[ó|ò|ö|ô]", RegexOptions.Compiled);
+        Regex replace_u_Accents = new Regex("[ú|ù|ü|û]", RegexOptions.Compiled);
+        s = replace_a_Accents.Replace(s, "a");
+        s = replace_e_Accents.Replace(s, "e");
+        s = replace_i_Accents.Replace(s, "i");
+        s = replace_i_Accents.Replace(s, "i");
+        s = replace_o_Accents.Replace(s, "o");
+        s = replace_u_Accents.Replace(s, "u");
+        s = s.ToUpper().Replace(" ", "");
+        return s;
+    } // prepareToCompareString
+
 } // StringExtension

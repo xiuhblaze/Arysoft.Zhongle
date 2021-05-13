@@ -1,0 +1,23 @@
+﻿@model IEnumerable<Arysoft.ProyectoN.Models.RepresentanteTemp>
+
+@using Arysoft.ProyectoN.Models;
+@using PagedList.Mvc;
+
+@{
+    ViewBag.Title = "Migrar Representantes";
+}
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            <h2>Migrar Representantes</h2>
+
+            <div class="alert alert-info">@Model.Count()</div>
+
+            @foreach (var item in Model)
+            {
+                <p>@item.Seccion | @item.Nombres @item.ApellidoPaterno</p>
+            }
+        </div>
+    </div>
+</div>

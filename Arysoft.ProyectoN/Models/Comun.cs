@@ -12,6 +12,7 @@ public static class Comun
 
     public const string TITULO_APP = "PROYECTO N21";
     public const int ELEMENTOS_PAGINA = 50;
+    public const string SESION_PERSONAS_FILTRO = "SESION_PERSONAS_FILTRO";
 
     // PERSONA
 

@@ -103,22 +103,22 @@
                         <td>
                             @Html.Raw(classStatusIcon)
                         </td>
-                        <td>
+                        <td style="cursor: pointer" onclick="getDetails('@item.CandidatoID')">
                             @Html.DisplayFor(modelItem => item.Nombre)
                         </td>
-                        <td>
+                        <td style="cursor: pointer" onclick="getDetails('@item.CandidatoID')">
                             @Html.DisplayFor(modelItem => item.Descripcion)
                         </td>                        
-                        <td>
+                        <td style="cursor: pointer" onclick="getDetails('@item.CandidatoID')">
                             @Html.DisplayFor(modelItem => item.VotosTotal)
                         </td>
-                        <td>
+                        <td style="cursor: pointer" onclick="getDetails('@item.CandidatoID')">
                             @Html.DisplayFor(modelItem => item.Campanna)
                         </td>
-                        <td>
+                        <td style="cursor: pointer" onclick="getDetails('@item.CandidatoID')">
                             @Html.DisplayFor(modelItem => item.Tipo)
                         </td>
-                        <td>
+                        <td style="cursor: pointer" onclick="getDetails('@item.CandidatoID')">
                             @switch (item.Tipo)
                             {
                                 case CandidatoTipo.Partido:
@@ -166,4 +166,91 @@
     </div>
 </div>
 
+@section scripts {
+    <script>
+        var modalDetailsOriginalContent = $('#detalles-modal-content').html();
 
+        function getDetails(id) {
+            var url = '@Url.Action("Details", "Candidato")/' + id;
+
+            $('#detailsModal').modal('show');
+            $.ajax({
+                cache: false,
+                async: true,
+                type: 'get',
+                url: url,
+                data: {},
+                beforeSend: function () {
+                    $('#detalles-modal-body').html('<p class="text-center" style="margin: 50px;"><img src="@Url.Content("~/Images/ajax-loader.gif")" /></p>');
+                },
+                success: function (vista) {
+                    switch (vista) {
+                        case "notid":
+                            alert('No se recibió un identificador del candidato');
+                            $('#detailsModal').modal('hide');
+                            $('#detalles-modal-content').html(modalDetailsOriginalContent);
+                            break;
+                        case "notfound":
+                            alert('No se encontró el candidato solicitado');
+                            $('#detailsModal').modal('hide');
+                            $('#detalles-modal-content').html(modalDetailsOriginalContent);
+                            break;
+                        default:
+                            $('#detalles-modal-content').html(vista);
+                            break;
+                    }
+                },
+                error: function (xhr, status, error) {
+                    alert('A ocurrido una excepción: ' + status + '\n error: ' + error);
+                }
+            });
+        } // getDetails
+
+        function getDelete(id) {
+            var url = '@Url.Action("Delete", "Candidato")/' + id;
+
+            $('#detailsModal').modal('show');
+            $.ajax({
+                cache: false,
+                async: true,
+                type: 'get',
+                url: url,
+                data: {},
+                beforeSend: function () {
+                    $('#detalles-modal-body').html('<p class="text-center" style="margin: 50px;"><img src="@Url.Content("~/Images/ajax-loader.gif")" /></p>');
+                },
+                success: function(vista) {
+                    switch (vista) {
+                        case "notid":
+                            alert('No se recibió un identificador del candidato');
+                            $('#detailsModal').modal('hide');
+                            $('#detalles-modal-content').html(modalDetailsOriginalContent);
+                            break;
+                        case "notfound":
+                            alert('No se encontró el candidato solicitado');
+                            $('#detailsModal').modal('hide');
+                            $('#detalles-modal-content').html(modalDetailsOriginalContent);
+                            break;
+                        default:
+                            $('#detalles-modal-content').html(vista);
+                            break;
+                    }
+                },
+                error: function (xhr, status, error) {
+                    alert('A ocurrido una excepción: ' + status + '\n error: ' + error);
+                }
+            });
+        } // getDelete
+
+        $(document).ready(function () {
+
+            // $('.chosen-select').chosen();
+
+            $('#detailsModal').on('hidden.bs.modal', function (e) {
+
+                $('#detalles-modal-content').html(modalDetailsOriginalContent);
+            })
+
+        }); // document.ready
+    </script>
+}

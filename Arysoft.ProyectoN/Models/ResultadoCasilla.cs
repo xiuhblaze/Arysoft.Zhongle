@@ -13,16 +13,26 @@ namespace Arysoft.ProyectoN.Models
     {
         public Guid ResultadoCasillaID { get; set; }
 
-        public Guid PartidoID { get; set; }
-
         public Guid CasillaID { get; set; }
 
-        public int Total { get; set; }
+        public Guid CandidatoID { get; set; }
+
+        public int Votos { get; set; }
+
+        public BoolTipo Nulos { get; set; }
+
+        [Display(Name = "Actualizado por")]
+        [StringLength(256)]
+        public string UserNameActualizacion { get; set; }
+
+        [Display(Name = "Última actualización")]
+        [DataType(DataType.DateTime)]
+        public DateTime FechaActualizacion { get; set; }
 
         // RELACION
 
-        public Partido Partido { get; set; }
-
         public Casilla Casilla { get; set; }
+
+        public Candidato Candidato { get; set; }
     }
 }

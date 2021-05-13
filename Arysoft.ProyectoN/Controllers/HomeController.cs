@@ -43,6 +43,95 @@ namespace Arysoft.ProyectoN.Controllers
             return View();
         }
 
+        [Authorize]
+        public ActionResult MigrarRepresentantes()
+        {
+            // 1.Verificar que tenga un nombre y un apellido
+            // 2.Verificar que no exista en el sistema
+            // Existe
+            //      2.1.Agregarlo como Representante de casilla
+            // No Existe
+            //      2.1.Agregarlo como persona
+            //      2.2.Agregarlo como representante de casilla
+
+            foreach (var item in db.RepresentantesTemp.ToList())
+            {
+                if (!string.IsNullOrEmpty(item.Nombres)
+                    && (!string.IsNullOrEmpty(item.ApellidoPaterno) || !string.IsNullOrEmpty(item.ApellidoMaterno)))
+                {
+                    // Buscando si existe la persona
+                    var persona = db.Personas
+                        .Where(p => p.Nombres.Equals(item.Nombres.PrepareToCompareString())
+                            && p.ApellidoPaterno.Equals(item.ApellidoPaterno.PrepareToCompareString())
+                            && p.ApellidoMaterno.Equals(item.ApellidoMaterno.PrepareToCompareString()))
+                        .FirstOrDefault();
+
+                    // Obteniendo la sección donde aparece su INE
+                    Seccion seccionIne = null;
+                    if (int.TryParse(item.SeccionVota.Trim(), out int seccionVota))
+                    {
+                        seccionIne = db.Secciones
+                            .Where(s => s.Numero == seccionVota)
+                            .FirstOrDefault();
+                    }
+
+                    // Obteniendo la sección donde va a ser representante de casilla
+                    Seccion seccion = null;
+                    if (int.TryParse(item.Seccion.Trim(), out int seccionRep))
+                    {
+                        seccion = db.Secciones
+                            .Where(s => s.Numero == seccionRep)
+                            .FirstOrDefault();
+                    }
+
+                    // Obtener casilla donde va a ser representante
+                    CasillaTipo casillaTipo = CasillaTipo.Ninguno;
+                    switch (item.Casilla)
+                    {
+                        case "B1": casillaTipo = CasillaTipo.Basica; break;
+                        case "C1": casillaTipo = CasillaTipo.Contigua; break;
+                        case "C2": casillaTipo = CasillaTipo.ContiguaII; break;
+                        case "C3": casillaTipo = CasillaTipo.ContiguaIII; break;
+                        case "C4": casillaTipo = CasillaTipo.ContiguaIV; break;
+                        case "C5": casillaTipo = CasillaTipo.ContiguaV; break;
+                        case "C6": casillaTipo = CasillaTipo.ContiguaVI; break;
+                        case "C7": casillaTipo = CasillaTipo.ContiguaVII; break;
+                        case "C8": casillaTipo = CasillaTipo.ContiguaVIII; break;
+                        case "C9": casillaTipo = CasillaTipo.ContiguaIX; break;
+                        case "C10": casillaTipo = CasillaTipo.ContiguaX; break;
+                        case "C11": casillaTipo = CasillaTipo.ContiguaXI; break;
+                        case "C12": casillaTipo = CasillaTipo.ContiguaXII; break;
+                        case "E1": casillaTipo = CasillaTipo.Extraordinaria; break;
+                        case "S1": casillaTipo = CasillaTipo.Especial; break;
+                    }
+                    Casilla casilla = db.Casillas
+                        .Where(c => c.SeccionID == seccion.SeccionID && c.Tipo == casillaTipo)
+                        .FirstOrDefault();
+
+                    // Determinar si el representante es Titular o Suplente
+                    RepresentanteTipo representanteTipo = RepresentanteTipo.Ninguno;
+                    if (string.Compare(item.Puesto.PrepareToCompareString(),"TITULAR") == 0) { representanteTipo = RepresentanteTipo.Principal; }
+                    else if (string.Compare(item.Puesto.PrepareToCompareString(), "SUPLENTE") == 0) { representanteTipo = RepresentanteTipo.Suplente; }
+
+                    // Armar la UbicacionAlterna
+
+                    //TODO: Aqui voy
+
+
+                    if (persona == null) // no existe, es nueva persona
+                    {
+                        persona = new Persona
+                        {
+                            PersonaID = item.ID, // Para poder localizarlo y borrarlo si algo sale mal.
+                            Celular = item.Telefono
+                        };
+                    }
+                }
+            }
+
+            return View(db.RepresentantesTemp.ToList());
+        }
+
         // METODOS AJAX
         ////////////////////////////////////////////////////////////////////////////////
 
@@ -213,20 +302,21 @@ namespace Arysoft.ProyectoN.Controllers
 
             Casilla casilla = await db.Casillas.FindAsync(id);
 
-            var partidos = await db.Partidos.Where(p => p.Status == StatusTipo.Activo).ToListAsync();
+            var candidatos = await db.Candidatos.Where(c => c.Status == StatusTipo.Activo).ToListAsync();
+            //var partidos = await db.Partidos.Where(p => p.Status == StatusTipo.Activo).ToListAsync();
 
-            foreach (Partido partido in partidos)
+            foreach (Candidato candidato in candidatos)
             {
                 int total = 0;
 
                 if (casilla.Resultados != null)
                 {
-                    total = casilla.Resultados.Where(r => r.PartidoID == partido.PartidoID).Sum(r => r.Total);
+                    total = casilla.Resultados.Where(r => r.CandidatoID == candidato.CandidatoID).Sum(r => r.Votos);
                 }
 
                 tabla.Add(new
                 {
-                    Partido = partido.Siglas,
+                    Partido = candidato.SiglasCoalicion,
                     Total = total
                 });
             }

@@ -24,9 +24,13 @@
                 <dt>Nombre</dt>
                 <dd>@ViewBag.User.NombreCompleto</dd>
 
-                <dt>CURP</dt>
-                <dd>@ViewBag.User.CURP</dd>
-
+                @if (ViewBag.Sector != null)
+                {
+                    <dt>Sector</dt>
+                    <dd>
+                        @ViewBag.Sector.Nombre
+                    </dd>
+                }
                 <dt>Correo Electrónico</dt>
                 <dd>@ViewBag.User.Email</dd>
             </dl>

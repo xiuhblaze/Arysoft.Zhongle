@@ -303,9 +303,9 @@
                             foreach (var resultado in item.Resultados)
                             {
                                 string classColor = "label-default";
-                                string title = resultado.Partido.Siglas; //string.Format("{0}: {1}", resultado.Partido.Siglas, resultado.Partido.Candidato);
+                                string title = resultado.Candidato.SiglasCoalicion; //string.Format("{0}: {1}", resultado.Partido.Siglas, resultado.Partido.Candidato);
 
-                                switch (resultado.Partido.Siglas) {
+                                switch (resultado.Candidato.SiglasCoalicion) {
                                     case "MC":
                                         classColor = "label-warning";
                                         break;
@@ -323,7 +323,7 @@
                                         break;
                                 }
 
-                                <span class="label @classColor" title="@title">@resultado.Total</span>
+                                <span class="label @classColor" title="@title">@resultado.Votos</span>
                             }
                         }
                     </td>

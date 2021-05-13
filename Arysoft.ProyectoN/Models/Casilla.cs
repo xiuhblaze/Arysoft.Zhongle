@@ -51,17 +51,17 @@ namespace Arysoft.ProyectoN.Models
 
                 if (Votantes != null)
                 {
-                    //foreach (Voto v in Votantes)
-                    //{
-                    //    if (v.Persona != null)
-                    //    {
-                    //        if (v.Persona.VotanteSeguro == BoolTipo.Si)
-                    //        {
-                    //            total++;
-                    //        }
-                    //    }
-                    //}
-                    total = Votantes.Where(v => v.Persona.VotanteSeguro == BoolTipo.Si).Count();
+                    foreach (Voto v in Votantes)
+                    {
+                        if (v.Persona != null)
+                        {
+                            if (v.Persona.VotanteSeguro == BoolTipo.Si)
+                            {
+                                total++;
+                            }
+                        }
+                    }
+                    //total = Votantes.Where(v => v.Persona.VotanteSeguro == BoolTipo.Si).Count();
                 }
                 return total;
             }
@@ -89,14 +89,14 @@ namespace Arysoft.ProyectoN.Models
 
                 if (Votantes != null)
                 {
-                    //foreach (Voto item in Votantes)
-                    //{
-                    //    if (item.YaVoto == BoolTipo.Si)
-                    //    {
-                    //        total++;
-                    //    }
-                    //}
-                    total = Votantes.Where(v => v.YaVoto == BoolTipo.Si).Count();
+                    foreach (Voto item in Votantes)
+                    {
+                        if (item.YaVoto == BoolTipo.Si)
+                        {
+                            total++;
+                        }
+                    }
+                    //total = Votantes.Where(v => v.YaVoto == BoolTipo.Si).Count();
                 }
 
                 return total;

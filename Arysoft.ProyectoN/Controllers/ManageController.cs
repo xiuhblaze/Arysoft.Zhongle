@@ -53,6 +53,10 @@ namespace Arysoft.ProyectoN.Controllers
 
             ViewBag.User = myUser;
 
+            Sector sector = db.Sectores.Find(User.Identity.GetSectorId());
+
+            ViewBag.Sector = sector;
+
             var model = new IndexViewModel
             {
                 HasPassword = HasPassword(),
