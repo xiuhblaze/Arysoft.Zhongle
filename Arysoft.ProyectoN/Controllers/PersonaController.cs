@@ -46,7 +46,8 @@ namespace Arysoft.ProyectoN.Controllers
                         PersonaSearchModel psm = (PersonaSearchModel)Session[Comun.SESION_PERSONAS_FILTRO];
 
                         buscar = psm.Buscar;
-                        orden = psm.Orden;
+                        orden = orden == null ? psm.Orden :
+                            orden != psm.Orden ? orden : psm.Orden; //psm.Orden;
                         afinidad = psm.Afinidad;
                         SectorID = psm.SectorID;
                         SeccionID = psm.SeccionID;
@@ -107,11 +108,11 @@ namespace Arysoft.ProyectoN.Controllers
                 .Include(p => p.Seccion.Sector)
                 .Include(p => p.PersonasAfines)
                 .Include(p => p.UbicacionVive)
-                .Include(p => p.UbicacionVive.Colonia)
-                .Include(p => p.UbicacionVive.Calle)
+                //.Include(p => p.UbicacionVive.Colonia)
+                //.Include(p => p.UbicacionVive.Calle)
                 .Include(p => p.UbicacionVota)
-                .Include(p => p.UbicacionVota.Colonia)
-                .Include(p => p.UbicacionVota.Calle)
+                //.Include(p => p.UbicacionVota.Colonia)
+                //.Include(p => p.UbicacionVota.Calle)
                 .Include(p => p.Voto)
                 .Include(p => p.Voto.Casilla)
                 .Include(p => p.Notas)
@@ -273,33 +274,33 @@ namespace Arysoft.ProyectoN.Controllers
                         .ThenByDescending(p => p.Sector.Nombre)
                         .ThenBy(p => p.ApellidoPaterno);
                     break;
-                case "colonia":
-                    personas = personas
-                        .OrderBy(p => p.UbicacionVive == null)
-                        .ThenBy(p => p.UbicacionVive.Colonia == null)
-                        .ThenBy(p => p.UbicacionVive.Colonia.Nombre);
-                    break;
-                case "colonia_desc  ":
-                    personas = personas
-                        .OrderByDescending(p => p.UbicacionVive == null)
-                        .ThenByDescending(p => p.UbicacionVive.Colonia == null)
-                        .ThenByDescending(p => p.UbicacionVive.Colonia.Nombre);
-                    break;
-                case "calle":
-                    personas = personas
-                        .OrderBy(p => p.UbicacionVive == null)
-                        .ThenBy(p => p.UbicacionVive.Calle == null)
-                        .ThenBy(p => p.UbicacionVive.Calle.Nombre)
-                        .ThenBy(p => p.UbicacionVive.NumExterior);
-                    //personas = personas.ToList();
-                    break;
-                case "calle_desc  ":
-                    personas = personas
-                        .OrderByDescending(p => p.UbicacionVive == null)
-                        .ThenByDescending(p => p.UbicacionVive.Calle == null)
-                        .ThenByDescending(p => p.UbicacionVive.Calle.Nombre)
-                        .ThenByDescending(p => p.UbicacionVive.NumExterior);
-                    break;
+                //case "colonia":
+                //    personas = personas
+                //        .OrderBy(p => p.UbicacionVive == null)
+                //        .ThenBy(p => p.UbicacionVive.Colonia == null)
+                //        .ThenBy(p => p.UbicacionVive.Colonia.Nombre);
+                //    break;
+                //case "colonia_desc  ":
+                //    personas = personas
+                //        .OrderByDescending(p => p.UbicacionVive == null)
+                //        .ThenByDescending(p => p.UbicacionVive.Colonia == null)
+                //        .ThenByDescending(p => p.UbicacionVive.Colonia.Nombre);
+                //    break;
+                //case "calle":
+                //    personas = personas
+                //        .OrderBy(p => p.UbicacionVive == null)
+                //        .ThenBy(p => p.UbicacionVive.Calle == null)
+                //        .ThenBy(p => p.UbicacionVive.Calle.Nombre)
+                //        .ThenBy(p => p.UbicacionVive.NumExterior);
+                //    //personas = personas.ToList();
+                //    break;
+                //case "calle_desc  ":
+                //    personas = personas
+                //        .OrderByDescending(p => p.UbicacionVive == null)
+                //        .ThenByDescending(p => p.UbicacionVive.Calle == null)
+                //        .ThenByDescending(p => p.UbicacionVive.Calle.Nombre)
+                //        .ThenByDescending(p => p.UbicacionVive.NumExterior);
+                //    break;
                 default:
                     personas = personas.OrderBy(p => p.ApellidoPaterno).ThenBy(p => p.ApellidoMaterno);
                     break;
@@ -800,7 +801,7 @@ namespace Arysoft.ProyectoN.Controllers
             PersonaEditViewModel personaVM = Comun.ObtenerPersonaEditViewModel(persona, false);
 
             return View(personaVM);
-        }
+        } // POST:Edit
 
         // GET: Persona/Delete/5
         [Authorize(Roles = "Admin, Editor")]
@@ -1097,6 +1098,49 @@ namespace Arysoft.ProyectoN.Controllers
                 totalSecciones
             }, JsonRequestBehavior.AllowGet);
         } // TotalCasillas
+
+        public async Task<ActionResult> ObtenerUbicacion(Guid id)
+        {
+            if (id != null)
+            {
+                Ubicacion ubicacion = await db.Ubicaciones
+                    //.Include(u => u.Calle)
+                    //.Include(u => u.Colonia)
+                    .Where(u => u.UbicacionID == id)
+                    .FirstOrDefaultAsync();
+
+                var ubicaciones = await db.Ubicaciones.ToListAsync();
+
+                var ub = ubicaciones.Where(u => u.UbicacionID == id);
+
+                if (ubicacion != null)
+                {
+                    var calle = ubicacion.Calle != null ? ubicacion.Calle.Nombre : string.Empty;
+                    var colonia = ubicacion.Colonia != null ? ubicacion.Colonia.Nombre : string.Empty;
+                    var cp = ubicacion.Colonia != null ? ubicacion.Colonia.CodigoPostal : string.Empty;
+
+                    return Json(new
+                    {
+                        Calle = calle,
+                        ubicacion.NumExterior,
+                        ubicacion.Letra,
+                        ubicacion.NumInterior,
+                        Colonia = colonia,
+                        CP = cp,
+                        ubicacion.Descripcion
+                    }, JsonRequestBehavior.AllowGet);
+                }
+
+                return Json(new
+                {
+                    error = "notfound"
+                }, JsonRequestBehavior.AllowGet);
+            }
+
+            return Json(new { 
+                error = "notid"
+            }, JsonRequestBehavior.AllowGet);
+        } // ObtenerUbicacion
 
         //public ActionResult
 
@@ -1491,15 +1535,25 @@ namespace Arysoft.ProyectoN.Controllers
             return RedirectToAction("index");
         } // MigrarPersonas
 
+        /// <summary>
+        /// Permite migrar la revisión de los libros INE por medio de un archivo excel que es vaciado al
+        /// sistema en la tabla PersonasIne, primero se debe de correr el script 'Scripts de transferencia.sql'
+        /// en el servidor de SQL Server segun las indicaciones del mismo archivo.
+        /// </summary>
+        /// <returns></returns>
         public ActionResult MigrarPersonasINE() {
             string logExcepciones = string.Empty;
             int totalRegistrosSatisfactorios = 0;
             int totalRegistrosSinCasilla = 0;
             int totalOtrasExcepciones = 0;
-            
-            foreach (var item in db.PersonasIne.Where(p => p.Registrado == BoolTipo.Ninguno))
+
+            var personasIne = db.PersonasIne.Where(p => p.Registrado == BoolTipo.Ninguno).ToList();
+
+            foreach (var item in personasIne) //db.PersonasIne.Where(p => p.Registrado == BoolTipo.Ninguno))
             {
-                Persona persona = db.Personas.Find(item.PersonaIneID);
+                Persona persona = db.Personas
+                    .Include(p => p.Seccion)
+                    .FirstOrDefault(p => p.PersonaID == item.PersonaIneID);
                 string logError = string.Empty;
                 bool esValido = true;
 
@@ -1513,7 +1567,7 @@ namespace Arysoft.ProyectoN.Controllers
                             persona.Verificada = BoolTipo.No;
                             persona.VotanteSeguro = BoolTipo.No;
                             persona.FechaActualizacion = DateTime.Now;
-                            persona.UserNameActualizacion = "primer auditoria (09/06/2018)";
+                            persona.UserNameActualizacion = "(asignacion numeros ine 2021)";
                             db.Entry(persona).State = EntityState.Modified;                            
                             break;
                         case "B":
@@ -1548,6 +1602,12 @@ namespace Arysoft.ProyectoN.Controllers
                             break;
                         case "C10":
                             casillaTipo = CasillaTipo.ContiguaX;
+                            break;
+                        case "C11":
+                            casillaTipo = CasillaTipo.ContiguaXI;
+                            break;
+                        case "C12":
+                            casillaTipo = CasillaTipo.ContiguaXII;
                             break;
                     }
 
@@ -1603,6 +1663,7 @@ namespace Arysoft.ProyectoN.Controllers
                         if (esValido)
                         {
                             Casilla casilla = db.Casillas
+                                .Include(c => c.Votantes)
                                 .Where(c => c.SeccionID == persona.SeccionID && c.Tipo == casillaTipo).FirstOrDefault();
 
                             if (casilla != null)

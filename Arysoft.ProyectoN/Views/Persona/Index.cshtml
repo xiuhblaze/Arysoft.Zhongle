@@ -109,7 +109,6 @@
             overflow: hidden;
         }
     </style>
-
 }
 
 <div id="detailsModal" class="modal fade" tabindex="-1" role="dialog" style="display: none;">
@@ -591,7 +590,11 @@
                     </td>
                     <td style="cursor: pointer" onclick="getPersonaDetails('@item.PersonaID')" @Html.Raw(item.VotaEnDomicilio == BoolTipo.Si ? "colspan='2'" : "")>
                         <span class="glyphicon glyphicon-home glyphicon-table-info-size"></span>
-                        @if (item.UbicacionVive != null)
+                        <span class="ubicacion" data-id="@item.UbicacionViveID">
+                            <i class="fa fa-spinner fa-spin fa-fw text-muted"></i>
+                        </span>
+                        @*<span onload="getAddress('@item.UbicacionViveID')"></span>*@
+                        @*@if (item.UbicacionVive != null)
                         {
                             <span>
                                 @if (item.UbicacionVive.Calle != null)
@@ -609,14 +612,16 @@
                                 @if (!string.IsNullOrEmpty(item.UbicacionVive.Descripcion))
                                 {<br /><span class="text-muted">@item.UbicacionVive.Descripcion</span>}
                             </span>
-                        }
+                        }*@
                     </td>
                     @if (item.VotaEnDomicilio == BoolTipo.No)
                     {
                         <td style="cursor: pointer" onclick="getPersonaDetails('@item.PersonaID')">
                             <span class="text-warning" title="Domicilio donde vota">
                                 <span class="glyphicon glyphicon-erase glyphicon-table-info-size"></span>
-                                @if (item.UbicacionVota != null)
+                                <span class="ubicacion" data-id="@item.UbicacionVotaID"></span>
+                                @*<script> getAddress('@item.UbicacionVotaID'); </script>*@
+                                @*@if (item.UbicacionVota != null)
                                 {
                                     <span>
                                         @if (item.UbicacionVota.Calle != null)
@@ -634,7 +639,7 @@
                                         @if (!string.IsNullOrEmpty(item.UbicacionVota.Descripcion))
                                         {<br /><span class="text-muted">@item.UbicacionVota.Descripcion</span>}
                                     </span>
-                                }
+                                }*@
                             </span>
                         </td>
                     }
@@ -876,6 +881,45 @@
             $('#detalles-modal-content').html(personaDetailsModalOriginalContent);
         })
 
+        $('.ubicacion').each(function () {
+            var id = $(this).data('id');
+            var url = '@Url.Action("ObtenerUbicacion", "Persona")/' + id;
+
+            $.ajax({
+                cache: false,
+                async: true,
+                type: 'get',
+                url: url,
+                data: {},
+                beforeSend: function () {
+                    $(this).html('<i class="fa fa-spinner fa-pulse fa-fw"></i>');
+                },
+                success: function (data) {
+                    console.log(data);
+                    if (data.error == null) {
+                        $(this).html('<span>' + data.Calle + '</span>');
+                    }
+                    else {
+                        switch (data.error) {
+                            case "notid":
+                                console.log('No se recibió un identificador de la ubicación(' + id + ')');
+                                break;
+                            case "notfound":
+                                console.log('No se encontró la ubicación (' + id + ')');
+                                break;
+                        }
+                        $(this).html('');
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.log('A ocurrido una excepción(' + id + '): ' + status + '\n error: ' + error);
+                    $(this).html('');
+                }
+            });
+
+            //$(this).html(id);
+        });
+
     }); // document.ready
 
     var personaDetailsModalOriginalContent = $('#detalles-modal-content').html();
@@ -951,7 +995,8 @@
                 alert('A ocurrido una excepción: ' + status + '\n error: ' + error);
             }
         });
-        } // getDelete
+    } // getDelete
+
     </script>
 
 }

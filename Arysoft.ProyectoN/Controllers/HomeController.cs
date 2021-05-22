@@ -53,17 +53,24 @@ namespace Arysoft.ProyectoN.Controllers
             // No Existe
             //      2.1.Agregarlo como persona
             //      2.2.Agregarlo como representante de casilla
+            List<Persona> personas = new List<Persona>();
 
             foreach (var item in db.RepresentantesTemp.ToList())
             {
                 if (!string.IsNullOrEmpty(item.Nombres)
                     && (!string.IsNullOrEmpty(item.ApellidoPaterno) || !string.IsNullOrEmpty(item.ApellidoMaterno)))
                 {
+                    item.Nombres = item.Nombres.PrepareToCompareString();
+                    item.ApellidoPaterno = item.ApellidoPaterno.PrepareToCompareString();
+                    item.ApellidoMaterno = item.ApellidoMaterno.PrepareToCompareString();
+
                     // Buscando si existe la persona
                     var persona = db.Personas
-                        .Where(p => p.Nombres.Equals(item.Nombres.PrepareToCompareString())
-                            && p.ApellidoPaterno.Equals(item.ApellidoPaterno.PrepareToCompareString())
-                            && p.ApellidoMaterno.Equals(item.ApellidoMaterno.PrepareToCompareString()))
+                        .Include(p => p.UbicacionVive)
+                        .Include(p => p.UbicacionVota)
+                        .Where(p => p.Nombres.Equals(item.Nombres)
+                            && p.ApellidoPaterno.Equals(item.ApellidoPaterno)
+                            && p.ApellidoMaterno.Equals(item.ApellidoMaterno))
                         .FirstOrDefault();
 
                     // Obteniendo la sección donde aparece su INE
@@ -74,6 +81,7 @@ namespace Arysoft.ProyectoN.Controllers
                             .Where(s => s.Numero == seccionVota)
                             .FirstOrDefault();
                     }
+                    Guid SeccionID = seccionIne != null ? seccionIne.SeccionID : Guid.Empty;
 
                     // Obteniendo la sección donde va a ser representante de casilla
                     Seccion seccion = null;
@@ -107,6 +115,7 @@ namespace Arysoft.ProyectoN.Controllers
                     Casilla casilla = db.Casillas
                         .Where(c => c.SeccionID == seccion.SeccionID && c.Tipo == casillaTipo)
                         .FirstOrDefault();
+                    Guid CasillaID = casilla != null ? casilla.CasillaID : Guid.Empty;
 
                     // Determinar si el representante es Titular o Suplente
                     RepresentanteTipo representanteTipo = RepresentanteTipo.Ninguno;
@@ -115,22 +124,97 @@ namespace Arysoft.ProyectoN.Controllers
 
                     // Armar la UbicacionAlterna
 
-                    //TODO: Aqui voy
+                    string ubicacionAlterna = string.Empty;
+                    if (!string.IsNullOrEmpty(item.Calle)) { ubicacionAlterna = item.Calle; }
+                    if (!string.IsNullOrEmpty(item.Numero)) { ubicacionAlterna += " " + item.Numero; }
+                    if (!string.IsNullOrEmpty(item.Interior)) { ubicacionAlterna += " " + item.Interior; }
+                    if (!string.IsNullOrEmpty(item.Colonia)) { ubicacionAlterna += " " + item.Colonia; }
+                    if (!string.IsNullOrEmpty(item.CP)) { ubicacionAlterna += " " + item.CP; }
+                    ubicacionAlterna = ubicacionAlterna.Trim();
+                    Ubicacion u = new Ubicacion
+                    {
+                        UbicacionID = Guid.NewGuid(),
+                        CalleID = Guid.Empty,
+                        ColoniaID = Guid.Empty,
+                        NumExterior = 0,
+                        Letra = "(r)", //string.Empty,
+                        NumInterior = string.Empty,
+                        Descripcion = ubicacionAlterna,
+                        Latitud = 0,
+                        Longitud = 0
+                    };
+                    db.Ubicaciones.Add(u); // BDD
 
+                    Guid sectorBrigadaID = new Guid("982ff706-94cc-4ad4-ad88-1518b57e4867"); // Id de Produccion
+                    //Guid sectorBrigadaID = new Guid("0b9eadd3-afa9-4643-9988-9c18c1ec02de"); // Id de Desarrollo
 
                     if (persona == null) // no existe, es nueva persona
                     {
                         persona = new Persona
                         {
                             PersonaID = item.ID, // Para poder localizarlo y borrarlo si algo sale mal.
-                            Celular = item.Telefono
-                        };
+                            SectorBrigadaID = sectorBrigadaID,
+                            SeccionID = SeccionID,
+                            UbicacionViveID = u.UbicacionID,
+                            CasillaID = CasillaID,
+                            Nombres = item.Nombres,
+                            ApellidoPaterno = item.ApellidoPaterno,
+                            ApellidoMaterno = item.ApellidoMaterno,
+                            Sexo = SexoTipo.Ninguno,
+                            VotaEnDomicilio = BoolTipo.Si,
+                            Telefono = string.Empty,
+                            Celular = !string.IsNullOrEmpty(item.Telefono) ? item.Telefono.PrepareToCompareString() : string.Empty,
+                            CorreoElectronico = string.Empty,
+                            Afinidad = AfinidadTipo.Simpatizante,
+                            VotanteSeguro = BoolTipo.Si,
+                            TieneBarda = BoolTipo.No,
+                            TieneLona = BoolTipo.No,
+                            RepresentanteTipo = representanteTipo,
+                            RepresentanteAsistencia = BoolTipo.Ninguno,
+                            RepresentanteCapacitacion = BoolTipo.Ninguno,
+                            Verificada = BoolTipo.Ninguno,
+                            FechaNacimiento = null,
+                            EstadoCivil = EstadoCivilTipo.Ninguno,
+                            Whatsapp = BoolTipo.Ninguno,
+                            Ocupacion = "(representante-new)", //string.Empty,
+                            FechaAlta = DateTime.Now,
+                            Status = StatusTipo.Activo,
+                            UserNameActualizacion = "xiuhblaze@gmail.com",
+                            FechaActualizacion = DateTime.Now
+                        };                        
+                        db.Personas.Add(persona);
                     }
+                    else 
+                    {
+                        //persona.SectorBrigadaID = sectorBrigadaID;
+                        persona.SeccionID = SeccionID;
+                        if (persona.UbicacionVive != null)
+                        {
+                            persona.UbicacionVive.Descripcion = ubicacionAlterna;
+                            db.Entry(persona.UbicacionVive).State = EntityState.Modified; // BDD
+                        }
+                        persona.CasillaID = CasillaID;
+                        persona.Telefono = !string.IsNullOrEmpty(item.Telefono) ? item.Telefono.PrepareToCompareString() : string.Empty;
+                        persona.VotanteSeguro = BoolTipo.Si;
+                        persona.RepresentanteTipo = representanteTipo;
+                        persona.RepresentanteAsistencia = BoolTipo.Ninguno;
+                        persona.RepresentanteCapacitacion = BoolTipo.Ninguno;
+                        persona.Ocupacion = "(representante-up)";
+                        persona.Status = StatusTipo.Activo;
+                        persona.UserNameActualizacion = "xiuhblaze@gmail.com";
+                        persona.FechaActualizacion = DateTime.Now;
+                        db.Entry(persona).State = EntityState.Modified; // BDD
+                    }
+
+                    personas.Add(persona);
+
+                    //db.SaveChanges(); // BDD
                 }
             }
 
-            return View(db.RepresentantesTemp.ToList());
-        }
+            // return View(db.RepresentantesTemp.ToList());
+            return View(personas);
+        } // MigrarRepresentantes
 
         // METODOS AJAX
         ////////////////////////////////////////////////////////////////////////////////

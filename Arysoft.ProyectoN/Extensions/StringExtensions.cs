@@ -83,7 +83,7 @@ public static class StringExtension
         s = replace_i_Accents.Replace(s, "i");
         s = replace_o_Accents.Replace(s, "o");
         s = replace_u_Accents.Replace(s, "u");
-        s = s.ToUpper().Replace(" ", "");
+        // s = s.ToUpper().Replace(" ", "");
         return s;
     } // prepareToCompareString
 

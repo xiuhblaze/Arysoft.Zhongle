@@ -1,4 +1,4 @@
-﻿@model IEnumerable<Arysoft.ProyectoN.Models.RepresentanteTemp>
+﻿@model IEnumerable<Arysoft.ProyectoN.Models.Persona>
 
 @using Arysoft.ProyectoN.Models;
 @using PagedList.Mvc;
@@ -16,7 +16,13 @@
 
             @foreach (var item in Model)
             {
-                <p>@item.Seccion | @item.Nombres @item.ApellidoPaterno</p>
+                <p>
+                    @item.SectorBrigadaID | 
+                    @item.Nombres @item.ApellidoPaterno @item.ApellidoMaterno | 
+                    @item.CasillaID |
+                    @item.RepresentanteTipo.GetDisplayName() |
+                    @item.Ocupacion
+                </p>
             }
         </div>
     </div>
