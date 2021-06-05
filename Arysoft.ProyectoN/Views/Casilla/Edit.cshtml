@@ -295,12 +295,12 @@
             </a>
         </li>
 
-        <li>
+        @*<li>
             <a href="#resultados" data-toggle="tab">
                 <span class="glyphicon glyphicon-erase"></span>
                 Resultados
             </a>
-        </li>
+        </li>*@
     </ul>
 
     <div class="tab-content">
@@ -390,13 +390,13 @@
             </div>
         </div>
 
-        <div class="tab-pane fade in" name="resultados" id="resultados">
+        @*<div class="tab-pane fade in" name="resultados" id="resultados">
             <h4>Resultados</h4>
             
             <div id="listaResultados" name="listaResultados">
             </div>
 
-        </div>
+        </div>*@
 
     </div>
 
@@ -574,7 +574,7 @@
                     });
                 }
                 else if (target == 'resultados') {                    
-                    var id = $('#CasillaID').val();
+                    @*var id = $('#CasillaID').val();
                     var url = '@Url.Action("ObtenerResultados", "Casilla")/' + id;
 
                     $.ajax({
@@ -602,7 +602,7 @@
                         error: function (xhr, status, error) {
                             alert('A ocurrido una excepción: ' + error);
                         }
-                    });
+                    });*@
 
                 }
             });
@@ -613,7 +613,7 @@
                 var url = '@Url.Action("RegistrarVotos", "Casilla")';
                 var id = $('#CasillaID').val();
                 var votos = $('#votosTexto').val();
-                var hora = '@VotoHoraTipo.OnceDoce'; // CAMBIAR HORA!!!
+                var hora = '@VotoHoraTipo.NueveDiez'; //TODO: CAMBIAR CORTE DE HORA BINGO !!!
 
                 if (votos.length == 0) {
                     alert('No se ha registrado ningún número');

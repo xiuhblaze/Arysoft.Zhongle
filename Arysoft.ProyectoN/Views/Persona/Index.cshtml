@@ -146,13 +146,13 @@
         <div class="row">
             <div class="col-md-11">
                 <div class="form-inline">
-                    @if (User.IsInRole("Admin") || User.IsInRole("Editor") || User.IsInRole("SectorEditor"))
+                    @*@if (User.IsInRole("Admin") || User.IsInRole("Editor") || User.IsInRole("SectorEditor"))
                     {
                         @Html.Raw(
                             Html.ActionLink("Nuevo", "Create", null, new { @class = "btn btn-link", @title = "Nueva persona" }).ToHtmlString()
                             .Replace("Nuevo", "<span class='glyphicon glyphicon-file glyphicon-toolbar-size'></span>")
                         )
-                    }
+                    }*@
                     <div class="form-group">
                         <label for="buscar" class="sr-only">Buscar</label>
                         @Html.TextBox("buscar", ViewBag.Filtro as string, htmlAttributes: new { @class = "form-control", @placeholder = "buscar..." })
@@ -882,9 +882,10 @@
         })
 
         $('.ubicacion').each(function () {
-            var id = $(this).data('id');
+            var ubicacion = $(this);
+            var id = ubicacion.data('id');
             var url = '@Url.Action("ObtenerUbicacion", "Persona")/' + id;
-
+            
             $.ajax({
                 cache: false,
                 async: true,
@@ -892,12 +893,25 @@
                 url: url,
                 data: {},
                 beforeSend: function () {
-                    $(this).html('<i class="fa fa-spinner fa-pulse fa-fw"></i>');
+                    //console.log('beforeSend');
+                    ubicacion.html('<i class="fa fa-spinner fa-pulse fa-fw"></i>');
                 },
                 success: function (data) {
-                    console.log(data);
-                    if (data.error == null) {
-                        $(this).html('<span>' + data.Calle + '</span>');
+                    //console.log(data);
+                    
+                    if (data.error == undefined) {
+                        var domicilio = '<span>';
+                        domicilio += data.Calle;
+                        if (data.NumExterior != 0) domicilio += ' ' + data.NumExterior;
+                        if (data.Letra != null && data.Letra != '' && data.Letra != '(r)') domicilio += ' ' + data.Letra;
+                        if (data.NumInterior != null) domicilio += ' ' + data.NumInterior;
+                        domicilio += ' ' + data.Colonia;
+                        domicilio += ' ' + data.CP;
+                        if (data.Descripcion != null && data.Descripcion != '') {
+                            domicilio += '<br /><span class="text-muted">' + data.Descripcion + '</span>';
+                        }
+                        domicilio += '</span>';
+                        ubicacion.html(domicilio);
                     }
                     else {
                         switch (data.error) {
@@ -908,12 +922,12 @@
                                 console.log('No se encontró la ubicación (' + id + ')');
                                 break;
                         }
-                        $(this).html('');
+                        ubicacion.html('');
                     }
                 },
                 error: function (xhr, status, error) {
                     console.log('A ocurrido una excepción(' + id + '): ' + status + '\n error: ' + error);
-                    $(this).html('');
+                    ubicacion.html('');
                 }
             });
 

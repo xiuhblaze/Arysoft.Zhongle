@@ -17,9 +17,9 @@ namespace Arysoft.ProyectoN.Models
     {
         public Guid UbicacionID { get; set; }
         
-        public Guid CalleID { get; set; }
+        public Guid? CalleID { get; set; }
 
-        public Guid ColoniaID { get; set; }
+        public Guid? ColoniaID { get; set; }
 
         [Display(Name = "No. Ext.")]
         public int NumExterior { get; set; }

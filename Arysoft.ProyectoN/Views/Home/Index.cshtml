@@ -107,7 +107,7 @@
     </div>
 
     <!-- Para el día D -->
-    @*<div class="row">
+    <div class="row">
         <div class="col-md-4">
             <div class="">
                 <div id="votosRealizados" style="width: 100%; height: 300px;"></div>
@@ -118,9 +118,9 @@
                 <div id="votosPorSector" style="width: 100%; height: 300px;"></div>
             </div>
         </div>
-    </div>*@
+    </div>
 
-    <div class="row" style="display: none;">
+    <div class="row">
         <div class="col-md-6">
             <div class="row">
                 <div class="col-md-12">
@@ -128,12 +128,12 @@
                     <div id="votosPorHora" style="width: 100%; height: 240px;"></div>
                 </div>
             </div>
-            <div class="row">
+            @*<div class="row">
                 <div class="col-md-12">
                     <h4>Resultados generales</h4>
                     <div id="resutaldosGenerales" style="width: 100%; height: 240px;"></div>
                 </div>
-            </div>
+            </div>*@
         </div>
 
         <div class="col-md-6">
@@ -145,7 +145,7 @@
                             <label for="SeccionID">Sección</label>
                             @Html.DropDownList("SeccionID", null, htmlAttributes: new { @class = "chosen-select" })
                         </div>
-                        <div class="form-group" id="votosCasillaList" style="display: none;">
+                        <div class="form-group" id="votosCasillaList">
                             <label for="CasillaID">Casilla</label>
                             <select id="CasillaID" class="form-control"></select>
                         </div>
@@ -156,7 +156,7 @@
                             </button>
                             <ul class="dropdown-menu">
                                 <li><a href="javascript:void(0);" onclick="CasillaBingo();">Bingo</a></li>
-                                <li><a href="javascript:void(0);" onclick="CasillaFaltantes();">Listado votantes faltantes</a></li>
+                                @*<li><a href="javascript:void(0);" onclick="CasillaFaltantes();">Listado votantes faltantes</a></li>*@
                             </ul>
                         </div>
 
@@ -164,16 +164,18 @@
                     <div id="votosPorCasilla" style="width: 100%; height: 200px;"></div>
                 </div>
             </div>
-            <div class="row">
+            @*<div class="row">
                 <div class="col-md-12">
                     <h4>Resultados por casilla</h4>
                     <div id="resultadosPorCasilla" style="width: 100%; height: 240px;"></div>
                 </div>
-            </div>
+            </div>*@
         </div>
     </div>
 
-    <div class="row">
+    <!-- Durante la campaña -->
+
+    @*<div class="row">
         <div class="col-md-12">
             <h3>Votos Meta VS Alcanzados y Trabajados</h3>
             <div id="votantesMetaAlcanzados" style="width: 100%; height: 500px;"></div>
@@ -181,7 +183,7 @@
             <h3>Votantes por Sector</h3>
             <div id="votantesSectorTodos" style="width: 100%; height: 500px;"></div>
         </div>
-    </div>
+    </div>*@
 
 </div>
 
@@ -203,13 +205,13 @@
 
         google.charts.load('current', { 'packages': ['corechart', 'bar'] });
 
-        google.charts.setOnLoadCallback(VotantesPorSectorTodos);
-        google.charts.setOnLoadCallback(VotantesMetaVSAlcanzados);
+        //google.charts.setOnLoadCallback(VotantesPorSectorTodos);
+        //google.charts.setOnLoadCallback(VotantesMetaVSAlcanzados);
 
         // - Para el día D
-        //google.charts.setOnLoadCallback(VotosRealizados);
-        //google.charts.setOnLoadCallback(VotosRealizadosPorSector);
-        //google.charts.setOnLoadCallback(ResultadosTotales);
+        google.charts.setOnLoadCallback(VotosRealizados);
+        google.charts.setOnLoadCallback(VotosRealizadosPorSector);
+        // google.charts.setOnLoadCallback(ResultadosTotales);
 
         $(function () {
 
@@ -278,12 +280,12 @@
                 if ($(this).val() == '00000000-0000-0000-0000-000000000000') {
                     $('#votosCasillaAcciones').attr('style', 'display: none;');
                     $('#votosPorCasilla').html('');
-                    $('#resultadosPorCasilla').html('');
+                    //$('#resultadosPorCasilla').html('');
                     idCasillaActiva = '';
                 }
                 else {
                     VotosCasillaPorHora($(this).val());
-                    ResultadosPorCasilla($(this).val());
+                    //ResultadosPorCasilla($(this).val());
                     idCasillaActiva = $(this).val();
                     $('#votosCasillaAcciones').removeAttr('style');
                 }
@@ -304,7 +306,7 @@
             FaltanDiasCierre();
 
             // Para el día D
-            //VotosTotalPorHora();
+            VotosTotalPorHora();
             
         }); // document.ready
 
@@ -390,7 +392,7 @@
 
         } // TotalLonas
 
-        function TotalBardas() {
+        @*function TotalBardas() {
             var url = '@Url.Action("TotalBardas", "Persona")';
 
             $.ajax({
@@ -434,7 +436,7 @@
                 }
             });
 
-        } // TotalLonas
+        } // TotalLonas*@
 
         function TotalCasillas() {
             var url = '@Url.Action("TotalCasillas", "Casilla")';
@@ -460,7 +462,7 @@
 
         } // TotalCasillas
 
-        function TotalAuditorias() {
+        @*function TotalAuditorias() {
             var url = '@Url.Action("TotalAuditorias", "Auditoria")';
 
             $.ajax({
@@ -503,7 +505,7 @@
                 }
             });
 
-        } // TotalAuditorias
+        } // TotalAuditorias*@
 
         function FaltanDias() {
             var hoy = new Date();
@@ -855,7 +857,7 @@
                     }
                 },
                 error: function (xhr, status, error) {
-                    $('#resutaldosGenerales').html('<span title="' + xhr.responseText + '">-</span>');
+                    $('#resultadosPorCasilla').html('<span title="' + xhr.responseText + '">-</span>');
                 }
             });
 

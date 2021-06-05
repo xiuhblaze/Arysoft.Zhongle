@@ -127,10 +127,10 @@ namespace Arysoft.ProyectoN.Controllers
             //    status = StatusTipo.Activo.ToString();
             //}
 
-            if (Request.IsAjaxRequest() && llamadaOrigen == "to-estatal") //HACK: xBlaze: Para encontrar los de la segunda etapa - QUITAR LUEGO!!
-            {
-                votanteSeguro = BoolTipo.Si.ToString();
-            }
+            //if (Request.IsAjaxRequest() && llamadaOrigen == "to-estatal") //HACK: xBlaze: Para encontrar los de la segunda etapa - QUITAR LUEGO!!
+            //{
+            //    votanteSeguro = BoolTipo.Si.ToString();
+            //}
 
             if (!string.IsNullOrEmpty(buscar)
                 || sectorID != Guid.Empty //!string.IsNullOrEmpty(SectorID)
@@ -626,8 +626,8 @@ namespace Arysoft.ProyectoN.Controllers
             }
             else
             {
-                CalleID = persona.UbicacionVive.CalleID;
-                ColoniaID = persona.UbicacionVive.ColoniaID;
+                CalleID = persona.UbicacionVive.CalleID ?? Guid.Empty;
+                ColoniaID = persona.UbicacionVive.ColoniaID ?? Guid.Empty;
             }
 
             ViewBag.CalleID = await ObtenerListaCallesAsync(CalleID); //new SelectList(db.Calles.OrderBy(c => c.Nombre), "CalleID", "Nombre", CalleID);
@@ -640,8 +640,8 @@ namespace Arysoft.ProyectoN.Controllers
             }
             else
             {
-                VotaCalleID = persona.UbicacionVota.CalleID;
-                VotaColoniaID = persona.UbicacionVota.ColoniaID;
+                VotaCalleID = persona.UbicacionVota.CalleID ?? Guid.Empty;
+                VotaColoniaID = persona.UbicacionVota.ColoniaID ?? Guid.Empty;
             }
 
             //if (persona.Seccion != null && persona.Seccion.Casillas != null)
@@ -772,8 +772,8 @@ namespace Arysoft.ProyectoN.Controllers
             }
             else
             {
-                CalleID = persona.UbicacionVive.CalleID;
-                ColoniaID = persona.UbicacionVive.ColoniaID;
+                CalleID = persona.UbicacionVive.CalleID ?? Guid.Empty;
+                ColoniaID = persona.UbicacionVive.ColoniaID ?? Guid.Empty;
             }
 
             ViewBag.CalleID = await ObtenerListaCallesAsync(CalleID); // new SelectList(db.Calles.OrderBy(c => c.Nombre), "CalleID", "Nombre", CalleID);
@@ -786,8 +786,8 @@ namespace Arysoft.ProyectoN.Controllers
             }
             else
             {
-                VotaCalleID = persona.UbicacionVota.CalleID;
-                VotaColoniaID = persona.UbicacionVota.ColoniaID;
+                VotaCalleID = persona.UbicacionVota.CalleID ?? Guid.Empty;
+                VotaColoniaID = persona.UbicacionVota.ColoniaID ?? Guid.Empty;
             }
             
             //if (persona.SeccionID != Guid.Empty)
@@ -1104,14 +1104,13 @@ namespace Arysoft.ProyectoN.Controllers
             if (id != null)
             {
                 Ubicacion ubicacion = await db.Ubicaciones
-                    //.Include(u => u.Calle)
-                    //.Include(u => u.Colonia)
+                    .Include(u => u.Calle)
+                    .Include(u => u.Colonia)
                     .Where(u => u.UbicacionID == id)
                     .FirstOrDefaultAsync();
 
-                var ubicaciones = await db.Ubicaciones.ToListAsync();
-
-                var ub = ubicaciones.Where(u => u.UbicacionID == id);
+                //var ubicaciones = await db.Ubicaciones.ToListAsync();
+                //var ub = ubicaciones.Where(u => u.UbicacionID == id);
 
                 if (ubicacion != null)
                 {
@@ -1553,6 +1552,7 @@ namespace Arysoft.ProyectoN.Controllers
             {
                 Persona persona = db.Personas
                     .Include(p => p.Seccion)
+                    .Include(p => p.Voto)
                     .FirstOrDefault(p => p.PersonaID == item.PersonaIneID);
                 string logError = string.Empty;
                 bool esValido = true;
@@ -1567,7 +1567,7 @@ namespace Arysoft.ProyectoN.Controllers
                             persona.Verificada = BoolTipo.No;
                             persona.VotanteSeguro = BoolTipo.No;
                             persona.FechaActualizacion = DateTime.Now;
-                            persona.UserNameActualizacion = "(asignacion numeros ine 2021)";
+                            persona.UserNameActualizacion = "(asignación numeros ine 2021)";
                             db.Entry(persona).State = EntityState.Modified;                            
                             break;
                         case "B":
@@ -1613,9 +1613,9 @@ namespace Arysoft.ProyectoN.Controllers
 
                     if (item.Casilla.ToUpper() != "X")
                     {
-                        persona.Nombres = item.Nombres;
-                        persona.ApellidoPaterno = item.PrimerApellido;
-                        persona.ApellidoMaterno = item.SegundoApellido;
+                        persona.Nombres = item.Nombres.ToUpper().Trim();
+                        persona.ApellidoPaterno = item.PrimerApellido.ToUpper().Trim();
+                        persona.ApellidoMaterno = item.SegundoApellido.ToUpper().Trim();
 
                         // Verifica y asigna la sección si es que la cambiaron o la persona no la tiene
                         if (item.SeccionNumero != null && item.SeccionNumero > 0)
@@ -1664,7 +1664,7 @@ namespace Arysoft.ProyectoN.Controllers
                         {
                             Casilla casilla = db.Casillas
                                 .Include(c => c.Votantes)
-                                .Where(c => c.SeccionID == persona.SeccionID && c.Tipo == casillaTipo).FirstOrDefault();
+                                .Where(c => c.SeccionID == persona.SeccionID && c.Tipo == casillaTipo && c.Status == StatusTipo.Activo).FirstOrDefault();
 
                             if (casilla != null)
                             {
@@ -1678,7 +1678,7 @@ namespace Arysoft.ProyectoN.Controllers
                                         CasillaID = casilla.CasillaID,
                                         Persona = persona,
                                         NumeroINE = item.NumeroINE ?? 0,
-                                        YaVoto = BoolTipo.Si
+                                        YaVoto = BoolTipo.Ninguno
                                     };
 
                                     casilla.Votantes.Add(voto);
@@ -1688,7 +1688,7 @@ namespace Arysoft.ProyectoN.Controllers
                                 else
                                 {
                                     persona.Voto.NumeroINE = item.NumeroINE ?? 0;
-                                    persona.Voto.YaVoto = BoolTipo.Si;
+                                    persona.Voto.YaVoto = BoolTipo.Ninguno;
                                     persona.Voto.CasillaID = casilla.CasillaID;
                                     db.Entry(persona.Voto).State = EntityState.Modified;
                                 }
@@ -1719,11 +1719,11 @@ namespace Arysoft.ProyectoN.Controllers
                 }
                 else if (item.Casilla.ToUpper() == "X")
                 {
-                    totalOtrasExcepciones++;
+                    totalRegistrosSinCasilla++;
                 }
                 else
                 {
-                    totalRegistrosSinCasilla++;
+                    totalOtrasExcepciones++;                    
                 }
 
                 logExcepciones += logError;
@@ -1731,6 +1731,15 @@ namespace Arysoft.ProyectoN.Controllers
                 item.Registrado = esValido ? BoolTipo.Si : BoolTipo.No;
                 item.LogError = string.IsNullOrEmpty(logError) ? "Persona registrada satisfatoriamente." : logError;
                 db.Entry(item).State = EntityState.Modified;
+
+                try
+                {
+                    db.SaveChanges();
+                }
+                catch (Exception e)
+                {
+                    logExcepciones += string.Format("Ah ocurrido una excepción al registrar a la persona {0} {1} {2}, sección: {3}, casilla {4}; [{5}] en la base de datos, excepción: {6}<br />", item.Nombres, item.PrimerApellido, item.SegundoApellido, item.SeccionNumero, item.Casilla, item.PersonaIneID, e.Message);
+                }
             } // foreach 
 
             logExcepciones += "<hr />";
@@ -1738,7 +1747,7 @@ namespace Arysoft.ProyectoN.Controllers
             logExcepciones += "Registros sin casilla: " + totalRegistrosSinCasilla + "<br />";
             logExcepciones += "Registros no registrados: " + totalOtrasExcepciones + "<br />";
 
-            db.SaveChanges();
+            //db.SaveChanges();
 
             return Content(logExcepciones);
         } // MigrarPersonasINE

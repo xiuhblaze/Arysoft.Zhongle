@@ -64,11 +64,11 @@
             <div class="col-md-12">
                 <div class="form-inline">
                     @if (User.IsInRole("Admin") || User.IsInRole("Editor"))
-                    { 
-                    @Html.Raw(
-                        Html.ActionLink("[replace]", "Create", null, new { @class = "btn btn-link", @title = "Nueva casilla" }).ToHtmlString()
-                            .Replace("[replace]", "<span class='glyphicon glyphicon-file glyphicon-toolbar-size'></span>")
-                    )
+                    {
+                        @Html.Raw(
+                            Html.ActionLink("[replace]", "Create", null, new { @class = "btn btn-link", @title = "Nueva casilla" }).ToHtmlString()
+                                .Replace("[replace]", "<span class='glyphicon glyphicon-file glyphicon-toolbar-size'></span>")
+                        )
                     }
                     <div class="form-group">
                         <label for="buscar" class="sr-only">Buscar</label>
@@ -155,117 +155,119 @@
                             tipo = ViewBag.Tipo,
                             pagina = Model.PageNumber
                         })/@Html.ActionLink("votantes", "Index", new
-                            {
-                                orden = ViewBag.OrdenVotantes,
-                                filtro = ViewBag.Filtro,
-                                SeccionID = ViewBag.SeccionIDSelected,
-                                tipo = ViewBag.Tipo,
-                                pagina = Model.PageNumber
-                            })
+                         {
+                             orden = ViewBag.OrdenVotantes,
+                             filtro = ViewBag.Filtro,
+                             SeccionID = ViewBag.SeccionIDSelected,
+                             tipo = ViewBag.Tipo,
+                             pagina = Model.PageNumber
+                         })
                     </th>
-                    <th>@Html.ActionLink("Ya Votaron", "Index", new
-                        {
-                            orden = ViewBag.OrdenYaVotaron,
-                            filtro = ViewBag.Filtro,
-                            SeccionID = ViewBag.SeccionIDSelected,
-                            tipo = ViewBag.Tipo,
-                            pagina = Model.PageNumber
-                        })/@Html.ActionLink("Votantes", "Index", new
-                            {
-                                orden = ViewBag.OrdenVotantes,
-                                filtro = ViewBag.Filtro,
-                                SeccionID = ViewBag.SeccionIDSelected,
-                                tipo = ViewBag.Tipo,
-                                pagina = Model.PageNumber
-                            })
-                    </th>
-                    <th>Resultados</th>
-                    @if (User.IsInRole("Admin") || User.IsInRole("Editor"))
+                    <th>
+                        @Html.ActionLink("Ya Votaron", "Index", new
                     {
+                        orden = ViewBag.OrdenYaVotaron,
+                        filtro = ViewBag.Filtro,
+                        SeccionID = ViewBag.SeccionIDSelected,
+                        tipo = ViewBag.Tipo,
+                        pagina = Model.PageNumber
+                    })/@Html.ActionLink("Votantes", "Index", new
+                     {
+                         orden = ViewBag.OrdenVotantes,
+                         filtro = ViewBag.Filtro,
+                         SeccionID = ViewBag.SeccionIDSelected,
+                         tipo = ViewBag.Tipo,
+                         pagina = Model.PageNumber
+                     })
+                </th>
+                <th>Ya Votaron/Votantes Seguros</th>
+                @if (User.IsInRole("Admin") || User.IsInRole("Editor"))
+                {
                     <th class="col-md-1"></th>
-                    }
-                </tr>
-            </thead>
+                }
+            </tr>
+        </thead>
 
-            <tbody>
+        <tbody>
 
-                @foreach (var item in Model)
-                {   
-                    int porcentajeVotaron = item.NumeroVotantes > 0 ? (item.YaVotaron * 100) / item.NumeroVotantes : 0;
+            @foreach (var item in Model)
+            {
+                int porcentajeVotaron = item.NumeroVotantes > 0 ? (item.YaVotaron * 100) / item.NumeroVotantes : 0;
+                int porcentajeVotaronSeguros = item.VotosSeguros > 0 ? (item.YaVotaronSeguros * 100) / item.VotosSeguros : 0;
 
-                    string classRow = "";
-                    string classStatusIcon = "";
+                string classRow = "";
+                string classStatusIcon = "";
 
-                    switch (item.Status)
-                    {
-                        case StatusTipo.Activo:
-                            classStatusIcon = "<span class='glyphicon glyphicon-ok glyphicon-table-action-size text-success'></span>";
-                            break;
+                switch (item.Status)
+                {
+                    case StatusTipo.Activo:
+                        classStatusIcon = "<span class='glyphicon glyphicon-ok glyphicon-table-action-size text-success'></span>";
+                        break;
 
-                        case StatusTipo.Baja:
-                            classRow = "text-muted";
-                            classStatusIcon = "<span class='glyphicon glyphicon-save glyphicon-table-action-size text-warning'></span>";
-                            break;
+                    case StatusTipo.Baja:
+                        classRow = "text-muted";
+                        classStatusIcon = "<span class='glyphicon glyphicon-save glyphicon-table-action-size text-warning'></span>";
+                        break;
 
-                        case StatusTipo.Eliminado:
-                            classRow = "text-danger danger";
-                            classStatusIcon = "<span class='glyphicon glyphicon-remove glyphicon-table-action-size text-danger'></span>";
-                            break;
-                    }
+                    case StatusTipo.Eliminado:
+                        classRow = "text-danger danger";
+                        classStatusIcon = "<span class='glyphicon glyphicon-remove glyphicon-table-action-size text-danger'></span>";
+                        break;
+                }
 
-                    <tr class="@classRow">
-                        <td>
-                            @Html.Raw(classStatusIcon)
+                <tr class="@classRow">
+                    <td>
+                        @Html.Raw(classStatusIcon)
 
-                            @if (item.Notas.Count == 0)
+                        @if (item.Notas.Count == 0)
+                        {
+                            <span class="glyphicon glyphicon-comment glyphicon-table-action-size text-muted" title="Sin comentarios"></span>
+                        }
+                        else
+                        {
+                            string notas = string.Empty;
+                            foreach (Nota nota in item.Notas)
                             {
-                                <span class="glyphicon glyphicon-comment glyphicon-table-action-size text-muted" title="Sin comentarios"></span>
+                                notas += nota.VistaAttrbTitle + "\n";
                             }
-                            else
-                            {
-                                string notas = string.Empty;
-                                foreach (Nota nota in item.Notas)
+                            <span class="glyphicon glyphicon-comment glyphicon-table-action-size text-info" title="@notas"></span>
+                        }
+                    </td>
+                    <td class="text-right" style="cursor: pointer" onclick="getDetails('@item.CasillaID')">
+                        @Html.DisplayFor(modelItem => item.Seccion.Numero)
+                    </td>
+                    <td style="cursor: pointer" onclick="getDetails('@item.CasillaID')">
+                        @item.Tipo.GetDisplayName()
+                    </td>
+                    <td style="cursor: pointer" onclick="getDetails('@item.CasillaID')">
+                        @if (item.Ubicacion != null)
+                        {
+                            <span>
+                                <span class="glyphicon glyphicon-home glyphicon-table-info-size"></span>
+                                @if (item.Ubicacion.Calle != null)
+                                {<span>@item.Ubicacion.Calle.Nombre</span>}
+                                @item.Ubicacion.NumExterior
+                                @if (!string.IsNullOrEmpty(item.Ubicacion.Letra))
+                                {<span>@item.Ubicacion.Letra</span>}
+                                @if (!string.IsNullOrEmpty(item.Ubicacion.NumInterior))
+                                {<span>@item.Ubicacion.NumInterior</span>}
+                                @if (item.Ubicacion.Colonia != null)
                                 {
-                                    notas += nota.VistaAttrbTitle + "\n";
+                                    @item.Ubicacion.Colonia.Nombre
+                                    <span>C.P.</span> @item.Ubicacion.Colonia.CodigoPostal
                                 }
-                                <span class="glyphicon glyphicon-comment glyphicon-table-action-size text-info" title="@notas"></span>
-                            }
-                        </td>
-                        <td class="text-right" style="cursor: pointer" onclick="getDetails('@item.CasillaID')">
-                            @Html.DisplayFor(modelItem => item.Seccion.Numero)
-                        </td>
-                        <td style="cursor: pointer" onclick="getDetails('@item.CasillaID')">
-                            @item.Tipo.GetDisplayName()
-                        </td>
-                        <td style="cursor: pointer" onclick="getDetails('@item.CasillaID')">
-                            @if (item.Ubicacion != null)
-                            {
-                                <span>
-                                    <span class="glyphicon glyphicon-home glyphicon-table-info-size"></span>
-                                    @if (item.Ubicacion.Calle != null)
-                                    {<span>@item.Ubicacion.Calle.Nombre</span>}
-                                    @item.Ubicacion.NumExterior
-                                    @if (!string.IsNullOrEmpty(item.Ubicacion.Letra))
-                                    {<span>@item.Ubicacion.Letra</span>}
-                                    @if (!string.IsNullOrEmpty(item.Ubicacion.NumInterior))
-                                    {<span>@item.Ubicacion.NumInterior</span>}
-                                    @if (item.Ubicacion.Colonia != null)
-                                    {
-                                        @item.Ubicacion.Colonia.Nombre
-                                        <span>C.P.</span> @item.Ubicacion.Colonia.CodigoPostal
-                                    }
-                                    @if (!string.IsNullOrEmpty(item.Ubicacion.Descripcion))
-                                    {<br /><span class="text-muted">@item.Ubicacion.Descripcion</span>}
-                                </span>
-                            }
-                            @if (!string.IsNullOrEmpty(item.PersonaDuenno))
-                            {
-                                <br />
-                                <span class="glyphicon glyphicon-user" title="Propietario del domicilio"></span>
-                                @item.PersonaDuenno
-                            }
-                        </td>
-                        @*<td style="cursor: pointer" onclick="getDetails('@item.CasillaID')">
+                                @if (!string.IsNullOrEmpty(item.Ubicacion.Descripcion))
+                                {<br /><span class="text-muted">@item.Ubicacion.Descripcion</span>}
+                            </span>
+                        }
+                        @if (!string.IsNullOrEmpty(item.PersonaDuenno))
+                        {
+                            <br />
+                            <span class="glyphicon glyphicon-user" title="Propietario del domicilio"></span>
+                            @item.PersonaDuenno
+                        }
+                    </td>
+                    @*<td style="cursor: pointer" onclick="getDetails('@item.CasillaID')">
                             @if (item.PersonaResponsable != null)
                             {
                                 <span class="glyphicon glyphicon-user" title="Responsable de casilla"></span>
@@ -285,7 +287,7 @@
                                 }
                             }
                         </td>*@
-                        <td style="cursor: pointer" onclick="getDetails('@item.CasillaID')">
+                    <td style="cursor: pointer" onclick="getDetails('@item.CasillaID')">
                         @item.VotosSeguros / @item.NumeroVotantes
                         <div class="progress" title="Votos seguros @item.PorcentajeVotos%" style="margin-bottom: 0;">
                             <div class="progress-bar progress-bar-info" style="width: @item.PorcentajeVotos%"></div>
@@ -297,36 +299,42 @@
                             <div class="progress-bar progress-bar-warning" style="width: @porcentajeVotaron%"></div>
                         </div>
                     </td>
-                    <td>
-                        @if (item.Resultados != null)
-                        {
-                            foreach (var resultado in item.Resultados)
-                            {
-                                string classColor = "label-default";
-                                string title = resultado.Candidato.SiglasCoalicion; //string.Format("{0}: {1}", resultado.Partido.Siglas, resultado.Partido.Candidato);
-
-                                switch (resultado.Candidato.SiglasCoalicion) {
-                                    case "MC":
-                                        classColor = "label-warning";
-                                        break;
-                                    case "PAN":
-                                        classColor = "label-primary";
-                                        break;
-                                    case "PRI":
-                                        classColor = "label-success";
-                                        break;
-                                    case "IND":
-                                        classColor = "label-info";
-                                        break;
-                                    case "Morena":
-                                        classColor = "label-danger";
-                                        break;
-                                }
-
-                                <span class="label @classColor" title="@title">@resultado.Votos</span>
-                            }
-                        }
+                    <td style="cursor: pointer" onclick="getDetails('@item.CasillaID')">
+                        @item.YaVotaronSeguros / @item.VotosSeguros
+                        <div class="progress" title="Ya votarón @porcentajeVotaronSeguros%" style="margin-bottom: 0;">
+                            <div class="progress-bar progress-bar-success" style="width: @porcentajeVotaronSeguros%"></div>
+                        </div>
                     </td>
+                    @*<td>
+                            @if (item.Resultados != null)
+                            {
+                                foreach (var resultado in item.Resultados)
+                                {
+                                    string classColor = "label-default";
+                                    string title = resultado.Candidato.SiglasCoalicion; //string.Format("{0}: {1}", resultado.Partido.Siglas, resultado.Partido.Candidato);
+
+                                    switch (resultado.Candidato.SiglasCoalicion) {
+                                        case "MC":
+                                            classColor = "label-warning";
+                                            break;
+                                        case "PAN":
+                                            classColor = "label-primary";
+                                            break;
+                                        case "PRI":
+                                            classColor = "label-success";
+                                            break;
+                                        case "IND":
+                                            classColor = "label-info";
+                                            break;
+                                        case "Morena":
+                                            classColor = "label-danger";
+                                            break;
+                                    }
+
+                                    <span class="label @classColor" title="@title">@resultado.Votos</span>
+                                }
+                            }
+                        </td>*@
                     <td class="text-right">
                         @if ((User.IsInRole("Admin") || User.IsInRole("Editor"))
                             && item.Status != StatusTipo.Eliminado)
@@ -347,10 +355,20 @@
                         }
                     </td>
                 </tr>
-                }
-            </tbody>
-        </table>
-    </div>
+            }
+        </tbody>
+    </table>
+</div>
+
+@Html.PagedListPager(Model, pagina => Url.Action("Index", new
+{
+    pagina,
+    orden = ViewBag.Orden,
+    filtro = ViewBag.Filtro,
+    SeccionID = ViewBag.SeccionIDSelected,
+    tipo = ViewBag.Tipo,
+    busquedaAvanzada = ViewBag.BusquedaAvanzada
+}))
 </div>
 
 @section scripts {

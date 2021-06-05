@@ -50,7 +50,7 @@ namespace Arysoft.ProyectoN.Controllers
                 .Include(c => c.Votantes)
                 .Include(c => c.Votantes.Select(v => v.Persona))
                 //.Include(c => c.Votantes) // https://stackoverflow.com/questions/10822656/entity-framework-include-multiple-levels-of-properties
-                .Include(c => c.Resultados)
+                //.Include(c => c.Resultados)
                 .Where(c => c.Status != StatusTipo.Ninguno);
 
             if (int.TryParse(buscar, out int seccion)) { buscar = string.Empty; }
@@ -181,6 +181,15 @@ namespace Arysoft.ProyectoN.Controllers
                 .Include(c => c.Votantes.Select(v => v.Persona))
                 .Include(c => c.Votantes.Select(v => v.Persona.Notas))
                 .Include(c => c.Representantes)
+                .Include(c => c.Representantes.Select(r => r.UbicacionVive))
+                .Include(c => c.Representantes.Select(r => r.UbicacionVive.Calle))
+                .Include(c => c.Representantes.Select(r => r.UbicacionVive.Colonia))
+                .Include(c => c.Representantes.Select(r => r.UbicacionVota))
+                .Include(c => c.Representantes.Select(r => r.UbicacionVota.Calle))
+                .Include(c => c.Representantes.Select(r => r.UbicacionVota.Colonia))
+                .Include(c => c.Representantes.Select(r => r.PersonasAfines))
+                .Include(c => c.Representantes.Select(r => r.Notas))
+                //.Include(c => c.Resultados)
                 .Include(c => c.Notas)
                 .FirstOrDefaultAsync(c => c.CasillaID == id);
             if (casilla == null)
@@ -253,6 +262,8 @@ namespace Arysoft.ProyectoN.Controllers
             Casilla casilla = await db.Casillas
                 .Include(c => c.Seccion)
                 .Include(c => c.Ubicacion)
+                .Include(c => c.Ubicacion.Calle)
+                .Include(c => c.Ubicacion.Colonia)
                 .Include(c => c.PersonaResponsable)
                 .Include(c => c.Votantes)
                 .Include(c => c.Votantes.Select(v => v.Persona))
@@ -266,7 +277,7 @@ namespace Arysoft.ProyectoN.Controllers
                 .Include(c => c.Representantes.Select(r => r.UbicacionVota.Colonia))
                 .Include(c => c.Representantes.Select(r => r.PersonasAfines))
                 .Include(c => c.Representantes.Select(r => r.Notas))
-                .Include(c => c.Resultados)
+                //.Include(c => c.Resultados)
                 .Include(c => c.Notas)
                 .FirstOrDefaultAsync(c => c.CasillaID == id);
             if (casilla == null)
@@ -277,8 +288,8 @@ namespace Arysoft.ProyectoN.Controllers
 
             if (casilla.Ubicacion != null)
             {
-                CalleID = casilla.Ubicacion.CalleID;
-                ColoniaID = casilla.Ubicacion.ColoniaID;
+                CalleID = casilla.Ubicacion.CalleID ?? Guid.Empty;
+                ColoniaID = casilla.Ubicacion.ColoniaID ?? Guid.Empty;
             }
                         
             ViewBag.PersonaResponsableID = await ObtenerListaPromotoresAsync(casilla.PersonaResponsableID ?? Guid.Empty); 
@@ -355,7 +366,7 @@ namespace Arysoft.ProyectoN.Controllers
                 .Include(c => c.Votantes)
                 .Include(c => c.Votantes.Select(v => v.Persona))
                 .Include(c => c.Votantes.Select(v => v.Persona.Notas))
-                .Include(c => c.Representantes)
+                //.Include(c => c.Representantes)
                 .Include(c => c.Notas)
                 .FirstOrDefaultAsync(c => c.CasillaID == id);
             if (casilla == null)
@@ -943,6 +954,8 @@ namespace Arysoft.ProyectoN.Controllers
                 .Include(c => c.Ubicacion)
                 .Include(c => c.PersonaResponsable)
                 .Include(c => c.Votantes)
+                .Include(c => c.Votantes.Select(v => v.Persona))
+                .Include(c => c.Votantes.Select(v => v.Persona.Notas))
                 .Include(c => c.Representantes)
                 .Include(c => c.Notas)
                 .FirstOrDefaultAsync(c => c.CasillaID == CasillaID);
@@ -963,8 +976,12 @@ namespace Arysoft.ProyectoN.Controllers
             Casilla casilla = await db.Casillas
                 .Include(c => c.Seccion)
                 .Include(c => c.Ubicacion)
+                .Include(c => c.Ubicacion.Calle)
+                .Include(c => c.Ubicacion.Colonia)
                 .Include(c => c.PersonaResponsable)
                 .Include(c => c.Votantes)
+                .Include(c => c.Votantes.Select(v => v.Persona))
+                .Include(c => c.Votantes.Select(v => v.Persona.Notas))
                 .Include(c => c.Representantes)
                 .Include(c => c.Notas)
                 .FirstOrDefaultAsync(c => c.CasillaID == id);

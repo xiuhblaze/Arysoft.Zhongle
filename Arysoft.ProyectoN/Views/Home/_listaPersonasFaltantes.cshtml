@@ -69,13 +69,13 @@
 
                         <tr @Html.Raw(rowClass) @Html.Raw(rowTitle)>
                             <td>
-                                @Html.DisplayFor(modelItem => item.Seccion.Sector.Nombre)
+                                @Html.DisplayFor(modelItem => Model.Seccion.Sector.Nombre)
                             </td>
                             <td class="text-right">
-                                @Html.DisplayFor(modelItem => item.Seccion.Numero)
+                                @Html.DisplayFor(modelItem => Model.Seccion.Numero)
                             </td>
                             <td>
-                                @Html.DisplayFor(modelItem => item.Voto.Casilla.Tipo)
+                                @Html.DisplayFor(modelItem => Model.Tipo)
                             </td>
                             <td>
                                 @Html.DisplayFor(modelItem => item.Voto.NumeroINE)
@@ -96,27 +96,22 @@
 
                             <td>
                                 @if (item.UbicacionVive != null)
-        {
-                        <span>
-                            @if (item.UbicacionVive.Calle != null)
-    {<span>@item.UbicacionVive.Calle.Nombre</span>}
-                            @item.UbicacionVive.NumExterior
-                            @if (!string.IsNullOrEmpty(item.UbicacionVive.Letra))
-    {<span>@item.UbicacionVive.Letra</span>}
-                            @if (!string.IsNullOrEmpty(item.UbicacionVive.NumInterior))
-    {<span>@item.UbicacionVive.NumInterior</span>}
-                        </span>
-}
+                                {
+                                    <span>
+                                        @if (item.UbicacionVive.Calle != null) {<span>@item.UbicacionVive.Calle.Nombre</span>}
+                                        @item.UbicacionVive.NumExterior
+                                        @if (!string.IsNullOrEmpty(item.UbicacionVive.Letra)) {<span>@item.UbicacionVive.Letra</span>}
+                                        @if (!string.IsNullOrEmpty(item.UbicacionVive.NumInterior)) {<span>@item.UbicacionVive.NumInterior</span>}
+                                    </span>
+                                }
                             </td>
                             <td>
-                                @if (item.UbicacionVive != null)
-        {
-            if (item.UbicacionVive.Colonia != null)
-            {
-                        @Html.DisplayFor(modelItem => item.UbicacionVive.Colonia.Nombre)
-                        <span>C.P.</span> @item.UbicacionVive.Colonia.CodigoPostal
-}
-}
+                                @if (item.UbicacionVive != null) { 
+                                    if (item.UbicacionVive.Colonia != null) {
+                                        @Html.DisplayFor(modelItem => item.UbicacionVive.Colonia.Nombre)
+                                        <span>C.P.</span> @item.UbicacionVive.Colonia.CodigoPostal
+                                    }
+                                }
                             </td>
                             <td>
                                 @if (item.UbicacionVive != null)

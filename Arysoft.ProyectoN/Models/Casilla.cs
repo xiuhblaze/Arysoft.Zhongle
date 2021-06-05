@@ -103,6 +103,30 @@ namespace Arysoft.ProyectoN.Models
             }
         } // YaVotaron
 
+        public int YaVotaronSeguros
+        {
+            get
+            {
+                int total = 0;
+
+                if (Votantes != null)
+                {
+                    foreach (Voto v in Votantes)
+                    {
+                        if (v.Persona != null)
+                        {
+                            if (v.Persona.VotanteSeguro == BoolTipo.Si && v.YaVoto == BoolTipo.Si)
+                            {
+                                total++;
+                            }
+                        }
+                    }
+                    //total = Votantes.Where(v => v.Persona.VotanteSeguro == BoolTipo.Si).Count();
+                }
+                return total;
+            }
+        } // YaVotaronSeguros
+
         public int VotantesRestantes
         {
             get {

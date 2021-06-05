@@ -415,7 +415,11 @@ namespace Arysoft.ProyectoN.Controllers
                 return Content("notid");
             }
 
-            Casilla casilla = await db.Casillas.FindAsync(id);
+            Casilla casilla = await db.Casillas
+                .Include(c => c.Seccion)
+                .Include(c => c.Votantes)
+                .Include(c => c.Votantes.Select(v => v.Persona))
+                .FirstOrDefaultAsync(c => c.CasillaID == id);
 
             if (casilla == null)
             {
@@ -434,7 +438,18 @@ namespace Arysoft.ProyectoN.Controllers
                 return Content("notid");
             }
 
-            Casilla casilla = await db.Casillas.FindAsync(id);
+            Casilla casilla = await db.Casillas
+                .Include(c => c.Seccion)
+                .Include(c => c.Seccion.Sector)
+                .Include(c => c.Votantes)
+                .Include(c => c.Votantes.Select(v => v.Persona))
+                //.Include(c => c.Votantes.Select(v => v.Persona.UbicacionVive))
+                //.Include(c => c.Votantes.Select(v => v.Persona.UbicacionVive.Calle))
+                //.Include(c => c.Votantes.Select(v => v.Persona.UbicacionVive.Colonia))
+                //.Include(c => c.Votantes.Select(v => v.Persona.UbicacionVota))
+                //.Include(c => c.Votantes.Select(v => v.Persona.UbicacionVota.Calle))
+                //.Include(c => c.Votantes.Select(v => v.Persona.UbicacionVota.Colonia))
+                .FirstOrDefaultAsync(c => c.CasillaID == id);
 
             if (casilla == null)
             {

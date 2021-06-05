@@ -124,8 +124,8 @@ public static class Comun
 
         if (persona.UbicacionVive != null)
         {
-            p.CalleID = persona.UbicacionVive.CalleID;
-            p.ColoniaID = persona.UbicacionVive.ColoniaID;
+            p.CalleID = persona.UbicacionVive.CalleID ?? Guid.Empty;
+            p.ColoniaID = persona.UbicacionVive.ColoniaID ?? Guid.Empty;
             p.NumExterior = persona.UbicacionVive.NumExterior;
             p.Letra = persona.UbicacionVive.Letra;
             p.NumInterior = persona.UbicacionVive.NumInterior;
@@ -136,8 +136,8 @@ public static class Comun
 
         if (persona.UbicacionVota != null)
         {
-            p.VotaCalleID = persona.UbicacionVota.CalleID;
-            p.VotaColoniaID = persona.UbicacionVota.ColoniaID;
+            p.VotaCalleID = persona.UbicacionVota.CalleID ?? Guid.Empty;
+            p.VotaColoniaID = persona.UbicacionVota.ColoniaID ?? Guid.Empty;
             p.VotaNumExterior = persona.UbicacionVota.NumExterior;
             p.VotaLetra = persona.UbicacionVota.Letra;
             p.VotaNumInterior = persona.UbicacionVota.NumInterior;
@@ -222,8 +222,8 @@ public static class Comun
 
         if (casilla.Ubicacion != null)
         {
-            c.CalleID = casilla.Ubicacion.CalleID;
-            c.ColoniaID = casilla.Ubicacion.ColoniaID;
+            c.CalleID = casilla.Ubicacion.CalleID ?? Guid.Empty;
+            c.ColoniaID = casilla.Ubicacion.ColoniaID ?? Guid.Empty;
             c.NumExterior = casilla.Ubicacion.NumExterior;
             c.Letra = casilla.Ubicacion.Letra;
             c.NumInterior = casilla.Ubicacion.NumInterior;
