@@ -192,7 +192,7 @@
 
             @foreach (var item in Model)
             {
-                int porcentajeVotaron = item.NumeroVotantes > 0 ? (item.YaVotaron * 100) / item.NumeroVotantes : 0;
+                // int porcentajeVotaron = item.NumeroVotantes > 0 ? (item.YaVotaron * 100) / item.NumeroVotantes : 0;
                 int porcentajeVotaronSeguros = item.VotosSeguros > 0 ? (item.YaVotaronSeguros * 100) / item.VotosSeguros : 0;
 
                 string classRow = "";
@@ -288,16 +288,16 @@
                             }
                         </td>*@
                     <td style="cursor: pointer" onclick="getDetails('@item.CasillaID')">
-                        @item.VotosSeguros / @item.NumeroVotantes
+                        @*@item.VotosSeguros / @item.NumeroVotantes
                         <div class="progress" title="Votos seguros @item.PorcentajeVotos%" style="margin-bottom: 0;">
                             <div class="progress-bar progress-bar-info" style="width: @item.PorcentajeVotos%"></div>
-                        </div>
+                        </div>*@
                     </td>
                     <td style="cursor: pointer" onclick="getDetails('@item.CasillaID')">
-                        @item.YaVotaron / @item.NumeroVotantes
+                        @*@item.YaVotaron / @item.NumeroVotantes
                         <div class="progress" title="Ya votarón @porcentajeVotaron%" style="margin-bottom: 0;">
                             <div class="progress-bar progress-bar-warning" style="width: @porcentajeVotaron%"></div>
-                        </div>
+                        </div>*@
                     </td>
                     <td style="cursor: pointer" onclick="getDetails('@item.CasillaID')">
                         @item.YaVotaronSeguros / @item.VotosSeguros

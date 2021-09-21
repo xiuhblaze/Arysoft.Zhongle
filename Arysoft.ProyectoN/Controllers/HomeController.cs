@@ -247,8 +247,8 @@ namespace Arysoft.ProyectoN.Controllers
         public async Task<ActionResult> VotosRealizadosPorSector()
         {
             var sectores = await (db.Sectores
-                .Include(s => s.Secciones.Select(c => c.Casillas.Select(cs => cs.Votantes)))
-                .Where(s => s.Status == StatusTipo.Activo)
+                .Include(s => s.Secciones.Select(c => c.Casillas.Select(cs => cs.Votantes.Select(v => v.Persona))))
+                .Where(s => s.Status == StatusTipo.Activo && s.Nombre.Contains("Sector"))
                 .OrderBy(s => s.Nombre)).ToListAsync();
 
             var tabla = new List<object>();
@@ -307,8 +307,13 @@ namespace Arysoft.ProyectoN.Controllers
             {
                 if (hora != VotoHoraTipo.Ninguno)
                 {
-                    int totalVotosNoSeguros = await db.Votos.Where(v => v.VotoHora == hora && v.YaVoto == BoolTipo.Si).CountAsync();
+                    int totalVotosNoSeguros = await db.Votos
+                        .Include(v => v.Persona)
+                        .Where(v => (v.Persona == null || v.Persona.VotanteSeguro != BoolTipo.Si || v.Persona.Status != StatusTipo.Activo)
+                            && v.VotoHora == hora 
+                            && v.YaVoto == BoolTipo.Si).CountAsync();
                     int totalVotosSeguros = await db.Votos
+                        .Include(v => v.Persona)
                         .Where(v => (v.Persona != null && v.Persona.Status == StatusTipo.Activo && v.Persona.VotanteSeguro == BoolTipo.Si)
                             && v.VotoHora == hora
                             && v.YaVoto == BoolTipo.Si).CountAsync();

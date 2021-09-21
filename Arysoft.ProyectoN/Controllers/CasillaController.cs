@@ -1051,7 +1051,7 @@ namespace Arysoft.ProyectoN.Controllers
                         }
                         else
                         {
-                            if (miVoto.YaVoto == BoolTipo.No)
+                            if (miVoto.YaVoto != BoolTipo.Si)
                             {
                                 miVoto.YaVoto = BoolTipo.Si;
                                 miVoto.VotoHora = hora;
