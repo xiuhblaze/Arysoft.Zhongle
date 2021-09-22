@@ -1,0 +1,95 @@
+﻿@model Arysoft.Website.Models.IndexViewModel
+@{
+    ViewBag.Title = "Administrar";
+}
+<div class="container">
+    <h2>@ViewBag.Title <small>@User.Identity.Name</small></h2>
+    <p class="text-success">@ViewBag.StatusMessage</p>
+    <div class="row">
+        <div class="col-md-8">
+            <p>
+                <ul class="nav nav-pills">
+                    @if (Model.HasPassword)
+                    {
+                        <li>@Html.ActionLink("Cambiar la contraseña", "ChangePassword")</li>
+                    }
+                    else
+                    {
+                        <li>@Html.ActionLink("Crear", "SetPassword")</li>
+                    }
+                </ul>
+            </p>
+            <hr />
+            <dl class="dl-horizontal">
+                <dt>Nombre</dt>
+                <dd>@ViewBag.User.NombreCompleto</dd>
+
+                @if (ViewBag.Sector != null)
+                {
+                    <dt>Sector</dt>
+                    <dd>
+                        @ViewBag.Sector.Nombre
+                    </dd>
+                }
+                <dt>Correo Electrónico</dt>
+                <dd>@ViewBag.User.Email</dd>
+            </dl>
+            
+
+            @*<p>
+                Número de teléfono: @(Model.PhoneNumber ?? "None") [
+                @if (Model.PhoneNumber != null)
+            {
+                    @Html.ActionLink("Change", "AddPhoneNumber")
+                    @: &nbsp;|&nbsp;
+                    @Html.ActionLink("Remove", "RemovePhoneNumber")
+                }
+                else
+                {
+                    @Html.ActionLink("Add", "AddPhoneNumber")
+                }
+                ]
+            </p>
+            <p>
+                Inicios de sesión externos: @Model.Logins.Count
+                @Html.ActionLink("[Manage]", "ManageLogins")
+            </p>
+            @if (Model.TwoFactor)
+            {
+                <form method="post" action="/Manage/DisableTFA">
+                    <p>
+                        Autentificación de dos factores:
+                        <input type="submit" value="Disable" class="btn btn-default" />
+                    </p>
+                </form>
+            }
+            else
+            {
+                <form method="post" action="/Manage/EnableTFA">
+                    <p>
+                        Two factor is currently disabled:
+                        <input type="submit" value="Enable" class="btn btn-default" />
+                    </p>
+                </form>
+            }
+            @if (Model.BrowserRemembered)
+            {
+                <form method="post" action="/Manage/ForgetBrowser">
+                    <p>
+                        Browser is curently remembered for two factor:
+                        <input type="submit" value="Forget Browser" class="btn btn-default" />
+                    </p>
+                </form>
+            }
+            else
+            {
+                <form method="post" action="/Manage/RememberBrowser">
+                    <p>
+                        Browser is curently not remembered for two factor:
+                        <input type="submit" value="Remember Browser" class="btn btn-default" />
+                    </p>
+                </form>
+            }*@
+        </div>
+    </div>
+</div>

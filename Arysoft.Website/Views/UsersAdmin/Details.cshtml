@@ -1,0 +1,67 @@
+﻿@model Arysoft.Website.Models.ApplicationUser
+
+@{
+    ViewBag.Title = "Detalles";
+}
+
+<div class="container">
+    <h2>Usuario <small style="text-transform: uppercase;">@ViewBag.Title</small></h2>
+
+    <div>        
+        <dl class="dl-horizontal">
+            <dt>
+                @Html.DisplayNameFor(model => model.UserName)
+            </dt>
+            <dd>
+                @Html.DisplayFor(model => model.UserName)
+            </dd>
+            <dt>
+                @Html.DisplayNameFor(model => model.NombreCompleto)
+            </dt>
+            <dd>
+                @Html.DisplayFor(model => model.NombreCompleto)
+            </dd>
+            @*<dt>
+                @Html.DisplayNameFor(model => model.SectorID)
+            </dt>
+            <dd>
+                @Html.DisplayFor(model => model.Sector.Nombre)
+            </dd>*@
+        </dl>
+    </div>
+    
+    <div class="panel panel-default" style="margin-top: 20px;">
+        <div class="panel-heading">Lista de roles para este usuario</div>
+        <div class="panel-body">
+            @if (ViewBag.RoleNames.Count == 0)
+            {
+                <p>No se encontrarón roles para este usuario.</p>
+            }
+
+            <table class="table table-hover" style="margin-bottom: 0;">
+                <tbody>
+                    @foreach (var item in ViewBag.RoleNames)
+                    {
+                        <tr>
+                            <td>
+                                @item
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <p class="text-right">
+        @Html.Raw(
+            @Html.ActionLink("Cancelar", "Index", null, new { @class = "btn btn-default" }).ToHtmlString()
+                .Replace("Cancelar", "<span class=\"glyphicon glyphicon-remove\" title=\"Cancelar cambios\"></span> Cancelar")
+        )
+        @Html.Raw(
+            @Html.ActionLink("Editar", "Edit", new { id = Model.Id }, new { @class = "btn btn-primary" }).ToHtmlString()
+                .Replace("Editar", "<span class=\"glyphicon glyphicon-edit\" title=\"Cancelar cambios\"></span> Editar")
+        )
+    </p>
+
+</div>
