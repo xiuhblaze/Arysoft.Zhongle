@@ -152,12 +152,12 @@ namespace Arysoft.ProyectoN.Controllers
             if (ModelState.IsValid)
             {
                 var user = new ApplicationUser {
-                    SectorID = model.SectorID,
+                    //SectorID = model.SectorID,
                     UserName = model.Email,
                     Email = model.Email,
                     Nombres = model.Nombres,
-                    ApellidoPaterno = model.ApellidoPaterno,
-                    ApellidoMaterno = model.ApellidoMaterno
+                    PrimerApellido = model.PrimerApellido,
+                    SegundoApellido = model.SegundoApellido
                 };
                 var result = await UserManager.CreateAsync(user, model.Password);
                 if (result.Succeeded)

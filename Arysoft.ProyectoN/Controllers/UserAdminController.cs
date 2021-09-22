@@ -69,7 +69,7 @@ namespace Arysoft.ProyectoN.Controllers
             ViewBag.Filtro = buscar;
 
             var users = await UserManager.Users
-                .Include(u => u.Sector)
+                //.Include(u => u.Sector)
                 .ToListAsync();
 
             //HttpContext.GetOwinContext().get
@@ -126,7 +126,7 @@ namespace Arysoft.ProyectoN.Controllers
 
             roles = roles.OrderBy(r => r.Name).ToList();
             ViewBag.RoleId = new SelectList(roles, "Name", "Name"); // new SelectList(await RoleManager.Roles.ToListAsync(), "Name", "Name");
-            ViewBag.SectorID = await ObtenerListaSectoresAsync(Guid.Empty);
+            //ViewBag.SectorID = await ObtenerListaSectoresAsync(Guid.Empty);
             return View();
         } // Create
 
@@ -138,12 +138,12 @@ namespace Arysoft.ProyectoN.Controllers
             if (ModelState.IsValid)
             {
                 var user = new ApplicationUser {
-                    SectorID = userViewModel.SectorID,
+                    //SectorID = userViewModel.SectorID,
                     UserName = userViewModel.Email,
                     Email = userViewModel.Email,
                     Nombres = userViewModel.Nombres,
-                    ApellidoPaterno = userViewModel.ApellidoPaterno,
-                    ApellidoMaterno = userViewModel.ApellidoMaterno
+                    PrimerApellido = userViewModel.PrimerApellido,
+                    SegundoApellido = userViewModel.SegundoApellido
                 };
                 var adminresult = await UserManager.CreateAsync(user, userViewModel.Password);
 
@@ -157,7 +157,7 @@ namespace Arysoft.ProyectoN.Controllers
                         {
                             ModelState.AddModelError("", result.Errors.First());
                             ViewBag.RoleId = new SelectList(await RoleManager.Roles.ToListAsync(), "Name", "Name");
-                            ViewBag.SectorID = await ObtenerListaSectoresAsync(Guid.Empty);
+                            //ViewBag.SectorID = await ObtenerListaSectoresAsync(Guid.Empty);
                             return View();
                         }
                     }
@@ -166,14 +166,14 @@ namespace Arysoft.ProyectoN.Controllers
                 {
                     ModelState.AddModelError("", adminresult.Errors.First());
                     ViewBag.RoleId = new SelectList(RoleManager.Roles, "Name", "Name");
-                    ViewBag.SectorID = await ObtenerListaSectoresAsync(Guid.Empty);
+                    //ViewBag.SectorID = await ObtenerListaSectoresAsync(Guid.Empty);
                     return View();
 
                 }
                 return RedirectToAction("Index");
             }
             ViewBag.RoleId = new SelectList(RoleManager.Roles, "Name", "Name");
-            ViewBag.SectorID = await ObtenerListaSectoresAsync(Guid.Empty);
+            //ViewBag.SectorID = await ObtenerListaSectoresAsync(Guid.Empty);
             return View();
         } // Create:POST
 
@@ -192,16 +192,16 @@ namespace Arysoft.ProyectoN.Controllers
             }
 
             var userRoles = await UserManager.GetRolesAsync(user.Id);
-            ViewBag.SectorID = await ObtenerListaSectoresAsync(user.SectorID ?? Guid.Empty);
+            //ViewBag.SectorID = await ObtenerListaSectoresAsync(user.SectorID ?? Guid.Empty);
 
             return View(new EditUserViewModel()
             {
                 Id = user.Id,
-                SectorID = user.SectorID,
+                //SectorID = user.SectorID,
                 Email = user.Email,
                 Nombres = user.Nombres,
-                ApellidoPaterno = user.ApellidoPaterno,
-                ApellidoMaterno = user.ApellidoMaterno,                
+                PrimerApellido = user.PrimerApellido,
+                SegundoApellido = user.SegundoApellido,
                 RolesList = RoleManager.Roles.ToList().OrderBy(x => x.Name).Select(x => new SelectListItem()
                 {
                     Selected = userRoles.Contains(x.Name),
@@ -225,12 +225,12 @@ namespace Arysoft.ProyectoN.Controllers
                     return HttpNotFound();
                 }
 
-                user.SectorID = editUser.SectorID;
+                //user.SectorID = editUser.SectorID;
                 user.UserName = editUser.Email;
                 user.Email = editUser.Email;
                 user.Nombres = editUser.Nombres;
-                user.ApellidoPaterno = editUser.ApellidoPaterno;
-                user.ApellidoMaterno = editUser.ApellidoMaterno;
+                user.PrimerApellido = editUser.PrimerApellido;
+                user.SegundoApellido = editUser.SegundoApellido;
                 //user.CURP = editUser.CURP;
 
                 var userRoles = await UserManager.GetRolesAsync(user.Id);
@@ -302,14 +302,14 @@ namespace Arysoft.ProyectoN.Controllers
             return View();
         }
 
-        private async Task<List<SelectListItem>> ObtenerListaSectoresAsync(Guid selectedID)
-        {
-            var listado = new SelectList(await (db.Sectores
-                .Where(c => c.Status == StatusTipo.Activo)
-                .OrderBy(c => c.Nombre))
-                .ToListAsync(), "SectorID", "Nombre", selectedID).ToList();
-            listado.Insert(0, (new SelectListItem { Text = "(seleccionar sector)", Value = Guid.Empty.ToString() }));
-            return listado;
-        } // ObtenerListaSectoresAsync
+        //private async Task<List<SelectListItem>> ObtenerListaSectoresAsync(Guid selectedID)
+        //{
+        //    var listado = new SelectList(await (db.Sectores
+        //        .Where(c => c.Status == StatusTipo.Activo)
+        //        .OrderBy(c => c.Nombre))
+        //        .ToListAsync(), "SectorID", "Nombre", selectedID).ToList();
+        //    listado.Insert(0, (new SelectListItem { Text = "(seleccionar sector)", Value = Guid.Empty.ToString() }));
+        //    return listado;
+        //} // ObtenerListaSectoresAsync
     }
 }
