@@ -169,5 +169,7 @@ namespace Arysoft.Website.Models
                         
 
         } // OnModelCreating        
+
+        public System.Data.Entity.DbSet<Arysoft.Website.Models.Pagina> Paginas { get; set; }
     }
 }

@@ -234,6 +234,7 @@
     <Content Include="Content\bootstrap.css" />
     <Content Include="Content\chosen-sprite%402x.png" />
     <Content Include="Content\chosen-sprite.png" />
+    <Content Include="Content\Dashboard.css" />
     <Content Include="Content\font-awesome.css" />
     <Content Include="Content\font-awesome.min.css" />
     <Content Include="Content\jasny-bootstrap.css" />
@@ -286,6 +287,15 @@
     <Content Include="Content\bootstrap-reboot.css.map" />
     <Content Include="Content\bootstrap-grid.min.css.map" />
     <Content Include="Content\bootstrap-grid.css.map" />
+    <Content Include="Areas\Admin\Views\web.config" />
+    <Content Include="Areas\Admin\Views\Shared\_Layout.cshtml" />
+    <Content Include="Areas\Admin\Views\_ViewStart.cshtml" />
+    <Content Include="Areas\Admin\Views\Admin\Index.cshtml" />
+    <Content Include="Areas\Admin\Views\Paginas\Create.cshtml" />
+    <Content Include="Areas\Admin\Views\Paginas\Delete.cshtml" />
+    <Content Include="Areas\Admin\Views\Paginas\Details.cshtml" />
+    <Content Include="Areas\Admin\Views\Paginas\Edit.cshtml" />
+    <Content Include="Areas\Admin\Views\Paginas\Index.cshtml" />
     <None Include="Properties\PublishProfiles\ciudadanos.arysoft.com.mx - Web Deploy.pubxml" />
     <None Include="Properties\PublishProfiles\FolderProfile.pubxml" />
     <None Include="Properties\PublishProfiles\movimientozapotlan.com - Web Deploy.pubxml" />
@@ -296,6 +306,7 @@
     <Content Include="Scripts\bootstrap.bundle.min.js" />
     <Content Include="Scripts\bootstrap.js" />
     <Content Include="Scripts\bootstrap.min.js" />
+    <Content Include="Scripts\dashboard.js" />
     <Content Include="Scripts\esm\popper-utils.js" />
     <Content Include="Scripts\esm\popper-utils.min.js" />
     <Content Include="Scripts\esm\popper.js" />
@@ -565,6 +576,12 @@
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="App_Start\Startup.Auth.cs" />
     <Compile Include="App_Start\WebApiConfig.cs" />
+    <Compile Include="Areas\Admin\AdminAreaRegistration.cs" />
+    <Compile Include="Areas\Admin\Controllers\AdminController.cs" />
+    <Compile Include="Areas\Admin\Controllers\PaginasController.cs" />
+    <Compile Include="Areas\Admin\Models\Comun.cs" />
+    <Compile Include="Areas\Admin\Models\NoticiaViewModels.cs" />
+    <Compile Include="Areas\Admin\Models\PaginaViewModels.cs" />
     <Compile Include="Areas\HelpPage\ApiDescriptionExtensions.cs" />
     <Compile Include="Areas\HelpPage\App_Start\HelpPageConfig.cs" />
     <Compile Include="Areas\HelpPage\Controllers\HelpController.cs" />
@@ -608,15 +625,24 @@
     </Compile>
     <Compile Include="Models\AccountViewModels.cs" />
     <Compile Include="Models\AdminViewModel.cs" />
+    <Compile Include="Models\Archivo.cs" />
     <Compile Include="Models\Comun.cs" />
-    <Compile Include="Models\Enumeradores.cs" />
+    <Compile Include="Models\ContactViewModels.cs" />
+    <Compile Include="Models\Enums.cs" />
     <Compile Include="Models\IdentityModels.cs" />
     <Compile Include="Models\ManageViewModels.cs" />
+    <Compile Include="Models\Nota.cs" />
+    <Compile Include="Models\Noticia.cs" />
+    <Compile Include="Models\NoticiaViewModels.cs" />
+    <Compile Include="Models\Opcion.cs" />
+    <Compile Include="Models\Pagina.cs" />
+    <Compile Include="Models\PaginaViewModels.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Startup.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Archivos\" />
+    <Folder Include="Areas\Admin\Data\" />
   </ItemGroup>
   <ItemGroup>
     <TypeScriptCompile Include="Scripts\index.d.ts" />

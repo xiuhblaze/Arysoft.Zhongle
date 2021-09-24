@@ -1,0 +1,186 @@
+﻿@model Arysoft.Website.Models.Pagina
+
+@{
+    ViewBag.Title = "Details";
+}
+
+<h2>Details</h2>
+
+<div>
+    <h4>Pagina</h4>
+    <hr />
+    <dl class="dl-horizontal">
+        <dt>
+            @Html.DisplayNameFor(model => model.PaginaPadre.Titulo)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.PaginaPadre.Titulo)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Titulo)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Titulo)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.IndiceMenu)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.IndiceMenu)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.EtiquetaMenu)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.EtiquetaMenu)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Resumen)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Resumen)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.HTMLContent)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.HTMLContent)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.FriendlyUrl)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.FriendlyUrl)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.TargetUrl)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.TargetUrl)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Target)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Target)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.TieneGaleria)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.TieneGaleria)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.ContadorVisitas)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.ContadorVisitas)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.FechaContador)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.FechaContador)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Idioma)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Idioma)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.EsPrincipal)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.EsPrincipal)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.HTMLHeadScript)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.HTMLHeadScript)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.HTMLFooterScript)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.HTMLFooterScript)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.MeGusta)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.MeGusta)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Status)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Status)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.FechaCreacion)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.FechaCreacion)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.FechaActualizacion)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.FechaActualizacion)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.UsuarioActualizacion)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.UsuarioActualizacion)
+        </dd>
+
+    </dl>
+</div>
+<p>
+    @Html.ActionLink("Edit", "Edit", new { id = Model.PaginaID }) |
+    @Html.ActionLink("Back to List", "Index")
+</p>

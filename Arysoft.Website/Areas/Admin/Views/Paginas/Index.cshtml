@@ -1,0 +1,153 @@
+﻿@model IEnumerable<Arysoft.Website.Models.Pagina>
+
+@{
+    ViewBag.Title = "Index";
+}
+
+<h2>Index</h2>
+
+<p>
+    @Html.ActionLink("Create New", "Create")
+</p>
+<table class="table">
+    <tr>
+        <th>
+            @Html.DisplayNameFor(model => model.PaginaPadre.Titulo)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Titulo)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.IndiceMenu)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.EtiquetaMenu)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Resumen)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.HTMLContent)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.FriendlyUrl)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.TargetUrl)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Target)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.TieneGaleria)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.ContadorVisitas)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.FechaContador)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Idioma)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.EsPrincipal)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.HTMLHeadScript)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.HTMLFooterScript)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.MeGusta)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Status)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.FechaCreacion)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.FechaActualizacion)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.UsuarioActualizacion)
+        </th>
+        <th></th>
+    </tr>
+
+@foreach (var item in Model) {
+    <tr>
+        <td>
+            @Html.DisplayFor(modelItem => item.PaginaPadre.Titulo)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.Titulo)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.IndiceMenu)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.EtiquetaMenu)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.Resumen)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.HTMLContent)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.FriendlyUrl)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.TargetUrl)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.Target)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.TieneGaleria)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.ContadorVisitas)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.FechaContador)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.Idioma)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.EsPrincipal)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.HTMLHeadScript)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.HTMLFooterScript)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.MeGusta)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.Status)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.FechaCreacion)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.FechaActualizacion)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.UsuarioActualizacion)
+        </td>
+        <td>
+            @Html.ActionLink("Edit", "Edit", new { id=item.PaginaID }) |
+            @Html.ActionLink("Details", "Details", new { id=item.PaginaID }) |
+            @Html.ActionLink("Delete", "Delete", new { id=item.PaginaID })
+        </td>
+    </tr>
+}
+
+</table>
