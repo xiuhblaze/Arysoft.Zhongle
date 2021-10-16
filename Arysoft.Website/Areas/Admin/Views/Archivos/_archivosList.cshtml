@@ -1,0 +1,158 @@
+﻿@using Arysoft.Website.Areas.Admin.Models;
+@using Arysoft.Website.Models;
+@using System.IO;
+
+@model IEnumerable<Archivo>
+
+@{
+    bool isReadonly = (bool)TempData["isReadonly"];
+    bool isPage = (bool)TempData["isPage"];
+    string carpeta = "Noticias";
+
+    if (isPage)
+    {
+        carpeta = "Paginas";
+    }
+}
+
+@if (Model.Count() == 0)
+{
+    <div class="alert alert-info" role="alert">
+        <h5 class="alert-heading">Sin archivos</h5>
+        @if (isReadonly)
+        {
+            <p>Aun no cuenta con archivos cargados, puede incluirlos al editar el contenido.</p>
+        }
+        else
+        {
+            <p>Aun no cuenta con archivos cargados, puede incluirlos en el formulario superior.</p>
+        }
+    </div>
+}
+else
+{
+    <div style="max-height: 800px; overflow-y: scroll;">
+        <ul class="list-group">
+            @foreach (Archivo archivo in Model)
+            {
+                string url = Path.Combine("/Archivos/" + carpeta + "/", archivo.PropietarioID.ToString(), archivo.Nombre).Replace("\\", "/");
+
+                <li class="list-group-item list-group-item-action">
+                    <div class="media">
+                        @if (Comun.EsImagen(archivo.Nombre))
+                        {
+                            <div style="min-width: 64px; width: 64px;" class="mr-3">
+                                <img src="@url" class="img-fluid" alt="@archivo.Descripcion">
+                            </div>
+                        }
+                        else
+                        {
+                            <div style="width: 64px; font-size: 3.5rem;" class="text-center mr-3">
+                                <i class="bi-file-richtext mr-3"></i>
+                            </div>
+                        }
+                        <div class="media-body" style="overflow-x: hidden;">
+                            <h5 class="mt-0 @(archivo.EnGaleria == BoolTipo.Si ? "text-success" : "")">@archivo.Nombre</h5>
+                            <p>
+                                <small>
+                                    <a href="@url" target="_blank">@url</a>
+                                </small>
+                            </p>
+                            @if (!isReadonly)
+                            {
+                                <p class="mb-0">
+                                    <button type="button" class="btn btn-link"
+                                            onclick="copyTextToClipboard('@url')" title="Copiar la url">
+                                        <i class="bi-files"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-link text-danger" title="Eliminar archivo"
+                                            onclick="deleteFile('@archivo.ArchivoID', '@archivo.Nombre')">
+                                        <i class="bi-file-x"></i>
+                                    </button>
+                                </p>
+                            }
+                        </div>
+                    </div>
+                </li>
+            }
+        </ul>
+    </div>
+}
+
+<script>
+    document.getElementById("archivosTabCount").innerHTML = "@Model.Count()";
+
+    // https://stackoverflow.com/questions/400212/how-do-i-copy-to-the-clipboard-in-javascript
+
+    function fallbackCopyTextToClipboard(text) {
+        var textArea = document.createElement("textarea");
+        textArea.value = text;
+
+        // Avoid scrolling to bottom
+        textArea.style.top = "0";
+        textArea.style.left = "0";
+        textArea.style.position = "fixed";
+
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+
+        try {
+            var successful = document.execCommand('copy');
+            var msg = successful ? 'successful' : 'unsuccessful';
+            console.log('Fallback: Copying text command was ' + msg);
+        } catch (err) {
+            console.error('Fallback: Oops, unable to copy', err);
+        }
+
+        document.body.removeChild(textArea);
+    }
+
+    function copyTextToClipboard(text) {
+        if (!navigator.clipboard) {
+            fallbackCopyTextToClipboard(text);
+            return;
+        }
+        navigator.clipboard.writeText(text).then(function () {
+            console.log('Async: Copying to clipboard was successful!');
+        }, function (err) {
+            console.error('Async: Could not copy text: ', err);
+        });
+    }
+
+    function deleteFile(id, fname) {
+        if (confirm('Realmente desea eliminar el archivo: ' + fname + ', esta acción no se puede deshacer.')) {
+            // Llamar Ajax para eliminar el archivo y devolver el listado actualizado
+            var url = '@Url.Action("EliminarArchivo", "Archivos")/' + id;
+
+            $.ajax({
+                url: url,
+                type: 'POST',
+                contentType: false,
+                processData: false,
+                success: function (result) {
+                    if (result.status === undefined) {
+                        $('#archivosDiv').html(result);
+                    } else {
+                        switch (result.status) {
+                            case "HttpNotFound":
+                                alert(result.message);
+                                break;
+                            case "exception":
+                                alert(result.message);
+                                break;
+                            case "notfile":
+                                alert(result.message);
+                                break;
+                            default:
+                                console.log("deleteFile (switch default): " + result);
+                        }
+                    }
+                },
+                error: function (err) {
+                    alert(err.statusText);
+                }
+            });
+        }
+    }
+</script>

@@ -1,0 +1,293 @@
+﻿@using Arysoft.Website.Areas.Admin.Models;
+@using Arysoft.Website.Models;
+
+@model PaginaDetailsViewModel
+
+@{
+    string classStatusAlert = "alert alert-secondary";
+    string classStatusIcon = "";
+    string classCard = "card";
+
+    switch (Model.Status)
+    {
+        case PaginaStatus.Nueva:
+            classStatusIcon = "<i class='bi-stars mr-1 text-primary icon' title='Nueva'></i>";
+            classStatusAlert = "alert alert-primary";
+            classCard = "card border-primary";
+            break;
+        case PaginaStatus.Publicada:
+            classStatusIcon = "<i class='bi-cursor mr-1 text-success icon' title='Publicada'></i>";
+            classStatusAlert = "alert alert-success";
+            classCard = "card border-success";
+            break;
+        case PaginaStatus.Oculta:
+            classStatusIcon = "<i class='bi-eye-slash mr-1 icon' title='Oculta'></i>";
+            classCard = "card border-secondary";
+            //classStatusAlert = "alert alert-primary";
+            //classMeGustaBadge = "badge badge-secondary";
+            //classVisitasBadge = "badge badge-secondary";
+            break;
+        case PaginaStatus.Eliminada:
+            classStatusIcon = "<i class='bi-x-circle mr-1 icon text-danger' title='Eliminada'></i>";
+            classStatusAlert = "alert alert-danger";
+            //classMeGustaBadge = "badge badge-danger";
+            //classVisitasBadge = "badge badge-danger";
+            classCard = "card border-danger";
+            break;
+    }
+}
+
+<div class="modal-header">
+    <h5 class="modal-title">Página</h5>
+    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+    </button>
+</div>
+<div class="modal-body">
+    <div class="container-fluid">
+        @if (Model.Origen == "delete")
+        {
+            <div class="row">
+                <div class="col-12">
+                    <h2 class="text-danger">¿Está seguro de eliminar esta página?</h2>
+                </div>
+            </div>
+        }
+        <div class="row">
+            <div class="col-md-8">
+                <div class="@classCard shadow">
+                    <div class="card-body">
+                        <h1 class="display-4" title="@Html.DisplayNameFor(model => model.Titulo)">
+                            @Html.DisplayFor(model => model.Titulo)
+                        </h1>
+                        <p class="lead" title="@Html.DisplayNameFor(model => model.Resumen)">
+                            @Html.DisplayFor(model => model.Resumen)
+                        </p>
+                        <div title="@Html.DisplayNameFor(model => model.HTMLContent)">
+                            @Html.Raw(Model.HTMLContent.Replace("<img ", "<img class='img-fluid' "))
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="@classStatusAlert">
+                            <h4 class="alert-heading">
+                                @Html.Raw(classStatusIcon)
+                                @Html.DisplayFor(model => model.Status)
+                            </h4>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-6">
+                        <div class="alert alert-me-gusta text-center">
+                            <h4 class="alert-heading">
+                                @Html.DisplayFor(model => model.MeGusta)
+                            </h4>
+                            <div>
+                                <i class="bi-hand-thumbs-up-fill"></i>
+                                Me Gusta
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="alert alert-visitas text-center">
+                            <h4 class="alert-heading">
+                                @Html.DisplayFor(model => model.ContadorVisitas)
+                            </h4>
+                            <div>
+                                <i class="bi-eye-fill"></i>
+                                Visitas
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12">
+                            <ul class="nav nav-tabs" id="detailsTab" role="tablist">
+                                <li class="nav-item" role="presentation">
+                                    <a class="nav-link active" id="informacion-tab" data-toggle="tab" href="#informacion" role="tab" aria-controls="informacion" aria-selected="true">
+                                        <i class="bi-info-circle"></i>
+                                    </a>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <a class="nav-link" id="archivos-tab" data-toggle="tab" href="#archivos" role="tab" aria-controls="archivos" aria-selected="false">
+                                        <i class="bi-files"></i>
+                                        <span id="archivosTabCount" class="badge badge-primary badge-pill">0</span>
+                                    </a>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <a class="nav-link" id="notas-tab" data-toggle="tab" href="#notas" role="tab" aria-controls="notas" aria-selected="false">
+                                        <i class="bi-square-fill text-warning"></i>
+                                        <span id="notasTabCount" class="badge badge-primary badge-pill">0</span>
+                                    </a>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <a class="nav-link" id="scripts-tab" data-toggle="tab" href="#scripts" role="tab" aria-controls="scripts" aria-selected="false">
+                                        <i class="bi-code" title="código"></i>
+                                    </a>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <a class="nav-link" id="hijos-tab" data-toggle="tab" href="#hijos" role="tab" aria-controls="hijos" aria-selected="false">
+                                        <i class="bi-bar-chart-steps text-danger"></i>
+                                        <span id="hijosTabCount" class="badge badge-primary badge-pill">@Model.PaginasHijo.Count</span>
+                                    </a>
+                                </li>
+                            </ul>
+                            <div class="tab-content" id="detailsTabContent">
+                                <div class="tab-pane fade show active" id="informacion" role="tabpanel" aria-labelledby="informacion-tab">
+                                    @if (!string.IsNullOrEmpty(Model.TargetUrl))
+                                    {
+                                        <div class="alert alert-primary">
+                                            <strong>IMPORTANTE</strong>
+                                            La página va a ser redireccionada a la dirección:
+                                            <br />
+                                            <a href="@Model.TargetUrl" target="_blank">@Model.TargetUrl</a>
+                                        </div>
+                                    }
+                                    <dl class="row mt-3">
+                                        <dt class="col-6 text-right">
+                                            @Html.DisplayNameFor(model => model.EtiquetaMenu)
+                                        </dt>
+                                        <dd class="col-6">
+                                            <h5>
+                                                <span class="badge badge-light" style="display: block;">
+                                                    @Html.DisplayFor(model => model.EtiquetaMenu)
+                                                </span>
+                                            </h5>
+                                        </dd>
+
+                                        <dt class="col-6 text-right">
+                                            @Html.DisplayNameFor(model => model.EsPrincipal)
+                                        </dt>
+                                        <dd class="col-6">
+                                            @Html.DisplayFor(model => model.EsPrincipal)
+                                        </dd>
+
+                                        <dt class="col-6 text-right">
+                                            @Html.DisplayNameFor(model => model.TieneGaleria)
+                                        </dt>
+                                        <dd class="col-6">
+                                            @Html.DisplayFor(model => model.TieneGaleria)
+                                        </dd>
+
+                                        <dt class="col-6 text-right">
+                                            @Html.DisplayNameFor(model => model.Idioma)
+                                        </dt>
+
+                                        <dd class="col-6">
+                                            @Model.Idioma.GetDisplayName()
+                                        </dd>
+
+                                        <dt class="col-6 text-right">
+                                            @Html.DisplayNameFor(model => model.Target)
+                                        </dt>
+                                        <dd class="col-6">
+                                            @Html.DisplayFor(model => model.Target)
+                                        </dd>
+
+                                        <dt class="col-6 text-right">
+                                            @Html.DisplayNameFor(model => model.FechaCreacion)
+                                        </dt>
+                                        <dd class="col-6">
+                                            @Html.DisplayFor(model => model.FechaCreacion)
+                                        </dd>
+
+                                        <dt class="col-6 text-right">
+                                            @Html.DisplayNameFor(model => model.FechaActualizacion)
+                                        </dt>
+
+                                        <dd class="col-6">
+                                            @Html.DisplayFor(model => model.FechaActualizacion)
+                                        </dd>
+
+                                        <dt class="col-6 text-right">
+                                            @Html.DisplayNameFor(model => model.UsuarioActualizacion)
+                                        </dt>
+
+                                        <dd class="col-6">
+                                            @Html.DisplayFor(model => model.UsuarioActualizacion)
+                                        </dd>
+                                    </dl>
+                                </div>
+                                <div class="tab-pane fade" id="archivos" role="tabpanel" aria-labelledby="archivos-tab">
+                                    <h4 class="mt-3">Archivos</h4>
+                                    <div id="archivosDiv">
+                                        @Html.Partial("~/Areas/Admin/Views/Archivos/_archivosList.cshtml", Model.Archivos)
+                                    </div>
+                                </div>
+                                <div class="tab-pane fade" id="notas" role="tabpanel" aria-labelledby="notas-tab">
+                                    <h4 class="mt-3">Notas</h4>
+                                    <div id="notasDiv">
+                                        @Html.Partial("~/Areas/Admin/Views/Notas/_notasList.cshtml", Model.Notas)
+                                    </div>
+                                </div>
+                                <div class="tab-pane fade" id="scripts" role="tabpanel" aria-labelledby="scripts-tab">
+                                    <h4 class="mt-3">Códigos</h4>
+
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal-footer">
+    <div class="row">
+        <div class="col-12">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+
+            @switch (Model.Status)
+            {
+                case PaginaStatus.Eliminada:
+                    if (Model.Origen == "details")
+                    {
+                        <form action="/Admin/Paginas/Activar/@Model.PaginaID" method="post" style="float: right; margin-left: .5em;">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn btn-success">
+                                <i class='bi-arrow-clockwise'></i> Reactivar
+                            </button>
+                        </form>
+                    }
+                    else
+                    {
+                        <form action="/Admin/Paginas/Delete/@Model.PaginaID" method="post" style="float: right; margin-left: .5em;">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn btn-danger" onclick="return confirm('Esta acción ELIMINARA DEFINITIVAMENTE el registro y no se puede deshacer. ¿Esta seguro?');">
+                                <i class='bi-x-square'></i> Eliminar
+                            </button>
+                        </form>
+                    }
+                    break;
+                default:
+                    if (Model.Origen == "details")
+                    {
+                        @Html.Raw(
+                            Html.ActionLink("[edit]", "Edit", new { id = Model.PaginaID }, new { @class = "btn btn-primary" })
+                                .ToHtmlString()
+                                .Replace("[edit]", "<i class='bi-pencil-square'></i> Editar")
+                        )
+                    }
+                    else
+                    {
+                        <form action="/Admin/Paginas/Delete/@Model.PaginaID" method="post" style="float: right; margin-left: .5em;">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn btn-danger" onclick="return confirm('Esta acción no se puede deshacer. ¿Esta seguro?');">
+                                <i class='bi-x-square'></i> Eliminar
+                            </button>
+                        </form>
+                    }
+
+                    break;
+            }
+
+        </div>
+
+
+
+    </div>
+</div>

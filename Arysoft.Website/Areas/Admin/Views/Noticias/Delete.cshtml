@@ -1,0 +1,144 @@
+﻿@model Arysoft.Website.Models.Noticia
+
+@{
+    ViewBag.Title = "Delete";
+}
+
+<h2>Delete</h2>
+
+<h3>Are you sure you want to delete this?</h3>
+<div>
+    <h4>Noticia</h4>
+    <hr />
+    <dl class="dl-horizontal">
+        <dt>
+            @Html.DisplayNameFor(model => model.Titulo)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Titulo)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Resumen)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Resumen)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.HTMLContent)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.HTMLContent)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.FriendlyUrl)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.FriendlyUrl)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Autor)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Autor)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.TieneGaleria)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.TieneGaleria)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.ContadorVisitas)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.ContadorVisitas)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Idioma)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Idioma)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.FechaPublicacion)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.FechaPublicacion)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.ImagenArchivo)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.ImagenArchivo)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.MeGusta)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.MeGusta)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Status)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Status)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.FechaCreacion)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.FechaCreacion)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.FechaActualizacion)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.FechaActualizacion)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.UsuarioActualizacion)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.UsuarioActualizacion)
+        </dd>
+
+    </dl>
+
+    @using (Html.BeginForm()) {
+        @Html.AntiForgeryToken()
+
+        <div class="form-actions no-color">
+            <input type="submit" value="Delete" class="btn btn-default" /> |
+            @Html.ActionLink("Back to List", "Index")
+        </div>
+    }
+</div>

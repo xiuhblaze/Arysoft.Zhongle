@@ -217,6 +217,7 @@
   <ItemGroup>
     <Content Include="apple-touch-icon.png" />
     <Content Include="Areas\HelpPage\HelpPage.css" />
+    <Content Include="Content\Admin.css" />
     <Content Include="Content\bootstrap-chosen.css" />
     <Content Include="Content\bootstrap-datepicker.css" />
     <Content Include="Content\bootstrap-datepicker.min.css" />
@@ -296,6 +297,24 @@
     <Content Include="Areas\Admin\Views\Paginas\Details.cshtml" />
     <Content Include="Areas\Admin\Views\Paginas\Edit.cshtml" />
     <Content Include="Areas\Admin\Views\Paginas\Index.cshtml" />
+    <Content Include="Areas\Admin\Views\Paginas\_details.cshtml" />
+    <Content Include="Areas\Admin\Views\Archivos\Create.cshtml" />
+    <Content Include="Areas\Admin\Views\Archivos\Delete.cshtml" />
+    <Content Include="Areas\Admin\Views\Archivos\Details.cshtml" />
+    <Content Include="Areas\Admin\Views\Archivos\Edit.cshtml" />
+    <Content Include="Areas\Admin\Views\Archivos\Index.cshtml" />
+    <Content Include="Areas\Admin\Views\Archivos\_archivosList.cshtml" />
+    <Content Include="Areas\Admin\Views\Notas\Create.cshtml" />
+    <Content Include="Areas\Admin\Views\Notas\Delete.cshtml" />
+    <Content Include="Areas\Admin\Views\Notas\Details.cshtml" />
+    <Content Include="Areas\Admin\Views\Notas\Edit.cshtml" />
+    <Content Include="Areas\Admin\Views\Notas\Index.cshtml" />
+    <Content Include="Areas\Admin\Views\Notas\_notasList.cshtml" />
+    <Content Include="Areas\Admin\Views\Noticias\Create.cshtml" />
+    <Content Include="Areas\Admin\Views\Noticias\Delete.cshtml" />
+    <Content Include="Areas\Admin\Views\Noticias\Details.cshtml" />
+    <Content Include="Areas\Admin\Views\Noticias\Edit.cshtml" />
+    <Content Include="Areas\Admin\Views\Noticias\Index.cshtml" />
     <None Include="Properties\PublishProfiles\ciudadanos.arysoft.com.mx - Web Deploy.pubxml" />
     <None Include="Properties\PublishProfiles\FolderProfile.pubxml" />
     <None Include="Properties\PublishProfiles\movimientozapotlan.com - Web Deploy.pubxml" />
@@ -578,6 +597,9 @@
     <Compile Include="App_Start\WebApiConfig.cs" />
     <Compile Include="Areas\Admin\AdminAreaRegistration.cs" />
     <Compile Include="Areas\Admin\Controllers\AdminController.cs" />
+    <Compile Include="Areas\Admin\Controllers\ArchivosController.cs" />
+    <Compile Include="Areas\Admin\Controllers\NotasController.cs" />
+    <Compile Include="Areas\Admin\Controllers\NoticiasController.cs" />
     <Compile Include="Areas\Admin\Controllers\PaginasController.cs" />
     <Compile Include="Areas\Admin\Models\Comun.cs" />
     <Compile Include="Areas\Admin\Models\NoticiaViewModels.cs" />
@@ -641,7 +663,8 @@
     <Compile Include="Startup.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Archivos\" />
+    <Folder Include="Archivos\Noticias\" />
+    <Folder Include="Archivos\Paginas\" />
     <Folder Include="Areas\Admin\Data\" />
   </ItemGroup>
   <ItemGroup>

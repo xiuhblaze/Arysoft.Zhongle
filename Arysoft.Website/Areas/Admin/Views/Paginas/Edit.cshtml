@@ -1,197 +1,724 @@
-﻿@model Arysoft.Website.Models.Pagina
+﻿@using Arysoft.Website.Areas.Admin.Models;
+@using Arysoft.Website.Models;
+
+@model PaginaEditViewModel
 
 @{
-    ViewBag.Title = "Edit";
+    bool esNueva = Model.Status == PaginaStatus.Ninguno;
+    string titleSmall = esNueva ? "NUEVA" : "EDITAR";
+    string classCard = "card";
+
+    ViewBag.Title = System.Globalization.CultureInfo.CurrentCulture.TextInfo.ToTitleCase(titleSmall);
+
+    switch (Model.Status)
+    {
+        case PaginaStatus.Ninguno:
+        case PaginaStatus.Nueva:
+            classCard = "card border-primary";
+            break;
+        case PaginaStatus.Publicada:
+            classCard = "card border-success";
+            break;
+        case PaginaStatus.Oculta:
+            classCard = "card border-secondary";
+            break;
+        case PaginaStatus.Eliminada:
+            classCard = "card border-danger";
+            break;
+    }
 }
 
-<h2>Edit</h2>
-
+<div class="row">
+    <div class="col-12">
+        <h3 class="mt-2">Página <small>@titleSmall</small></h3>
+        <hr />
+    </div>
+</div>
 @using (Html.BeginForm())
 {
     @Html.AntiForgeryToken()
-    
-    <div class="form-horizontal">
-        <h4>Pagina</h4>
-        <hr />
-        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
-        @Html.HiddenFor(model => model.PaginaID)
+    <div class="row">
+        <!-- EDITOR -->
+        <div class="col-md-8">
+            <div class="@classCard shadow">
+                <div class="card-body">
+                    <ul class="nav nav-tabs" id="editorTab" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link active" id="editor-tab" data-toggle="tab" href="#editor" role="tab" aria-controls="editor" area-selected="true">
+                                <i class="bi-file-richtext"></i>
+                                Editor
+                            </a>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link" id="code-tab" data-toggle="tab" href="#codigo" role="tab" aria-controls="code" area-selected="false">
+                                <i class="bi-code"></i>
+                                Código
+                            </a>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link" id="child-tab" data-toggle="tab" href="#child" role="tab" aria-controls="child" area-selected="false">
+                                <i class="bi-bar-chart-steps"></i>
+                                Páginas hijo
+                            </a>
+                        </li>
+                    </ul>
+                    <div class="tab-content" id="editorTabContent">
+                        <!-- EDITOR -->
+                        <div class="tab-pane fade show active" id="editor" role="tabpanel" aria-labelledby="editor-tab">
 
-        <div class="form-group">
-            @Html.LabelFor(model => model.PaginaPadreID, "PaginaPadreID", htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.DropDownList("PaginaPadreID", null, htmlAttributes: new { @class = "form-control" })
-                @Html.ValidationMessageFor(model => model.PaginaPadreID, "", new { @class = "text-danger" })
+                            @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                            @Html.HiddenFor(model => model.PaginaID)
+                            @Html.HiddenFor(model => model.TieneGaleria)
+                            @Html.HiddenFor(model => model.ContadorVisitas)
+                            @Html.HiddenFor(model => model.FechaContador)
+                            @Html.HiddenFor(model => model.EsPrincipal)
+                            @Html.HiddenFor(model => model.MeGusta)
+                            @Html.HiddenFor(model => model.Status)
+                            @Html.HiddenFor(model => model.FechaCreacion)
+                            @Html.HiddenFor(model => model.OrdenPaginasHijo)
+
+                            <div class="form-group mb-0">
+                                @Html.EditorFor(model => model.Titulo, new { htmlAttributes = new { @class = "form-control pagina-titulo p-0", @title = "Título de la página", placeholder = "Título de la página" } })
+                                @Html.ValidationMessageFor(model => model.Titulo, "", new { @class = "text-danger" })
+                            </div>
+
+                            <div class="form-group">
+                                @*@Html.EditorFor(model => model.__resumen, new { htmlAttributes = new { @class = "form-control pagina-resumen p-0", @title = "Texto breve descriptivo del contenido de la página.", @placeholder = "Resumen" } })
+                                @Html.ValidationMessageFor(model => model.__resumen, "", new { @class = "text-danger" })*@
+                                <textarea id="__resumen" name="__resumen" class="form-control pagina-resumen p-0" placeholder="Resumen">@Html.Raw(Model.__resumen)</textarea>
+                            </div>
+
+                            <div class="form-group">
+                                @*@Html.EditorFor(model => model.__content, new { htmlAttributes = new { @class = "form-control" } })
+                                @Html.ValidationMessageFor(model => model.__content, "", new { @class = "text-danger" })*@
+                                <textarea id="__content" name="__content" class="form-control">@Html.Raw(Model.__content)</textarea>
+                            </div>
+
+                            <div class="form-group">
+                                @Html.LabelFor(model => model.PaginaPadreID, "Página padre")
+                                @Html.DropDownList("PaginaPadreID", null, htmlAttributes: new { @class = "form-control" })
+                                @Html.ValidationMessageFor(model => model.PaginaPadreID, "", new { @class = "text-danger" })
+                                <small class="form-text text-muted">
+                                    Seleccione el título de una página ya existente que será la página padre de la actual, para
+                                    generar una estructura de árbol en el sitio.
+                                </small>
+                            </div>
+
+                            <div class="form-group">
+                                @Html.LabelFor(model => model.FriendlyUrl)
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">http://zhongle.com/</span>
+                                    </div>
+                                    @Html.EditorFor(model => model.FriendlyUrl, new { htmlAttributes = new { @class = "form-control", @title = "URL Amigable", placeholder = "url-amigable-basada-en-el-titulo", @aria_describedby = "FriendlyUrlHelpBlock" } })
+                                    <div class="input-group-append">
+                                        <button id="copyFriendlyUrlButton"
+                                                class="btn btn-outline-secondary"
+                                                type="button"
+                                                title="Copiar la url al portapapeles"
+                                                onclick="copyTextToClipboard(urlToCopy);">
+                                            <i class="bi-files"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                @Html.ValidationMessageFor(model => model.FriendlyUrl, "", new { @class = "text-danger" })
+                                <small id="FriendlyUrlHelpBlock" class="form-text text-muted">
+                                    Url amigable, generada automáticamente por el título, puede editarla, sin embargo se validará
+                                    para evitar títulos duplicados.
+                                </small>
+                            </div>
+                        </div>
+                        <!-- CODIGO -->
+                        <div class="tab-pane fade" id="codigo" area-labeledby="code-tab">
+                            <h4 class="mt-3">Código</h4>
+                            <p>
+                                En estos campos se permite la inclusión de código para mejorar la personalización
+                                de la página, debe de incluirse incluso los tags <strong>script</strong> o
+                                <strong>style</strong> de cierre y de apertura.
+                            </p>
+                            <div class="form-group">
+                                @Html.LabelFor(model => model.__headScript)
+                                <textarea id="__headScript" name="__headScript" class="form-control" rows="10" aria-describedby="headScriptHelpBlock">@Html.Raw(Model.__headScript)</textarea>
+                                @*@Html.EditorFor(model => model.__headScript, new { htmlAttributes = new { @class = "form-control", @rows = "10", @aria_describedby = "headScriptHelpBlock" } })
+                                @Html.ValidationMessageFor(model => model.__headScript, "", new { @class = "text-danger" })*@
+                                <small id="headScriptHelpBlock" class="form-text text-muted">
+                                    Este script va en el encabezado de la página dentro de las etiquetas &lt;head&gt;
+                                    &lt;/head&gt;, al final cuando se hayan ejecutado todas las demas instrucciones del
+                                    encabezado.
+                                </small>
+                            </div>
+                            <div class="form-group">
+                                @Html.LabelFor(model => model.__footerScript)
+                                @*@Html.EditorFor(model => model.__footerScript, new { htmlAttributes = new { @class = "form-control", @rows = "10" } })
+                                @Html.ValidationMessageFor(model => model.__footerScript, "", new { @class = "text-danger" })*@
+                                <textarea id="__footerScript" name="__footerScript" class="form-control" rows="10" aria-describedby="footerScriptHelpBlok">@Html.Raw(Model.__footerScript)</textarea>
+                                <small id="footerScriptHelpBlock" class="form-text text-muted">
+                                    Este script, va al final de la página, justo antes de la etiqueta &lt;/body&gt;, considerar que ya se
+                                    han cargado librerias .js como jQuery por lo que no se recomienda volverlas a cargar.
+                                </small>
+                            </div>
+                            <div class="alert alert-info">
+                                Se recomienda editar este código en un editor afin, ya que estos cuadros de texto, no ofrecen
+                                un entorno amigable para la edición de código.
+                                <footer class="blockquote-footer">En futuras ediciones, esto se mejorará.</footer>
+                            </div>
+                            <div class="alert alert-warning">
+                                Si el código ingresado aquí, se encuentra mal construido o contiene llamadas a código
+                                malicioso, es responsabilidad de quién lo genera.
+                                <footer class="blockquote-footer"><strong>Arysoft</strong> no se hace responsable por los daños ocacionados a su sitio por consecuencia de código mal elaborado.</footer>
+                            </div>
+                        </div>
+                        <!-- PAGINAS HIJO -->
+                        <div class="tab-pane fade" id="child" area-labeledby="child-tab" style="min-height: 500px;">
+                            <h4 class="mt-2">Páginas hijo</h4>
+                            <p>
+                                Páginas dependientes de esta página, puede ajustar el orden en que se
+                                muestran en los menus
+                            </p>
+                            @if (Model.PaginasHijo != null && Model.PaginasHijo.Count > 0)
+                            {
+                                <ul id="childMenu" class="list-group col-md-4">
+                                    @foreach (Pagina paginaHijo in Model.PaginasHijo)
+                                    {
+                                        string classColor = string.Empty;
+                                        switch (paginaHijo.Status)
+                                        {
+                                            case PaginaStatus.Nueva:
+                                                classColor = "list-group-item-primary";
+                                                break;
+                                            case PaginaStatus.Publicada:
+                                                //classColor = "text-success"; //"list-group-item-success";
+                                                break;
+                                            case PaginaStatus.Oculta:
+                                                classColor = "list-group-item-secondary";
+                                                break;
+                                            case PaginaStatus.Eliminada:
+                                                classColor = "list-group-item-danger";
+                                                break;
+                                        };
+                                        <li class="list-group-item @classColor" id="@paginaHijo.PaginaID">@paginaHijo.EtiquetaMenu</li>
+                                    }
+                                </ul>
+                            }
+                            else
+                            {
+                                <div class="alert alert-info">
+                                    La página no tiene páginas hijo, para eso, cree una página nueva o en una
+                                    existente y seleccione esta página como <strong>Página padre</strong> en
+                                    los controles del Editor.
+                                </div>
+                                <ul id="childMenu" class="list-group col-md-4">
+                                </ul>
+                            }
+                        </div>
+                    </div>
+
+                </div>
             </div>
         </div>
+        <!-- LATERAL DERECHA -->
+        <div class="col-md-4">
+            <ul class="nav nav-tabs" id="opcionesTab" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <a class="nav-link active" id="opciones-tab" data-toggle="tab" href="#opciones" role="tab" aria-controls="opciones" aria-selected="true">
+                        Opciones
+                    </a>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <a class="nav-link" id="archivos-tab" data-toggle="tab" href="#archivos" role="tab" aria-controls="archivos" aria-selected="false">
+                        Archivos
+                        <span id="archivosTabCount" class="badge badge-primary badge-pill">0</span>
+                    </a>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <a class="nav-link" id="notas-tab" data-toggle="tab" href="#notas" role="tab" aria-controls="notas" aria-selected="false">
+                        Notas
+                        <span id="notasTabCount" class="badge badge-primary badge-pill">0</span>
+                    </a>
+                </li>
+            </ul>
+            <div class="tab-content" id="opcionesTabContent">
+                <!-- OPCIONES -->
+                <div class="tab-pane fade show active" id="opciones" role="tabpanel" aria-labelledby="opciones-tab">
+                    <div class="form-group mt-2">
+                        <div class="alert alert-me-gusta">
+                            <div class="form-row">
+                                <div class="col-md-8 pt-2">
+                                    <h5>
+                                        <i class="bi-hand-thumbs-up-fill"></i>
+                                        Me Gusta:
+                                        <strong id="meGustaStrong">
+                                            @Html.DisplayFor(model => model.MeGusta)
+                                        </strong>
+                                    </h5>
+                                </div>
+                                <div class="col-md-4 text-right">
+                                    <button type="button" id="meGustaResetButton" class="btn btn-outline-light" title="Restablecer a cero"><i class="bi-arrow-counterclockwise"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group mt-2">
+                        <div class="alert alert-visitas">
+                            <div class="form-row">
+                                <div class="col-md-8 pt-2">
+                                    <h5>
+                                        <i class="bi-file-binary"></i>
+                                        Visitas:
+                                        <strong id="visitasStrong">
+                                            @Html.DisplayFor(model => model.ContadorVisitas)
+                                        </strong>
+                                    </h5>
+                                </div>
+                                <div class="col-md-4 text-right">
+                                    <button type="button" id="visitasResetButton" class="btn btn-outline-light" title="Restablecer a cero"><i class="bi-arrow-counterclockwise"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
-        <div class="form-group">
-            @Html.LabelFor(model => model.Titulo, htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.EditorFor(model => model.Titulo, new { htmlAttributes = new { @class = "form-control" } })
-                @Html.ValidationMessageFor(model => model.Titulo, "", new { @class = "text-danger" })
+                    <div class="alert alert-warning">
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.TargetUrl)
+                            @Html.EditorFor(model => model.TargetUrl, new { htmlAttributes = new { @class = "form-control", @aria_describedby = "targetUrlHelpBlock" } })
+                            @Html.ValidationMessageFor(model => model.TargetUrl, "", new { @class = "text-danger" })
+                            <small id="targetUrlHelpBlock" class="form-text text-muted">
+                                Incluir una dirección URL para que la navegación del sitio, sea redireccionada a ese
+                                lugar, en este caso se omitirá el resto del contenido de la página.
+                            </small>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.EtiquetaMenu)
+                        @Html.EditorFor(model => model.EtiquetaMenu, new { htmlAttributes = new { @class = "form-control", @aria_describedby = "EtiquetaMenuHelpBlock" } })
+                        @Html.ValidationMessageFor(model => model.EtiquetaMenu, "", new { @class = "text-danger" })
+                        <small id="EtiquetaMenuHelpBlock" class="form-text text-muted">
+                            Nombre corto de la página, para ser utilizado en los menús.
+                        </small>
+                    </div>
+                    <div class="form-group mt-2">
+                        <div class="custom-control custom-switch">
+                            <input type="checkbox" class="custom-control-input" id="esPrincipalCheckbox" @(Model.EsPrincipal == BoolTipo.Si ? "checked" : "") aria-describedby="EsPrincipalHelpBlock" />
+                            <label class="custom-control-label" for="esPrincipalCheckbox">Es página principal</label>
+                        </div>
+                        <small id="EsPrincipalHelpBlock" class="form-text text-muted">
+                            Establece si la página actual es principal a una sección o grupo de páginas.
+                        </small>
+                    </div>
+                    <div class="form-group mt-2">
+                        <div class="custom-control custom-switch">
+                            <input type="checkbox" class="custom-control-input" id="tieneGaleriaCheckbox" @(Model.TieneGaleria == BoolTipo.Si ? "checked" : "") aria-describedby="tieneGaleriaHelpBlock" />
+                            <label class="custom-control-label" for="tieneGaleriaCheckbox">Tiene galeria</label>
+                        </div>
+                        <small id="tieneGaleriaHelpBlock" class="form-text text-muted">
+                            Indica si algunos de los archivos de imagenes adjuntos, deben formar una galeria dentro de la
+                            noticia, para ello debe incluir el tag <strong>[GALERIA]</strong> dentro del Contenido.
+                        </small>
+                    </div>
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.Idioma)
+                        @Html.EnumDropDownListFor(model => model.Idioma, htmlAttributes: new { @class = "form-control" })
+                        @Html.ValidationMessageFor(model => model.Idioma, "", new { @class = "text-danger" })
+                        <small id="IdiomaHelpBlock" class="form-text text-muted">
+                            Establesca el idioma en el que se esta redactando el contenido, esto sirve para
+                            clasificar la página, para la lectura correcta del visitante en el idioma que
+                            seleccione.
+                        </small>
+                    </div>
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.Target)
+                        @Html.EnumDropDownListFor(model => model.Target, htmlAttributes: new { @class = "form-control" })
+                        @Html.ValidationMessageFor(model => model.Target, "", new { @class = "text-danger" })
+                        <small id="Target" class="form-text text-muted">
+                            Indica el comportamiento que tendra el enlace a esta página, de acuerdo a las opciones
+                            establecidas en la etiqueta &lt;a&gt; en su propiedad <em>target</em>.
+                        </small>
+                    </div>
+                    <div class="form-group">
+                        <div class="custom-control custom-radio custom-control-inline">
+                            <input type="radio" id="statusPublicado" name="status"
+                                   value="@NoticiaStatus.Publicada" @(Model.Status == PaginaStatus.Publicada ? "checked" : "")
+                                   class="custom-control-input" aria-describedby="StatusHelpBlock" />
+                            <label class="custom-control-label" for="statusPublicado">Publicada</label>
+                        </div>
+                        <div class="custom-control custom-radio custom-control-inline">
+                            <input type="radio" id="statusOculto" name="status"
+                                   value="@NoticiaStatus.Oculta" @(Model.Status == PaginaStatus.Oculta ? "checked" : "")
+                                   class="custom-control-input" aria-describedby="StatusHelpBlock" />
+                            <label class="custom-control-label" for="statusOculto">Oculta</label>
+                        </div>
+                        <small id="StatusHelpBlock" class="form-text text-muted">
+                            Establesca si la publicación, se encuentra <span class="badge badge-success">PUBLICADA</span> o se encuentra
+                            <span class="badge badge-secondary">OCULTA</span> a la vista de los visitantes.
+                        </small>
+                    </div>
+                </div>
+
+                <!-- ARCHIVOS -->
+                <div class="tab-pane fade" id="archivos" role="tabpanel" aria-labelledby="archivos-tab">
+                    <h4 class="mt-3">Archivos</h4>
+                    <div class="form-row">
+                        <div class="col-md-8">
+                            <div class="input-group">
+                                <div class="custom-file mr-2">
+                                    <input type="file" class="custom-file-input" id="archivosFileUpload" multiple />
+                                    <label class="custom-file-label" for="archivosFileUpload">Incluir archivo</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="custom-control custom-switch mt-2" title="Incluir en galeria">
+                                <input type="checkbox" class="custom-control-input" id="incluirGaleriaCheckbox" />
+                                <label class="custom-control-label" for="incluirGaleriaCheckbox"></label>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <button type="button" id="subirArchivosButton" class="btn btn-outline-primary">
+                                <i class="bi-upload"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12">
+                            <small class="form-text text-muted mb-2">
+                                Puede incluir archivos a la página ya sean imagenes o documentos, puede indicar si
+                                la imagen pertenece a una galeria dentro de la página.
+                                Los formatos permitidos son (.jpg, .png, .pdf, docx y zip).
+                            </small>
+                        </div>
+                    </div>
+                    <div id="archivosDiv">
+                        @Html.Partial("~/Areas/Admin/Views/Archivos/_archivosList.cshtml", Model.Archivos)
+                    </div>
+                </div>
+
+                <!-- NOTAS -->
+                <div class="tab-pane fade" id="notas" role="tabpanel" aria-labelledby="notas-tab">
+                    <h4 class="mt-3">Notas</h4>
+                    <div class="form-row">
+                        <div class="col-md-10">
+                            <textarea id="notaTextarea" class="form-control"
+                                      style="border-color: #ffc107;"
+                                      placeholder="Escribe para agregar una nota..."></textarea>
+                        </div>
+                        <div class="col-md-2">
+                            <button type="button" id="guardarNotaButton" class="btn btn-outline-warning">
+                                <i class="bi-plus"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div id="notasDiv">
+                        @Html.Partial("~/Areas/Admin/Views/Notas/_notasList.cshtml", Model.Notas)
+                    </div>
+                </div>
             </div>
         </div>
-
-        <div class="form-group">
-            @Html.LabelFor(model => model.IndiceMenu, htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.EditorFor(model => model.IndiceMenu, new { htmlAttributes = new { @class = "form-control" } })
-                @Html.ValidationMessageFor(model => model.IndiceMenu, "", new { @class = "text-danger" })
-            </div>
-        </div>
-
-        <div class="form-group">
-            @Html.LabelFor(model => model.EtiquetaMenu, htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.EditorFor(model => model.EtiquetaMenu, new { htmlAttributes = new { @class = "form-control" } })
-                @Html.ValidationMessageFor(model => model.EtiquetaMenu, "", new { @class = "text-danger" })
-            </div>
-        </div>
-
-        <div class="form-group">
-            @Html.LabelFor(model => model.Resumen, htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.EditorFor(model => model.Resumen, new { htmlAttributes = new { @class = "form-control" } })
-                @Html.ValidationMessageFor(model => model.Resumen, "", new { @class = "text-danger" })
-            </div>
-        </div>
-
-        <div class="form-group">
-            @Html.LabelFor(model => model.HTMLContent, htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.EditorFor(model => model.HTMLContent, new { htmlAttributes = new { @class = "form-control" } })
-                @Html.ValidationMessageFor(model => model.HTMLContent, "", new { @class = "text-danger" })
-            </div>
-        </div>
-
-        <div class="form-group">
-            @Html.LabelFor(model => model.FriendlyUrl, htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.EditorFor(model => model.FriendlyUrl, new { htmlAttributes = new { @class = "form-control" } })
-                @Html.ValidationMessageFor(model => model.FriendlyUrl, "", new { @class = "text-danger" })
-            </div>
-        </div>
-
-        <div class="form-group">
-            @Html.LabelFor(model => model.TargetUrl, htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.EditorFor(model => model.TargetUrl, new { htmlAttributes = new { @class = "form-control" } })
-                @Html.ValidationMessageFor(model => model.TargetUrl, "", new { @class = "text-danger" })
-            </div>
-        </div>
-
-        <div class="form-group">
-            @Html.LabelFor(model => model.Target, htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.EnumDropDownListFor(model => model.Target, htmlAttributes: new { @class = "form-control" })
-                @Html.ValidationMessageFor(model => model.Target, "", new { @class = "text-danger" })
-            </div>
-        </div>
-
-        <div class="form-group">
-            @Html.LabelFor(model => model.TieneGaleria, htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.EnumDropDownListFor(model => model.TieneGaleria, htmlAttributes: new { @class = "form-control" })
-                @Html.ValidationMessageFor(model => model.TieneGaleria, "", new { @class = "text-danger" })
-            </div>
-        </div>
-
-        <div class="form-group">
-            @Html.LabelFor(model => model.ContadorVisitas, htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.EditorFor(model => model.ContadorVisitas, new { htmlAttributes = new { @class = "form-control" } })
-                @Html.ValidationMessageFor(model => model.ContadorVisitas, "", new { @class = "text-danger" })
-            </div>
-        </div>
-
-        <div class="form-group">
-            @Html.LabelFor(model => model.FechaContador, htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.EditorFor(model => model.FechaContador, new { htmlAttributes = new { @class = "form-control" } })
-                @Html.ValidationMessageFor(model => model.FechaContador, "", new { @class = "text-danger" })
-            </div>
-        </div>
-
-        <div class="form-group">
-            @Html.LabelFor(model => model.Idioma, htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.EnumDropDownListFor(model => model.Idioma, htmlAttributes: new { @class = "form-control" })
-                @Html.ValidationMessageFor(model => model.Idioma, "", new { @class = "text-danger" })
-            </div>
-        </div>
-
-        <div class="form-group">
-            @Html.LabelFor(model => model.EsPrincipal, htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.EnumDropDownListFor(model => model.EsPrincipal, htmlAttributes: new { @class = "form-control" })
-                @Html.ValidationMessageFor(model => model.EsPrincipal, "", new { @class = "text-danger" })
-            </div>
-        </div>
-
-        <div class="form-group">
-            @Html.LabelFor(model => model.HTMLHeadScript, htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.EditorFor(model => model.HTMLHeadScript, new { htmlAttributes = new { @class = "form-control" } })
-                @Html.ValidationMessageFor(model => model.HTMLHeadScript, "", new { @class = "text-danger" })
-            </div>
-        </div>
-
-        <div class="form-group">
-            @Html.LabelFor(model => model.HTMLFooterScript, htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.EditorFor(model => model.HTMLFooterScript, new { htmlAttributes = new { @class = "form-control" } })
-                @Html.ValidationMessageFor(model => model.HTMLFooterScript, "", new { @class = "text-danger" })
-            </div>
-        </div>
-
-        <div class="form-group">
-            @Html.LabelFor(model => model.MeGusta, htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.EditorFor(model => model.MeGusta, new { htmlAttributes = new { @class = "form-control" } })
-                @Html.ValidationMessageFor(model => model.MeGusta, "", new { @class = "text-danger" })
-            </div>
-        </div>
-
-        <div class="form-group">
-            @Html.LabelFor(model => model.Status, htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.EnumDropDownListFor(model => model.Status, htmlAttributes: new { @class = "form-control" })
-                @Html.ValidationMessageFor(model => model.Status, "", new { @class = "text-danger" })
-            </div>
-        </div>
-
-        <div class="form-group">
-            @Html.LabelFor(model => model.FechaCreacion, htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.EditorFor(model => model.FechaCreacion, new { htmlAttributes = new { @class = "form-control" } })
-                @Html.ValidationMessageFor(model => model.FechaCreacion, "", new { @class = "text-danger" })
-            </div>
-        </div>
-
-        <div class="form-group">
-            @Html.LabelFor(model => model.FechaActualizacion, htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.EditorFor(model => model.FechaActualizacion, new { htmlAttributes = new { @class = "form-control" } })
-                @Html.ValidationMessageFor(model => model.FechaActualizacion, "", new { @class = "text-danger" })
-            </div>
-        </div>
-
-        <div class="form-group">
-            @Html.LabelFor(model => model.UsuarioActualizacion, htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.EditorFor(model => model.UsuarioActualizacion, new { htmlAttributes = new { @class = "form-control" } })
-                @Html.ValidationMessageFor(model => model.UsuarioActualizacion, "", new { @class = "text-danger" })
-            </div>
-        </div>
-
-        <div class="form-group">
-            <div class="col-md-offset-2 col-md-10">
-                <input type="submit" value="Save" class="btn btn-default" />
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <div class="form-horizontal text-right">
+                <hr />
+                @Html.Raw(
+                     @Html.ActionLink("[cancelar]", "Index", null, new { @class = "btn btn-secondary" }).ToHtmlString()
+                         .Replace("[cancelar]", "<i class='bi-arrow-left-square'></i> Cancelar")
+                )
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi-save"></i> Guardar
+                </button>
             </div>
         </div>
     </div>
 }
 
-<div>
-    @Html.ActionLink("Back to List", "Index")
-</div>
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+
+    <script src="https://cdn.jsdelivr.net/gh/RubaXa/Sortable/Sortable.min.js"></script>
+    <script src="~/Scripts/ckeditor/ckeditor.js"></script>
+
+    <script>
+
+        var urlToCopy = '/@Model.FriendlyUrl';
+
+        CKEDITOR.replace('__content', {
+            height: 500,
+            resize_minHeight: 300,
+            resize_maxHeight: 800
+        });
+        /* config.extraPlugins = 'divarea'; */
+
+        Sortable.create(childMenu, {
+            animation: 100,
+            group: 'listaMenu',
+            draggable: '.list-group-item',
+            handle: '.list-group-item',
+            sort: true,
+            filter: '.sortable-disabled',
+            chosenClass: 'active',
+            onEnd: function (evt) {
+                //alert(evt.newIndex);
+                var menu = document.querySelectorAll('#childMenu>li');
+                var opciones = '';
+                for (var opcion of menu) {
+                    opciones += opcion.getAttribute('id') + ',';
+                }
+                //alert(opciones);
+                opciones = opciones.slice(0, -1); // opciones.substring(0, opciones.length - 1);
+                document.getElementById('OrdenPaginasHijo').value = opciones;
+            }
+        });
+
+        // Copy to clipboard
+
+        // https://stackoverflow.com/questions/400212/how-do-i-copy-to-the-clipboard-in-javascript
+
+        function fallbackCopyTextToClipboard(text) {
+            var textArea = document.createElement("textarea");
+            textArea.value = text;
+
+            // Avoid scrolling to bottom
+            textArea.style.top = "0";
+            textArea.style.left = "0";
+            textArea.style.position = "fixed";
+
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+
+            try {
+                var successful = document.execCommand('copy');
+                var msg = successful ? 'successful' : 'unsuccessful';
+                console.log('Fallback: Copying text command was ' + msg);
+            } catch (err) {
+                console.error('Fallback: Oops, unable to copy', err);
+            }
+
+            document.body.removeChild(textArea);
+        } // fallbackCopyTextToClipboard
+
+        function copyTextToClipboard(text) {
+            if (!navigator.clipboard) {
+                fallbackCopyTextToClipboard(text);
+                return;
+            }
+            navigator.clipboard.writeText(text).then(function () {
+                console.log('Async: Copying to clipboard was successful!');
+            }, function (err) {
+                console.error('Async: Could not copy text: ', err);
+            });
+        }
+
+        // Document.Ready
+
+        $(document).ready(function () {
+
+            // FRIENDLY URL
+
+            $('#Titulo').focusout(function () {
+                var url = '@Url.Action("FriendlyUrl", "Paginas")/@Model.PaginaID';
+                var titulo = $('#Titulo').val();
+
+                // console.log('FriendlyUrl.FocusOut: ' + titulo);
+                $.ajax({
+                    cache: false,
+                    async: true,
+                    url: url,
+                    type: 'POST',
+                    data: {
+                        valor: titulo
+                    },
+                    success: function (result) {
+                        if (result.status === undefined) {
+                            $('#FriendlyUrl').val(result.friendlyUrl);
+                            urlToCopy = '/' + result.friendlyUrl;
+                        } else {
+                            console.log(result.status);
+                        }
+                    },
+                    error: function (err) {
+                        alert(err.statusText);
+                    }
+                });
+            }); // Titulo.FocusOut
+
+            $('#FriendlyUrl').focusout(function () {
+                var url = '@Url.Action("FriendlyUrl", "Paginas")/@Model.PaginaID';
+                var friendlyUrl = $('#FriendlyUrl').val();
+
+                $.ajax({
+                    cache: false,
+                    async: true,
+                    url: url,
+                    type: 'POST',
+                    data: {
+                        valor: friendlyUrl
+                    },
+                    success: function (result) {
+                        if (result.status === undefined) {
+                            $('#FriendlyUrl').val(result.friendlyUrl);
+                            urlToCopy = '/' + result.friendlyUrl;
+                        } else {
+                            console.log(result.status);
+                        }
+                    },
+                    error: function (err) {
+                        alert(err.statusText);
+                    }
+                });
+            }); // Titulo.FocusOut
+
+            // ME GUSTA & VISITAS
+
+            $('#meGustaResetButton').click(function () {
+                $('#meGustaStrong').html('0');
+                $('#MeGusta').val('0');
+            });
+
+            $('#visitasResetButton').click(function () {
+                $('#visitasStrong').html('0');
+                $('#ContadorVisitas').val('0');
+                $('#FechaContador').val(new Date().toLocaleDateString());
+            });
+
+            // TIENE GALERIA
+
+            $('#tieneGaleriaCheckbox').change(function () {
+                if (this.checked) {
+                    // alert('Tiene Galeria');
+                    $('#TieneGaleria').val('@BoolTipo.Si');
+                }
+                else {
+                    // alert('Sin Galeria');
+                    $('#TieneGaleria').val('@BoolTipo.No');
+                }
+            });
+
+            // ES PRINCIPAL
+
+            $('#esPrincipalCheckbox').change(function () {
+                if (this.checked) {
+                    $('#EsPrincipal').val('@BoolTipo.Si');
+                }
+                else {
+                    $('#EsPrincipal').val('@BoolTipo.No');
+                }
+            });
+
+            // STATUS
+
+            $('input[type=radio][name=status]').change(function () {
+                $('#Status').val(this.value);
+            });
+
+            // ARCHIVOS
+
+            $('#subirArchivosButton').attr('disabled', true);
+            $('#archivosFileUpload').change(function () {
+                if ($('#archivosFileUpload').val().length != 0) {
+                    $('#subirArchivosButton').attr('disabled', false);
+                } else {
+                    $('#subirArchivosButton').attr('disabled', true);
+                }
+            });
+
+            $('#subirArchivosButton').click(function () {
+
+                if (window.FormData !== undefined) {
+                    var fileUpload = $('#archivosFileUpload').get(0);
+                    var files = fileUpload.files;
+                    var url = '@Url.Action("AgregarArchivos", "Archivos")/@Model.PaginaID';
+                    var incluirGaleria = $('#incluirGaleriaCheckbox').is(':checked');
+                    var fileData = new FormData();
+
+                    for (var i = 0; i < files.length; i++) {
+                        fileData.append(files[i].name, files[i]);
+                    }
+
+                    fileData.append('incluirGaleria', incluirGaleria);
+                    fileData.append('isPage', 'true');
+                    fileData.append('username', 'xBlaze');
+
+                    $.ajax({
+                        url: url,
+                        type: 'POST',
+                        contentType: false,
+                        processData: false,
+                        data: fileData,
+                        success: function (result) {
+                            if (result.status === undefined) {
+                                $('#archivosDiv').html(result);
+                            } else {
+                                switch (result.status) {
+                                    case "exception":
+                                        alert(result.message);
+                                        break;
+                                    case "notfile":
+                                        alert(result.message);
+                                        break;
+                                    default:
+                                        console.log("SubirArchivosButton (switch default): " + result);
+                                }
+                            }
+                        },
+                        error: function (err) {
+                            alert(err.statusText);
+                        }
+                    });
+                } else {
+                    alert("FormData is not supported.");
+                }
+            }); // subirArchivosButton.click
+
+            // NOTAS
+
+            $('#guardarNotaButton').attr('disabled', true);
+            // https://stackoverflow.com/questions/11338592/how-can-i-bind-to-the-change-event-of-a-textarea-in-jquery
+            $('#notaTextarea').bind('input propertychange', function () {
+
+                if (this.value.length) {
+                    $('#guardarNotaButton').attr('disabled', false);
+                } else {
+                    $('#guardarNotaButton').attr('disabled', true);
+                }
+            });
+
+            $('#guardarNotaButton').click(function () {
+                var url = '@Url.Action("AgregarNota", "Notas")/@Model.PaginaID';
+                var nota = $('#notaTextarea').val();
+
+                $.ajax({
+                    cache: false,
+                    async: true,
+                    url: url,
+                    type: 'POST',
+                    data: {
+                        nota: nota
+                    },
+                    success: function (result) {
+                        if (result.status === undefined) {
+                            $('#notasDiv').html(result);
+                            $('#notaTextarea').val('');
+                            $('#guardarNotaButton').attr('disabled', true);
+                        } else {
+                            switch (result.status) {
+                                case "exception":
+                                    alert(result.message);
+                                    break;
+                                case "notnote":
+                                    alert(result.message);
+                                    break;
+                                default:
+                                    console.log("GuardarNotaButton (switch default): " + result);
+                            }
+                        }
+                    },
+                    error: function (err) {
+                        alert(err.statusText);
+                    }
+                });
+            }); // guardarNotaButton.click
+
+        }); // document.ready
+    </script>
+}

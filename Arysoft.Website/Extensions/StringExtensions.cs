@@ -21,6 +21,24 @@ public static class StringExtension
         return Regex.Replace(value, @"\s+", " ");
     } // ToSingleSpaces
 
+    public static string ToFriendlyUrl(this string value)
+    {
+        // a minúsculas
+        string friendlyUrl = value.ToLower();
+        // acentos de todo tipo
+        byte[] enBytes = Encoding.GetEncoding("ISO-8859-8").GetBytes(friendlyUrl); // https://es.stackoverflow.com/questions/227145/regex-para-quitar-tildes-y-grave-accent-de-un-txt
+        friendlyUrl = Encoding.UTF8.GetString(enBytes);
+        // solo letras, numeros y espacios
+        Regex reg = new Regex("[^a-zA-Z0-9 ]");
+        friendlyUrl = reg.Replace(friendlyUrl, "");
+        // solo espacios simples
+        friendlyUrl = friendlyUrl.ToSingleSpaces();
+        // espacios por guiones medios
+        friendlyUrl = friendlyUrl.Replace(' ', '-');
+
+        return friendlyUrl;
+    }
+
     /// <summary>
     /// 
     /// </summary>

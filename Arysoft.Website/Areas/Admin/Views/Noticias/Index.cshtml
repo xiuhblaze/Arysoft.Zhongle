@@ -1,0 +1,269 @@
+﻿@model PagedList.IPagedList<NoticiaIndexListViewModel>
+
+@using Arysoft.Website.Models;
+@using Arysoft.Website.Areas.Admin.Models;
+@using PagedList.Mvc;
+
+@{
+    ViewBag.Title = "Index";
+}
+
+<div class="modal fade" id="detailsModal" tabindex="-1" aria-labelledby="detailsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content" id="details-modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="detailsModalLabel">Noticia</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" id="details-modal-body">
+                ...
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">...</button>
+            </div>
+        </div> <!-- modal-content -->
+    </div>
+</div>
+
+<h2>Noticias</h2>
+<div class="row">
+    <div class="col-md-12">
+        @using (Html.BeginForm("Index", "Noticias", FormMethod.Get, new { @class = "form-inline mb-2" }))
+        {
+            @Html.Raw(
+                Html.ActionLink("[nuevo]", "Create", null, new { @class = "btn btn-outline-primary mr-3", @title = "Nueva noticia" }).ToHtmlString()
+                    .Replace("[nuevo]", "<i class='bi-file-earmark-fill'></i>")
+            )
+            <label class="sr-only" for="">Buscar</label>
+            @Html.TextBox("buscar", ViewBag.Filtro as string, htmlAttributes: new { @class = "form-control mr-sm-2", @placeholder = "buscar..." })
+            <button type="submit" id="buscarButton" class="btn btn-primary" title="Buscar...">
+                <i class="bi-search"></i>
+            </button>
+        }
+        <div class="alert alert-secondary" role="alert">
+            Total de resultados en la consulta: @ViewBag.Count
+        </div>
+    </div>
+</div>
+@Html.PagedListPager(Model, pagina => Url.Action("Index", new
+    {
+        pagina,
+        orden = ViewBag.Orden,
+        filtro = ViewBag.Filtro
+    })
+)
+<div class="row row-cols-1 row-cols-xl-4 row-cols-lg-3 row-cols-md-2 row-cols-sm-2">
+    @foreach (var item in Model)
+    {
+        string classCard = "card";
+        string imageTag = string.Empty;
+        string classStatusIcon = "";
+        string classGaleriaIcon = "<i class='bi-image text-muted icon' title='Galeria deshabilitada'></i>";
+        string classArchivosIcon = "<i class='bi-paperclip text-muted icon' title='Sin archivos'></i>";
+        string classNotasIcon = "<i class='bi-square-fill text-muted icon' title='Sin notas'></i>";
+        string classMeGustaBadge = "badge badge-primary";
+        string classVisitasBadge = "badge badge-success";
+
+        //if(!string.IsNullOrEmpty(item.ImagenArchivo))
+        if (!string.IsNullOrEmpty(item.ImagenArchivo))
+        {
+            imageTag = "<img src='/Archivos/Noticias/" + item.NoticiaID.ToString() + "/" + item.ImagenArchivo + "' class='card-img-top' alt='Imagen Principal' style='cursor: pointer' onclick='getDetails(\"" + item.NoticiaID + "\")' />";
+        }
+
+        switch (item.Status)
+        {
+            case NoticiaStatus.Nueva:
+                classStatusIcon = "<i class='bi-stars mr-1 text-primary icon' title='Nueva'></i>";
+                classCard += " border-primary";
+                break;
+            case NoticiaStatus.Publicada:
+                classStatusIcon = "<i class='bi-cursor mr-1 text-success icon' title='Publicada'></i>";
+                classCard += " border-success";
+                break;
+            case NoticiaStatus.Oculta:
+                classStatusIcon = "<i class='bi-eye-slash mr-1 icon' title='Oculta'></i>";
+                classCard += " border-muted text-muted";
+                classMeGustaBadge = "badge badge-secondary";
+                classVisitasBadge = "badge badge-secondary";
+                break;
+            case NoticiaStatus.Eliminada:
+                classStatusIcon = "<i class='bi-x-circle mr-1 icon text-danger' title='Eliminada'></i>";
+                classCard += " border-danger text-danger";
+                classMeGustaBadge = "badge badge-danger";
+                classVisitasBadge = "badge badge-danger";
+                break;
+        }
+
+        if (item.TieneGaleria == BoolTipo.Si)
+        {
+            classGaleriaIcon = "<i class='bi-image icon text-success' title='Galeria habilitda'></i>";
+        }
+
+        if (item.ContadorArchivos > 0)
+        {
+            classArchivosIcon = "<i class='bi-paperclip text-info icon' title='" + item.ContadorArchivos + " archivo(s)'></i>";
+        }
+
+        if (item.ContadorNotas > 0)
+        {
+            classNotasIcon = "<i class='bi-square-fill text-warning icon' title='" + item.ContadorNotas + " nota(s)'></i>";
+        }
+
+        <div class="col mb-3">
+            <div class="@classCard">
+                @Html.Raw(imageTag)
+                <div class="card-body" style="cursor: pointer" onclick="getDetails('@item.NoticiaID')">
+                    <p class="card-text mb-0">
+                        @Html.Raw(classStatusIcon)
+                        @Html.Raw(classGaleriaIcon)
+                        @Html.Raw(classNotasIcon)
+                        @Html.Raw(classArchivosIcon)
+                    </p>
+                    <h5 class="card-title">
+                        @Html.DisplayFor(modelItem => item.Titulo)
+                    </h5>
+                    <h6 class="card-subtitle mb-2 text-muted" title="Fecha de publicación">
+                        @Html.DisplayFor(modelItem => item.FechaPublicacion)
+                    </h6>
+                    <p class="card-text">
+                        @if (!string.IsNullOrEmpty(item.FriendlyUrl))
+                        {
+                            <small class="text-success" title="Url amigable">
+                                /Noticias/@Html.DisplayFor(modelItem => item.FriendlyUrl)
+                            </small><br />
+                        }
+                        @Html.DisplayFor(modelItem => item.Resumen)
+                    </p>
+                    <p class="mb-0">
+                        <span class="@classMeGustaBadge">
+                            <i class="bi-hand-thumbs-up-fill"></i>
+                            Me gusta: @Html.DisplayFor(modelItem => item.MeGusta)
+                        </span>
+                        <span class="@classVisitasBadge">
+                            <i class="bi-eye-fill"></i>
+                            Visitas: @Html.DisplayFor(modelItem => item.ContadorVisitas)
+                        </span>
+                    </p>
+                </div>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item text-right">
+                        @if (item.Status != NoticiaStatus.Eliminada)
+                        {
+                            @Html.Raw(
+                                @Html.ActionLink("[editar]", "Edit", new { id = item.NoticiaID }, new { @class = "card-link" }).ToHtmlString()
+                                    .Replace("[editar]", "<i class='bi-pencil-square' style='font-size: 1.2rem;'></i>")
+                            );
+                        }
+
+                        <a href="#" onclick="getDetails('@item.NoticiaID'); return false;" class="card-link">
+                            <i class='bi-info-square' style='font-size: 1.2rem;' title="Detalles"></i>
+                        </a>
+                        <a href="#" onclick="getDelete('@item.NoticiaID'); return false;" class="card-link text-danger">
+                            <i class='bi-x-square' style='font-size: 1.2rem;' title="Eliminar"></i>
+                        </a>
+                    </li>
+                </ul>
+                <div class="card-footer">
+                    <small class="text-muted">Autor: @Html.DisplayFor(modelItem => item.Autor)</small>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@Html.PagedListPager(Model, pagina => Url.Action("Index", new
+    {
+        pagina,
+        orden = ViewBag.Orden,
+        filtro = ViewBag.Filtro
+    })
+)
+
+@section scripts {
+
+    <script>
+        var modalDetailsOriginalContent = $('#details-modal-content').html();
+
+        $(document).ready(function () {
+
+            $('#detailsModal').on('hidden.bs.modal', function (e) {
+
+                $('#details-modal-content').html(modalDetailsOriginalContent);
+            })
+        });
+
+        function getDetails(id) {
+            var url = '@Url.Action("Details", "Noticias")/' + id;
+
+            $('#detailsModal').modal('show');
+            $.ajax({
+                cache: false,
+                async: true,
+                type: 'get',
+                url: url,
+                data: {},
+                beforeSend: function () {
+                    $('#details-modal-body').html('<p class="text-center" style="margin: 50px;"><img src="@Url.Content("~/Images/ajax-loader.gif")" /></p>');
+                },
+                success: function (vista) {
+                    switch (vista) {
+                        case "BadRequest":
+                            alert('No se recibió un identificador de la noticia');
+                            $('#detailsModal').modal('hide');
+                            $('#details-modal-content').html(modalDetailsOriginalContent);
+                            break;
+                        case "HttpNotFound":
+                            alert('No se encontró la noticia solicitada');
+                            $('#detailsModal').modal('hide');
+                            $('#details-modal-content').html(modalDetailsOriginalContent);
+                            break;
+                        default:
+                            $('#details-modal-content').html(vista);
+                            break;
+                    }
+                },
+                error: function (xhr, status, error) {
+                    alert('A ocurrido una excepción: ' + status + '\n error: ' + error);
+                }
+            });
+        } // getDetails
+
+        function getDelete(id) {
+            var url = '@Url.Action("Delete", "Noticias")/' + id;
+
+            $('#detailsModal').modal('show');
+            $.ajax({
+                cache: false,
+                async: true,
+                type: 'get',
+                url: url,
+                data: {},
+                beforeSend: function () {
+                    $('#details-modal-body').html('<p class="text-center" style="margin: 50px;"><img src="@Url.Content("~/Images/ajax-loader.gif")" /></p>');
+                },
+                success: function (vista) {
+                    switch (vista) {
+                        case "BadRequest":
+                            alert('No se recibió un identificador de la noticia');
+                            $('#detailsModal').modal('hide');
+                            $('#details-modal-content').html(modalDetailsOriginalContent);
+                            break;
+                        case "HttpNotFound":
+                            alert('No se encontró la noticia solicitada');
+                            $('#detailsModal').modal('hide');
+                            $('#details-modal-content').html(modalDetailsOriginalContent);
+                            break;
+                        default:
+                            $('#details-modal-content').html(vista);
+                            break;
+                    }
+                },
+                error: function (xhr, status, error) {
+                    alert('A ocurrido una excepción: ' + status + '\n error: ' + error);
+                }
+            });
+        } // getDelete
+    </script>
+}

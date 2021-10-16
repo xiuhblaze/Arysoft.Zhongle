@@ -69,6 +69,11 @@ namespace Arysoft.Website.Models
 
     public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     {
+        public DbSet<Archivo> Archivos { get; set; }
+        public DbSet<Pagina> Paginas { get; set; }
+        public DbSet<Nota> Notas { get; set; }
+        public DbSet<Noticia> Noticias { get; set; }
+        public DbSet<Opcion> Opciones { get; set; }
         //public DbSet<Auditoria> Auditorias { get; set; }
         //public DbSet<Calle> Calles { get; set; }        
         //public DbSet<Casilla> Casillas { get; set; }
@@ -170,6 +175,5 @@ namespace Arysoft.Website.Models
 
         } // OnModelCreating        
 
-        public System.Data.Entity.DbSet<Arysoft.Website.Models.Pagina> Paginas { get; set; }
     }
 }
