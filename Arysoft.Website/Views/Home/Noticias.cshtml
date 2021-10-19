@@ -1,0 +1,100 @@
+﻿@using Arysoft.Website.Models;
+@using PagedList.Mvc;
+
+@model PagedList.IPagedList<NoticiasListViewModel>
+
+@{
+    ViewBag.Title = "Noticias";
+}
+
+<div class="container mt-4">
+    <div class="jumbotron text-white mb-0">
+        <h1>Noticias</h1>
+    </div>
+    <div class="row">
+        <div class="col-md-9">
+            @Html.PagedListPager(Model, pagina => Url.Action("Index", new
+                {
+                    pagina,
+                    filtro = ViewBag.Filtro
+                })
+            )
+            <ul class="list-group list-group-flush">
+                @foreach (var item in Model)
+                {
+                    <li class="list-group-item list-group-item-action">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <img src="~/Archivos/Noticias/@item.NoticiaID/@item.ImagenArchivo" class="img-fluid" />
+                            </div>
+                            <div class="col-md-8">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h5><a href="/noticias/@item.FriendlyUrl">@item.Titulo</a></h5>
+                                    <small>
+                                        <span class="badge badge-primary">
+                                            Me gusta: @Html.DisplayFor(modelItem => item.MeGusta)
+                                        </span>
+                                        <span class="badge badge-success">
+                                            Vistas: @Html.DisplayFor(modelItem => item.ContadorVisitas)
+                                        </span>
+                                    </small>
+                                </div>
+                                <p class="mb-1">@item.Resumen</p>
+                                <div class="d-flex w-100 justify-content-between">
+                                    <small>@Html.DisplayFor(modelItem => item.FechaPublicacion)</small>
+                                    <small><em>@Html.DisplayFor(modelItem => item.Autor)</em></small>
+                                </div>
+                            </div>
+                        </div>
+                    </li>
+                }
+            </ul>
+            @Html.PagedListPager(Model, pagina => Url.Action("Index", new
+                {
+                    pagina,
+                    filtro = ViewBag.Filtro
+                })
+            )
+        </div>
+        <div class="col-md-3 pt-4">
+            <div id="noticiasTopDIV"></div>
+        </div>
+    </div>
+
+</div>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+
+    <script>
+
+        const obtenerNoticiasTop = (cantidad, tipo) => {
+            var url = '@Url.Action("NoticiasTop", "Home")';
+
+            $.ajax({
+                cache: false,
+                async: true,
+                url: url,
+                type: 'POST',
+                data: {
+                    cantidad: cantidad,
+                    tipo: tipo,
+                    conRetorno: false
+                },
+                success: function (result) {
+                    if (result.status === undefined) {
+                        $('#noticiasTopDIV').html(result);
+                    } else {
+                        console.log(result.status);
+                    }
+                },
+                error: function (err) {
+                    alert(err.statusText);
+                }
+
+            });
+        };
+
+        obtenerNoticiasTop(5, 1);
+    </script>
+}

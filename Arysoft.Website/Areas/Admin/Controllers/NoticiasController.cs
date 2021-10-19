@@ -14,6 +14,7 @@ using PagedList;
 
 namespace Arysoft.Website.Areas.Admin.Controllers
 {
+    [Authorize]
     public class NoticiasController : Controller
     {
         private ApplicationDbContext db = new ApplicationDbContext();

@@ -1,0 +1,14 @@
+﻿@using Arysoft.Website.Models;
+
+@model IEnumerable<NoticiasListViewModel>
+
+<div class="list-group">
+    <a href="/noticias" class="list-group-item list-group-item-action">
+        <i class="bi-arrow-90deg-left"></i>
+        Noticias
+    </a>
+    @foreach (NoticiasListViewModel noticia in Model)
+    {
+        <a href="/noticias/@noticia.FriendlyUrl" class="list-group-item list-group-item-action">@noticia.Titulo</a>
+    }
+</div>

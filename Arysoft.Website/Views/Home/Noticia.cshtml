@@ -1,0 +1,77 @@
+﻿@model Arysoft.Website.Models.Noticia
+
+@using Arysoft.Website.Models;
+
+@{
+    string imagenPrincipalTag = string.Empty;
+
+    ViewBag.Title = "Noticia";
+
+    if (!string.IsNullOrEmpty(Model.ImagenArchivo))
+    {
+        imagenPrincipalTag = "<img src='/Archivos/Noticias/" + Model.NoticiaID.ToString() + "/" + Model.ImagenArchivo + "' class='card-img-top' alt='" + Html.DisplayNameFor(model => model.ImagenArchivo) + "' />";
+    }
+}
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-9">
+            <div class="card">
+                @Html.Raw(imagenPrincipalTag)
+                <div class="card-body">
+                    <h1 class="display-4" title="@Html.DisplayNameFor(model => model.Titulo)">
+                        @Html.DisplayFor(model => model.Titulo)
+                    </h1>
+                    <p class="lead" title="@Html.DisplayNameFor(model => model.Resumen)">
+                        @Html.DisplayFor(model => model.Resumen)
+                    </p>
+                    <div title="@Html.DisplayNameFor(model => model.HTMLContent)">
+                        @Html.Raw(Model.HTMLContent.Replace("<img ", "<img class='img-fluid' "))
+                    </div>
+                    <p class="text-right" title="@Html.DisplayNameFor(model => model.Autor)">
+                        <em>@Html.DisplayFor(model => model.Autor)</em>
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div id="noticiasTopDIV"></div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+
+    <script>
+
+        const obtenerNoticiasTop = (cantidad, tipo) => {
+            var url = '@Url.Action("NoticiasTop", "Home")';
+
+            $.ajax({
+                cache: false,
+                async: true,
+                url: url,
+                type: 'POST',
+                data: {
+                    cantidad: cantidad,
+                    tipo: tipo,
+                    conRetorno: true
+                },
+                success: function (result) {
+                    if (result.status === undefined) {
+                        $('#noticiasTopDIV').html(result);
+                    } else {
+                        console.log(result.status);
+                    }
+                },
+                error: function (err) {
+                    alert(err.statusText);
+                }
+
+            });
+        };
+
+        obtenerNoticiasTop(5, 1);
+    </script>
+}

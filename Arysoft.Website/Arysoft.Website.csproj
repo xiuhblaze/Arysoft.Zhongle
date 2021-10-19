@@ -315,6 +315,7 @@
     <Content Include="Areas\Admin\Views\Noticias\Details.cshtml" />
     <Content Include="Areas\Admin\Views\Noticias\Edit.cshtml" />
     <Content Include="Areas\Admin\Views\Noticias\Index.cshtml" />
+    <Content Include="Areas\Admin\Views\Noticias\_details.cshtml" />
     <None Include="Properties\PublishProfiles\ciudadanos.arysoft.com.mx - Web Deploy.pubxml" />
     <None Include="Properties\PublishProfiles\FolderProfile.pubxml" />
     <None Include="Properties\PublishProfiles\movimientozapotlan.com - Web Deploy.pubxml" />
@@ -524,6 +525,10 @@
     <Content Include="Scripts\jquery-3.6.0.slim.min.map" />
     <Content Include="Scripts\jquery-3.6.0.min.map" />
     <Content Include="Scripts\jquery.form.min.js.map" />
+    <Content Include="Views\Home\_noticiasTop.cshtml" />
+    <Content Include="Views\Home\Pagina.cshtml" />
+    <Content Include="Views\Home\Noticias.cshtml" />
+    <Content Include="Views\Home\Noticia.cshtml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>

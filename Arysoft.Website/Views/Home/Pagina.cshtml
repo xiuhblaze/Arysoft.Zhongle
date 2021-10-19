@@ -1,0 +1,54 @@
+﻿@model Arysoft.Website.Models.Pagina
+
+@using Arysoft.Website.Models;
+
+@{
+    ViewBag.Title = Model.Titulo;
+}
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="jumbotron" style="background-color: #019DBE;">
+                <h1 class="display-3 text-white">@Model.Titulo</h1>
+                @if (!string.IsNullOrEmpty(Model.Resumen))
+                {
+                    <p class="lead text-white-50">@Model.Resumen</p>
+                }
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-9 mb-3">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item" aria-current="page">
+                        <a href="/">Inicio</a>
+                    </li>
+                </ol>
+            </nav>
+            @Html.Raw(Model.HTMLContent.Replace("<img ", "<img class='img-fluid' "))
+        </div>
+        <div class="col-md-3">
+            <div class="list-group">
+                @if (Model.PaginaPadre != null)
+                {
+                    <a href="/@Model.PaginaPadre.FriendlyUrl" class="list-group-item  list-group-item-action" title="Regresar">
+                        <i class="bi-arrow-90deg-left"></i>
+                        @Model.PaginaPadre.EtiquetaMenu
+                    </a>
+                }
+                @foreach (Pagina paginaHijo in Model.PaginasHijo)
+                {
+                    if (paginaHijo.Status == PaginaStatus.Publicada)
+                    {
+                        <a href="/@paginaHijo.FriendlyUrl" class="list-group-item list-group-item-action">
+                            @paginaHijo.EtiquetaMenu
+                        </a>
+                    }
+                }
+            </div>
+        </div>
+    </div>
+
+</div>

@@ -6,6 +6,7 @@ using System.Web.Mvc;
 
 namespace Arysoft.Website.Areas.Admin.Controllers
 {
+    [Authorize]
     public class AdminController : Controller
     {
         // GET: Admin/Admin

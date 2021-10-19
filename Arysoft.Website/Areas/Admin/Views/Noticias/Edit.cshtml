@@ -1,149 +1,645 @@
-﻿@model Arysoft.Website.Models.Noticia
+﻿@using Arysoft.Website.Areas.Admin.Models;
+@using Arysoft.Website.Models;
+
+@model NoticiaEditViewModel
 
 @{
-    ViewBag.Title = "Edit";
+    bool esNueva = Model.Status == NoticiaStatus.Ninguno;
+    string titleSmall = "EDITAR";
+    string classCard = "card";
+    string imagenPrincipalUrl = string.Empty;
+
+    ViewBag.Title = "Editar";
+
+    if (esNueva)
+    {
+        titleSmall = "NUEVA";
+        ViewBag.Title = "Nueva";
+    }
+
+    switch (Model.Status)
+    {
+        case NoticiaStatus.Ninguno:
+        case NoticiaStatus.Nueva:
+            classCard = "card border-primary";
+            break;
+        case NoticiaStatus.Publicada:
+            classCard = "card border-success";
+            break;
+        case NoticiaStatus.Oculta:
+            classCard = "card border-secondary";
+            break;
+        case NoticiaStatus.Eliminada:
+            classCard = "card border-danger";
+            break;
+    }
+
+    if (!string.IsNullOrEmpty(Model.ImagenArchivo))
+    {
+        imagenPrincipalUrl = "/Archivos/Noticias/" + Model.NoticiaID.ToString() + "/" + Model.ImagenArchivo;
+    }
+
 }
 
-<h2>Edit</h2>
-
+<div class="row">
+    <div class="col-12">
+        <h3 class="mt-2">Noticia <small>@titleSmall</small></h3>
+        <hr />
+    </div>
+</div>
 @using (Html.BeginForm())
 {
     @Html.AntiForgeryToken()
-    
-    <div class="form-horizontal">
-        <h4>Noticia</h4>
-        <hr />
-        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
-        @Html.HiddenFor(model => model.NoticiaID)
+    <div class="row">
+        <!-- EDITOR -->
+        <div class="col-8">
+            <div class="@classCard shadow">
+                <img id="imagenPrincipalView" src="@imagenPrincipalUrl" class="card-img-top" alt="Imagen Principal" />
+                <div class="card-body">
+                    <div class="form-horizontal">
+                        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                        @Html.HiddenFor(model => model.NoticiaID)
+                        @Html.HiddenFor(model => model.TieneGaleria)
+                        @Html.HiddenFor(model => model.ContadorVisitas)
+                        @Html.HiddenFor(model => model.ImagenArchivo)
+                        @Html.HiddenFor(model => model.MeGusta)
+                        @Html.HiddenFor(model => model.Status)
+                        @Html.HiddenFor(model => model.FechaCreacion)
 
-        <div class="form-group">
-            @Html.LabelFor(model => model.Titulo, htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.EditorFor(model => model.Titulo, new { htmlAttributes = new { @class = "form-control" } })
-                @Html.ValidationMessageFor(model => model.Titulo, "", new { @class = "text-danger" })
+                        <div class="form-group mb-0">
+                            @*@Html.LabelFor(model => model.Titulo)*@
+                            @Html.EditorFor(model => model.Titulo, new { htmlAttributes = new { @class = "form-control noticia-titulo p-0", @title = "Título de la noticia", @placeholder = "Título de la noticia" } })
+                            @Html.ValidationMessageFor(model => model.Titulo, "", new { @class = "text-danger" })
+                        </div>
+
+                        <div class="form-group">
+                            @*@Html.LabelFor(model => model.Resumen)*@
+                            @*@Html.EditorFor(model => model.__resumen, new { htmlAttributes = new { @class = "form-control noticia-resumen p-0", @placeholder = "Resumen" } })
+                            @Html.ValidationMessageFor(model => model.__resumen, "", new { @class = "text-danger" })*@
+                            <textarea id="__resumen" name="__resumen" class="form-control noticia-resumen p-0" placeholder="Resumen">@Html.Raw(Model.__resumen)</textarea>
+                        </div>
+
+                        <div class="form-group">
+                            @*@Html.LabelFor(model => model.HTMLContent)*@
+                            @*@Html.EditorFor(model => model.__content, new { htmlAttributes = new { @class = "form-control" } })
+                            @Html.ValidationMessageFor(model => model.__content, "", new { @class = "text-danger" })*@
+                            <textarea id="__content" name="__content" class="form-control">@Html.Raw(Model.__content)</textarea>
+                        </div>
+
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.Autor)
+                            @Html.EditorFor(model => model.Autor, new { htmlAttributes = new { @class = "form-control", @placeholder = "Autor" } })
+                            @Html.ValidationMessageFor(model => model.Autor, "", new { @class = "text-danger" })
+                        </div>
+
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.FriendlyUrl)
+                            <div class="input-group">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text">http://zhongle.com/Noticias/</span>
+                                </div>
+                                @Html.EditorFor(model => model.FriendlyUrl, new { htmlAttributes = new { @class = "form-control", @title = "URL Amigable", placeholder = "url-amigable-basada-en-el-titulo", @aria_describedby = "FriendlyUrlHelpBlock" } })
+                                <div class="input-group-append">
+                                    <button id="copyFriendlyUrlButton"
+                                            class="btn btn-outline-secondary"
+                                            type="button"
+                                            title="Copiar la url al portapapeles"
+                                            onclick="copyTextToClipboard(urlToCopy);">
+                                        <i class="bi-files"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            @Html.ValidationMessageFor(model => model.FriendlyUrl, "", new { @class = "text-danger" })
+                            <small id="FriendlyUrlHelpBlock" class="form-text text-muted">
+                                Url amigable, generada automáticamente por el título, puede editarla, sin embargo se validará
+                                para evitar títulos duplicados.
+                            </small>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
+        <!-- LATERAL DERECHA -->
+        <div class="col-4">
+            <ul class="nav nav-tabs" id="opcionesTab" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <a class="nav-link active" id="opciones-tab" data-toggle="tab" href="#opciones" role="tab" aria-controls="opciones" aria-selected="true">
+                        Opciones
+                    </a>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <a class="nav-link" id="archivos-tab" data-toggle="tab" href="#archivos" role="tab" aria-controls="archivos" aria-selected="false">
+                        Archivos
+                        <span id="archivosTabCount" class="badge badge-primary badge-pill">0</span>
+                    </a>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <a class="nav-link" id="notas-tab" data-toggle="tab" href="#notas" role="tab" aria-controls="notas" aria-selected="false">
+                        Notas
+                        <span id="notasTabCount" class="badge badge-primary badge-pill">0</span>
+                    </a>
+                </li>
+            </ul>
+            <div class="tab-content" id="opcionesTabContent">
+                <!-- OPCIONES -->
+                <div class="tab-pane fade show active" id="opciones" role="tabpanel" aria-labelledby="opciones-tab">
+                    <div class="form-group mt-2">
+                        <div class="alert alert-me-gusta">
+                            <div class="form-row">
+                                <div class="col-md-8 pt-2">
+                                    <h5>
+                                        <i class="bi-hand-thumbs-up-fill"></i>
+                                        Me Gusta:
+                                        <strong id="meGustaStrong">
+                                            @Html.DisplayFor(model => model.MeGusta)
+                                        </strong>
+                                    </h5>
+                                </div>
+                                <div class="col-md-4 text-right">
+                                    <button type="button" id="meGustaResetButton" class="btn btn-outline-light" title="Restablecer a cero"><i class="bi-arrow-counterclockwise"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group mt-2">
+                        <div class="alert alert-visitas">
+                            <div class="form-row">
+                                <div class="col-md-8 pt-2">
+                                    <h5>
+                                        <i class="bi-hand-thumbs-up-fill"></i>
+                                        Visitas:
+                                        <strong id="visitasStrong">
+                                            @Html.DisplayFor(model => model.ContadorVisitas)
+                                        </strong>
+                                    </h5>
+                                </div>
+                                <div class="col-md-4 text-right">
+                                    <button type="button" id="visitasResetButton" class="btn btn-outline-light" title="Restablecer a cero"><i class="bi-arrow-counterclockwise"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="mr-2">Imagen Principal</label>
+                        <div class="form-row">
+                            <div class="col-md-10">
+                                <div class="input-group">
+                                    <div class="custom-file">
+                                        <input type="file" class="custom-file-input" id="imagenPrincipalFileUpload" />
+                                        <label class="custom-file-label" for="imagenPrincipalFileUpload">Selecciona una imagen</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <button type="button" id="subirImagenPrincipalButton" class="btn btn-outline-primary"><i class="bi-upload"></i></button>
+                            </div>
+                        </div>
+                        <small class="form-text text-muted">
+                            Seleccione de su equipo, la imagen principal a subir en la noticia, se recomienda
+                            que sea de una resolución de 1170x380 pixeles para mantener una uniformidad en las
+                            imágenes de las noticias.
+                        </small>
+                    </div>
+                    <div class="form-group mt-2">
+                        <div class="custom-control custom-switch">
+                            <input type="checkbox" class="custom-control-input" id="tieneGaleriaCheckbox" @(Model.TieneGaleria == BoolTipo.Si ? "checked" : "") aria-describedby="tieneGaleriaHelpBlock" />
+                            <label class="custom-control-label" for="tieneGaleriaCheckbox">Tiene galeria</label>
+                        </div>
+                        <small id="tieneGaleriaHelpBlock" class="form-text text-muted">
+                            Indica si algunos de los archivos de imagenes adjuntos, deben formar una galeria dentro de la
+                            noticia, para ello debe incluir el tag <strong>[GALERIA]</strong> dentro del Contenido.
+                        </small>
+                    </div>
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.Idioma)
+                        @Html.EnumDropDownListFor(model => model.Idioma, htmlAttributes: new { @class = "form-control" })
+                        @Html.ValidationMessageFor(model => model.Idioma, "", new { @class = "text-danger" })
+                        <small id="IdiomaHelpBlock" class="form-text text-muted">
+                            Establesca el idioma en el que se esta redactando el contenido, esto sirve para
+                            clasificar la noticia, para la lectura correcta del visitante en el idioma que
+                            seleccione.
+                        </small>
+                    </div>
 
-        <div class="form-group">
-            @Html.LabelFor(model => model.Resumen, htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.EditorFor(model => model.Resumen, new { htmlAttributes = new { @class = "form-control" } })
-                @Html.ValidationMessageFor(model => model.Resumen, "", new { @class = "text-danger" })
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.FechaPublicacion)
+                        @Html.EditorFor(model => model.FechaPublicacion, new { htmlAttributes = new { @class = "form-control" } })
+                        @Html.ValidationMessageFor(model => model.FechaPublicacion, "", new { @class = "text-danger" })
+                        <small id="FechaPublicacionHelpBlock" class="form-text text-muted">
+                            Indique la fecha en que se generá la noticia, esto es indistinto cuando se genera
+                            el registro de la noticia en el sistema.
+                        </small>
+                    </div>
+                    <div class="form-group">
+                        <div class="custom-control custom-radio custom-control-inline">
+                            <input type="radio" id="statusPublicado" name="status"
+                                   value="@NoticiaStatus.Publicada" @(Model.Status == NoticiaStatus.Publicada ? "checked" : "")
+                                   class="custom-control-input" aria-describedby="StatusHelpBlock" />
+                            <label class="custom-control-label" for="statusPublicado">Publicada</label>
+                        </div>
+                        <div class="custom-control custom-radio custom-control-inline">
+                            <input type="radio" id="statusOculto" name="status"
+                                   value="@NoticiaStatus.Oculta" @(Model.Status == NoticiaStatus.Oculta ? "checked" : "")
+                                   class="custom-control-input" aria-describedby="StatusHelpBlock" />
+                            <label class="custom-control-label" for="statusOculto">Oculta</label>
+                        </div>
+                        <small id="StatusHelpBlock" class="form-text text-muted">
+                            Establesca si la publicación, se encuentra <span class="badge badge-success">PUBLICADA</span> o se encuentra
+                            <span class="badge badge-secondary">OCULTA</span> a la vista de los visitantes.
+                        </small>
+                    </div>
+                </div>
+
+                <!-- ARCHIVOS -->
+                <div class="tab-pane fade" id="archivos" role="tabpanel" aria-labelledby="archivos-tab">
+                    <h4 class="mt-3">Archivos</h4>
+                    <div class="form-row">
+                        <div class="col-md-8">
+                            <div class="input-group">
+                                <div class="custom-file mr-2">
+                                    <input type="file" class="custom-file-input" id="archivosFileUpload" multiple />
+                                    <label class="custom-file-label" for="archivosFileUpload">Incluir archivo</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="custom-control custom-switch mt-2" title="Incluir en galeria">
+                                <input type="checkbox" class="custom-control-input" id="incluirGaleriaCheckbox" />
+                                <label class="custom-control-label" for="incluirGaleriaCheckbox"></label>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <button type="button" id="subirArchivosButton" class="btn btn-outline-primary">
+                                <i class="bi-upload"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12">
+                            <small class="form-text text-muted mb-2">
+                                Puede incluir archivos a la noticia ya sean imagenes o documentos, puede indicar si
+                                la imagen pertenece a una galeria dentro de la noticia.
+                                Los formatos permitidos son (.jpg, .png, .pdf, docx y zip).
+                            </small>
+                        </div>
+                    </div>
+                    <div id="archivosDiv">
+                        @Html.Partial("~/Areas/Admin/Views/Archivos/_archivosList.cshtml", Model.Archivos)
+                    </div>
+                </div>
+
+                <!-- NOTAS -->
+                <div class="tab-pane fade" id="notas" role="tabpanel" aria-labelledby="notas-tab">
+                    <h4 class="mt-3">Notas</h4>
+                    <div class="form-row">
+                        <div class="col-md-10">
+                            <textarea id="notaTextarea" class="form-control"
+                                      style="border-color: #ffc107;"
+                                      placeholder="Escribe para agregar una nota..."></textarea>
+                        </div>
+                        <div class="col-md-2">
+                            <button type="button" id="guardarNotaButton" class="btn btn-outline-warning">
+                                <i class="bi-plus"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div id="notasDiv">
+                        @Html.Partial("~/Areas/Admin/Views/Notas/_notasList.cshtml", Model.Notas)
+                    </div>
+                </div>
             </div>
         </div>
-
-        <div class="form-group">
-            @Html.LabelFor(model => model.HTMLContent, htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.EditorFor(model => model.HTMLContent, new { htmlAttributes = new { @class = "form-control" } })
-                @Html.ValidationMessageFor(model => model.HTMLContent, "", new { @class = "text-danger" })
-            </div>
-        </div>
-
-        <div class="form-group">
-            @Html.LabelFor(model => model.FriendlyUrl, htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.EditorFor(model => model.FriendlyUrl, new { htmlAttributes = new { @class = "form-control" } })
-                @Html.ValidationMessageFor(model => model.FriendlyUrl, "", new { @class = "text-danger" })
-            </div>
-        </div>
-
-        <div class="form-group">
-            @Html.LabelFor(model => model.Autor, htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.EditorFor(model => model.Autor, new { htmlAttributes = new { @class = "form-control" } })
-                @Html.ValidationMessageFor(model => model.Autor, "", new { @class = "text-danger" })
-            </div>
-        </div>
-
-        <div class="form-group">
-            @Html.LabelFor(model => model.TieneGaleria, htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.EnumDropDownListFor(model => model.TieneGaleria, htmlAttributes: new { @class = "form-control" })
-                @Html.ValidationMessageFor(model => model.TieneGaleria, "", new { @class = "text-danger" })
-            </div>
-        </div>
-
-        <div class="form-group">
-            @Html.LabelFor(model => model.ContadorVisitas, htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.EditorFor(model => model.ContadorVisitas, new { htmlAttributes = new { @class = "form-control" } })
-                @Html.ValidationMessageFor(model => model.ContadorVisitas, "", new { @class = "text-danger" })
-            </div>
-        </div>
-
-        <div class="form-group">
-            @Html.LabelFor(model => model.Idioma, htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.EnumDropDownListFor(model => model.Idioma, htmlAttributes: new { @class = "form-control" })
-                @Html.ValidationMessageFor(model => model.Idioma, "", new { @class = "text-danger" })
-            </div>
-        </div>
-
-        <div class="form-group">
-            @Html.LabelFor(model => model.FechaPublicacion, htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.EditorFor(model => model.FechaPublicacion, new { htmlAttributes = new { @class = "form-control" } })
-                @Html.ValidationMessageFor(model => model.FechaPublicacion, "", new { @class = "text-danger" })
-            </div>
-        </div>
-
-        <div class="form-group">
-            @Html.LabelFor(model => model.ImagenArchivo, htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.EditorFor(model => model.ImagenArchivo, new { htmlAttributes = new { @class = "form-control" } })
-                @Html.ValidationMessageFor(model => model.ImagenArchivo, "", new { @class = "text-danger" })
-            </div>
-        </div>
-
-        <div class="form-group">
-            @Html.LabelFor(model => model.MeGusta, htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.EditorFor(model => model.MeGusta, new { htmlAttributes = new { @class = "form-control" } })
-                @Html.ValidationMessageFor(model => model.MeGusta, "", new { @class = "text-danger" })
-            </div>
-        </div>
-
-        <div class="form-group">
-            @Html.LabelFor(model => model.Status, htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.EnumDropDownListFor(model => model.Status, htmlAttributes: new { @class = "form-control" })
-                @Html.ValidationMessageFor(model => model.Status, "", new { @class = "text-danger" })
-            </div>
-        </div>
-
-        <div class="form-group">
-            @Html.LabelFor(model => model.FechaCreacion, htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.EditorFor(model => model.FechaCreacion, new { htmlAttributes = new { @class = "form-control" } })
-                @Html.ValidationMessageFor(model => model.FechaCreacion, "", new { @class = "text-danger" })
-            </div>
-        </div>
-
-        <div class="form-group">
-            @Html.LabelFor(model => model.FechaActualizacion, htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.EditorFor(model => model.FechaActualizacion, new { htmlAttributes = new { @class = "form-control" } })
-                @Html.ValidationMessageFor(model => model.FechaActualizacion, "", new { @class = "text-danger" })
-            </div>
-        </div>
-
-        <div class="form-group">
-            @Html.LabelFor(model => model.UsuarioActualizacion, htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.EditorFor(model => model.UsuarioActualizacion, new { htmlAttributes = new { @class = "form-control" } })
-                @Html.ValidationMessageFor(model => model.UsuarioActualizacion, "", new { @class = "text-danger" })
-            </div>
-        </div>
-
-        <div class="form-group">
-            <div class="col-md-offset-2 col-md-10">
-                <input type="submit" value="Save" class="btn btn-default" />
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <div class="form-horizontal text-right">
+                <hr />
+                @Html.Raw(
+                     @Html.ActionLink("[cancelar]", "Index", null, new { @class = "btn btn-secondary" }).ToHtmlString()
+                         .Replace("[cancelar]", "<i class='bi-arrow-left-square'></i> Cancelar")
+                )
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi-save"></i> Guardar
+                </button>
             </div>
         </div>
     </div>
 }
 
-<div>
-    @Html.ActionLink("Back to List", "Index")
-</div>
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+
+    <script src="~/Scripts/ckeditor/ckeditor.js"></script>
+
+    <script>
+
+        var urlToCopy = '/@Model.FriendlyUrl';
+
+        CKEDITOR.replace('__content', {
+            height: 500,
+            resize_minHeight: 300,
+            resize_maxHeight: 800
+        });
+
+        // Copy to clipboard
+
+        // https://stackoverflow.com/questions/400212/how-do-i-copy-to-the-clipboard-in-javascript
+
+        function fallbackCopyTextToClipboard(text) {
+            var textArea = document.createElement("textarea");
+            textArea.value = text;
+
+            // Avoid scrolling to bottom
+            textArea.style.top = "0";
+            textArea.style.left = "0";
+            textArea.style.position = "fixed";
+
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+
+            try {
+                var successful = document.execCommand('copy');
+                var msg = successful ? 'successful' : 'unsuccessful';
+                console.log('Fallback: Copying text command was ' + msg);
+            } catch (err) {
+                console.error('Fallback: Oops, unable to copy', err);
+            }
+
+            document.body.removeChild(textArea);
+        } // fallbackCopyTextToClipboard
+
+        function copyTextToClipboard(text) {
+            if (!navigator.clipboard) {
+                fallbackCopyTextToClipboard(text);
+                return;
+            }
+            navigator.clipboard.writeText(text).then(function () {
+                console.log('Async: Copying to clipboard was successful!');
+            }, function (err) {
+                console.error('Async: Could not copy text: ', err);
+            });
+        }
+
+        $(document).ready(function () {
+
+            // FRIENDLY URL
+
+            $('#Titulo').focusout(function () {
+                var url = '@Url.Action("FriendlyUrl", "Noticias")/@Model.NoticiaID';
+                var titulo = $('#Titulo').val();
+
+                // console.log('FriendlyUrl.FocusOut: ' + titulo);
+                $.ajax({
+                    cache: false,
+                    async: true,
+                    url: url,
+                    type: 'POST',
+                    data: {
+                        valor: titulo
+                    },
+                    success: function (result) {
+                        if (result.status === undefined) {
+                            $('#FriendlyUrl').val(result.friendlyUrl);
+                            urlToCopy = '/' + result.friendlyUrl;
+                        } else {
+                            console.log(result.status);
+                        }
+                    },
+                    error: function (err) {
+                        alert(err.statusText);
+                    }
+                });
+            }); // Titulo.FocusOut
+
+            $('#FriendlyUrl').focusout(function () {
+                var url = '@Url.Action("FriendlyUrl", "Noticias")/@Model.NoticiaID';
+                var friendlyUrl = $('#FriendlyUrl').val();
+
+                // console.log('FriendlyUrl.FocusOut: ' + titulo);
+                $.ajax({
+                    cache: false,
+                    async: true,
+                    url: url,
+                    type: 'POST',
+                    data: {
+                        valor: friendlyUrl
+                    },
+                    success: function (result) {
+                        if (result.status === undefined) {
+                            $('#FriendlyUrl').val(result.friendlyUrl);
+                            urlToCopy = '/' + result.friendlyUrl;
+                        } else {
+                            console.log(result.status);
+                        }
+                    },
+                    error: function (err) {
+                        alert(err.statusText);
+                    }
+                });
+            }); // Titulo.FocusOut
+
+            // ME GUSTA & VISITAS
+
+            $('#meGustaResetButton').click(function () {
+                $('#meGustaStrong').html('0');
+                $('#MeGusta').val('0');
+            });
+
+            $('#visitasResetButton').click(function () {
+                $('#visitasStrong').html('0');
+                $('#ContadorVisitas').val('0');
+            });
+
+            // IMAGEN PRINCIPAL
+
+            $('#subirImagenPrincipalButton').attr('disabled', true);
+
+            $('#imagenPrincipalFileUpload').change(function () {
+                if ($('#imagenPrincipalFileUpload').val().length != 0) {
+                    $('#subirImagenPrincipalButton').attr('disabled', false);
+                } else {
+                    $('#subirImagenPrincipalButton').attr('disabled', true);
+                }
+            }); // imagenPrincipalFileUpload.change
+
+            $('#subirImagenPrincipalButton').click(function () { // https://www.c-sharpcorner.com/UploadFile/manas1/upload-files-through-jquery-ajax-in-Asp-Net-mvc/
+                //alert('subirImagenPrincipalButton');
+                if (window.FormData !== undefined) { // checking whether FormData is available in browser
+
+                    var fileUpload = $('#imagenPrincipalFileUpload').get(0);
+                    var files = fileUpload.files;
+                    var url = '@Url.Action("AgregarImagenPrincipal", "Noticias")/@Model.NoticiaID';
+
+                    // Create FormData object
+                    var fileData = new FormData();
+
+                    // Looping over all files and add it to FormData object
+                    for (var i = 0; i < files.length; i++) {
+                        fileData.append(files[i].name, files[i]);
+                    }
+
+                    // Adding one more key to FormData object
+                    fileData.append('username', 'xBlaze');
+
+                    $.ajax({
+                        url: url,
+                        type: "POST",
+                        contentType: false, // Not to set any content header
+                        processData: false, // Not to process data
+                        data: fileData,
+                        success: function (result) {
+
+                            switch (result.status) {
+                                case 'success':
+                                    var aleatorio = Math.ceil(Math.random() * 100); // Para que genere un parametro aleatorio y refresque la imagen (pues tiene el mismo nombre)
+                                    $('#ImagenArchivo').val(result.filename);
+                                    $('#imagenPrincipalView').attr("src", "/Archivos/Noticias/@Model.NoticiaID/" + result.filename + "?" + aleatorio);
+                                    break;
+                                case 'exception':
+                                    alert(result.message);
+                                    break;
+                            }
+                            $('#imagenPrincipalFileUpload').fileinput('clear');
+                            $('#subirImagenPrincipalButton').attr('disabled', true);
+                        },
+                        error: function (err) {
+                            alert(err.statusText);
+                        }
+                    });
+                }
+                else {
+                    alert("FormData is not supported.");
+                }
+            }); // subirImagenPrincipalButton
+
+            // TIENE GALERIA
+
+            $('#tieneGaleriaCheckbox').change(function () {
+                if (this.checked) {
+                    // alert('Tiene Galeria');
+                    $('#TieneGaleria').val('@BoolTipo.Si');
+                }
+                else {
+                    // alert('Sin Galeria');
+                    $('#TieneGaleria').val('@BoolTipo.No');
+                }
+            });
+
+            // STATUS
+
+            $('input[type=radio][name=status]').change(function () {
+                $('#Status').val(this.value);
+            });
+
+            // ARCHIVOS
+
+            $('#subirArchivosButton').attr('disabled', true);
+            $('#archivosFileUpload').change(function () {
+                if ($('#archivosFileUpload').val().length != 0) {
+                    $('#subirArchivosButton').attr('disabled', false);
+                } else {
+                    $('#subirArchivosButton').attr('disabled', true);
+                }
+            });
+
+            $('#subirArchivosButton').click(function () {
+
+                if (window.FormData !== undefined) {
+                    var fileUpload = $('#archivosFileUpload').get(0);
+                    var files = fileUpload.files;
+                    var url = '@Url.Action("AgregarArchivos", "Archivos")/@Model.NoticiaID';
+                    var incluirGaleria = $('#incluirGaleriaCheckbox').is(':checked');
+                    var fileData = new FormData();
+
+                    for (var i = 0; i < files.length; i++) {
+                        fileData.append(files[i].name, files[i]);
+                    }
+
+                    fileData.append('incluirGaleria', incluirGaleria);
+                    fileData.append('isPage', 'false');
+                    fileData.append('username', 'xBlaze');
+
+                    $.ajax({
+                        url: url,
+                        type: 'POST',
+                        contentType: false,
+                        processData: false,
+                        data: fileData,
+                        success: function (result) {
+                            if (result.status === undefined) {
+                                $('#archivosDiv').html(result);
+                            } else {
+                                switch (result.status) {
+                                    case "exception":
+                                        alert(result.message);
+                                        break;
+                                    case "notfile":
+                                        alert(result.message);
+                                        break;
+                                    default:
+                                        console.log("SubirArchivosButton (switch default): " + result);
+                                }
+                            }
+                        },
+                        error: function (err) {
+                            alert(err.statusText);
+                        }
+                    });
+                } else {
+                    alert("FormData is not supported.");
+                }
+            }); // subirArchivosButton.click
+
+            // NOTAS
+
+            $('#guardarNotaButton').attr('disabled', true);
+            // https://stackoverflow.com/questions/11338592/how-can-i-bind-to-the-change-event-of-a-textarea-in-jquery
+            $('#notaTextarea').bind('input propertychange', function () {
+
+                if (this.value.length) {
+                    $('#guardarNotaButton').attr('disabled', false);
+                } else {
+                    $('#guardarNotaButton').attr('disabled', true);
+                }
+            });
+
+            $('#guardarNotaButton').click(function () {
+                var url = '@Url.Action("AgregarNota", "Notas")/@Model.NoticiaID';
+                var nota = $('#notaTextarea').val();
+
+                $.ajax({
+                    cache: false,
+                    async: true,
+                    url: url,
+                    type: 'POST',
+                    data: {
+                        nota: nota
+                    },
+                    success: function (result) {
+                        if (result.status === undefined) {
+                            $('#notasDiv').html(result);
+                            $('#notaTextarea').val('');
+                            $('#guardarNotaButton').attr('disabled', true);
+                        } else {
+                            switch (result.status) {
+                                case "exception":
+                                    alert(result.message);
+                                    break;
+                                case "notnote":
+                                    alert(result.message);
+                                    break;
+                                default:
+                                    console.log("GuardarNotaButton (switch default): " + result);
+                            }
+                        }
+                    },
+                    error: function (err) {
+                        alert(err.statusText);
+                    }
+                });
+            }); // guardarNotaButton.click
+
+        }); // document.ready
+    </script>
+}

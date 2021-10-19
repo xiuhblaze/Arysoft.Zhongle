@@ -13,33 +13,38 @@
             @*<span class="caret"></span>*@
         </a>
         <div class="dropdown-menu" aria-labelledby="navbarDropdownAdmin">
-            <a class="dropdown-item" href="#">Action</a>
+            <a class="dropdown-item" href="#">(sin uso)</a>
             @Html.ActionLink("Administrar " + User.Identity.GetUserName(), "Index", "Manage", routeValues: null, htmlAttributes: new { title = "Manage", @class = "dropdown-item" })
-            @if (Request.IsAuthenticated && User.IsInRole("Admin"))
+            @if (Request.IsAuthenticated)
             {
                 <div class="dropdown-divider"></div>
-                @Html.ActionLink("Usuarios", "Index", "UsersAdmin", new { area = "" }, new { @class = "dropdown-item" })
-                @Html.ActionLink("Roles de usuario", "Index", "RolesAdmin", new { area = "" }, new { @class = "dropdown-item" })
+                @Html.ActionLink("Dashboard", "Index", "Admin", new { area = "Admin" }, new { @class = "dropdown-item" })
+                if (User.IsInRole("Admin"))
+                {
+                    <div class="dropdown-divider"></div>
+                    @Html.ActionLink("Usuarios", "Index", "UsersAdmin", new { area = "" }, new { @class = "dropdown-item" })
+                    @Html.ActionLink("Roles de usuario", "Index", "RolesAdmin", new { area = "" }, new { @class = "dropdown-item" })
+                }
             }
             <div class="dropdown-divider"></div>
             <a class="dropdown-item" href="javascript:document.getElementById('logoutForm').submit()">Cerrar sesión</a>
         </div>
     </li>
 </ul>
-            }
-        }
-        else
-        {
-            <ul class="navbar-nav">
-                @*<li>@Html.ActionLink("Register", "Register", "Account", routeValues: null, htmlAttributes: new { id = "registerLink" })</li>*@
+    }
+}
+else
+{
+    <ul class="navbar-nav">
+        @*<li>@Html.ActionLink("Register", "Register", "Account", routeValues: null, htmlAttributes: new { id = "registerLink" })</li>*@
 
-                @*<li>@Html.ActionLink("Iniciar sesión", "Login", "Account", routeValues: null, htmlAttributes: new { id = "loginLink" })</li>*@
-                <li>
-                    @Html.Raw(
-                        @Html.ActionLink("[login]", "Login", "Account", routeValues: null, htmlAttributes: new { id = "loginLink", @class = "nav-link" })
-                        .ToHtmlString()
-                        .Replace("[login]", "<i class='bi-box-arrow-in-right'></i>")
-                    )
-                </li>
-            </ul>
-        }
+        @*<li>@Html.ActionLink("Iniciar sesión", "Login", "Account", routeValues: null, htmlAttributes: new { id = "loginLink" })</li>*@
+        <li>
+            @Html.Raw(
+                @Html.ActionLink("[login]", "Login", "Account", routeValues: null, htmlAttributes: new { id = "loginLink", @class = "nav-link" })
+                .ToHtmlString()
+                .Replace("[login]", "<i class='bi-box-arrow-in-right'></i>")
+            )
+        </li>
+    </ul>
+}

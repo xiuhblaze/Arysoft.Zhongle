@@ -14,6 +14,7 @@ using PagedList;
 
 namespace Arysoft.Website.Areas.Admin.Controllers
 {
+    [Authorize]
     public class PaginasController : Controller
     {
         private ApplicationDbContext db = new ApplicationDbContext();
@@ -136,8 +137,8 @@ namespace Arysoft.Website.Areas.Admin.Controllers
             {
                 PaginaID = Guid.NewGuid(),
                 IndiceMenu = 0,
-                Resumen = string.Empty,
-                HTMLContent = string.Empty,
+                //Resumen = string.Empty,
+                //HTMLContent = string.Empty,
                 Target = PaginaTarget.Ninguno,
                 ContadorVisitas = 0,
                 TieneGaleria = BoolTipo.Ninguno,

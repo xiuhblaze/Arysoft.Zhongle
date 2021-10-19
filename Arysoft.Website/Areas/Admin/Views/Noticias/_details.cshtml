@@ -1,0 +1,260 @@
+﻿@using Arysoft.Website.Areas.Admin.Models;
+@using Arysoft.Website.Models;
+
+@model NoticiaDetailsViewModel
+    
+@{
+    string imagenPrincipalTag = string.Empty;
+    string classStatusAlert = "alert alert-secondary";
+    string classStatusIcon = "";
+
+    if (!string.IsNullOrEmpty(Model.ImagenArchivo))
+    {
+        imagenPrincipalTag = "<img src='/Archivos/Noticias/" + Model.NoticiaID.ToString() + "/" + Model.ImagenArchivo + "' class='card-img-top' alt='" + Html.DisplayNameFor(model => model.ImagenArchivo) + "' />";
+    }
+
+    switch (Model.Status)
+    {
+        case NoticiaStatus.Nueva:
+            classStatusIcon = "<i class='bi-stars mr-1 text-primary icon' title='Nueva'></i>";
+            classStatusAlert = "alert alert-primary";
+            break;
+        case NoticiaStatus.Publicada:
+            classStatusIcon = "<i class='bi-cursor mr-1 text-success icon' title='Publicada'></i>";
+            classStatusAlert = "alert alert-success";
+            break;
+        case NoticiaStatus.Oculta:
+            classStatusIcon = "<i class='bi-eye-slash mr-1 icon' title='Oculta'></i>";
+            //classStatusAlert = "alert alert-primary";
+            //classMeGustaBadge = "badge badge-secondary";
+            //classVisitasBadge = "badge badge-secondary";
+            break;
+        case NoticiaStatus.Eliminada:
+            classStatusIcon = "<i class='bi-x-circle mr-1 icon text-danger' title='Eliminada'></i>";
+            classStatusAlert = "alert alert-danger";
+            //classMeGustaBadge = "badge badge-danger";
+            //classVisitasBadge = "badge badge-danger";
+            break;
+    }
+}
+<div class="modal-header">
+    <h5 class="modal-title">Noticia</h5>
+    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+    </button>
+</div>
+<div class="modal-body">
+    <div class="container-fluid">
+        @if (Model.Origen == "delete")
+        {
+            <div class="row">
+                <div class="col-12">
+                    <h2 class="text-danger">¿Está seguro de eliminar esta noticia?</h2>
+                </div>
+            </div>
+        }
+        <div class="row">
+            <div class="col-md-8">
+                <div class="card shadow">
+                    @Html.Raw(imagenPrincipalTag)
+                    <div class="card-body">
+                        <h1 class="display-4" title="@Html.DisplayNameFor(model => model.Titulo)">
+                            @Html.DisplayFor(model => model.Titulo)
+                        </h1>
+                        <p class="lead" title="@Html.DisplayNameFor(model => model.Resumen)">
+                            @Html.DisplayFor(model => model.Resumen)
+                        </p>
+                        <div title="@Html.DisplayNameFor(model => model.HTMLContent)">
+                            @Html.Raw(Model.HTMLContent.Replace("<img ", "<img class='img-fluid' "))
+                        </div>
+                        <p class="text-right" title="@Html.DisplayNameFor(model => model.Autor)">
+                            <em>@Html.DisplayFor(model => model.Autor)</em>
+                        </p>
+                    </div>
+                </div>
+
+            </div>
+            <div class="col-md-4">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="@classStatusAlert">
+                            <h4 class="alert-heading">
+                                @Html.Raw(classStatusIcon)
+                                @Html.DisplayFor(model => model.Status)
+                            </h4>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-6">
+                        <div class="alert alert-me-gusta text-center">
+                            <h4 class="alert-heading">
+                                @Html.DisplayFor(model => model.MeGusta)
+                            </h4>
+                            <div>
+                                <i class="bi-hand-thumbs-up-fill"></i>
+                                Me Gusta
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="alert alert-visitas text-center">
+                            <h4 class="alert-heading">
+                                @Html.DisplayFor(model => model.ContadorVisitas)
+                            </h4>
+                            <div>
+                                <i class="bi-eye-fill"></i>
+                                Visitas
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-12">
+                        <ul class="nav nav-tabs" id="detailsTab" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <a class="nav-link active" id="informacion-tab" data-toggle="tab" href="#informacion" role="tab" aria-controls="informacion" aria-selected="true">
+                                    Información
+                                </a>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <a class="nav-link" id="archivos-tab" data-toggle="tab" href="#archivos" role="tab" aria-controls="archivos" aria-selected="false">
+                                    Archivos
+                                    <span id="archivosTabCount" class="badge badge-primary badge-pill">0</span>
+                                </a>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <a class="nav-link" id="notas-tab" data-toggle="tab" href="#notas" role="tab" aria-controls="notas" aria-selected="false">
+                                    Notas
+                                    <span id="notasTabCount" class="badge badge-primary badge-pill">0</span>
+                                </a>
+                            </li>
+                        </ul>
+                        <div class="tab-content" id="detailsTabContent">
+                            <div class="tab-pane fade show active" id="informacion" role="tabpanel" aria-labelledby="informacion-tab">
+                                <dl class="row mt-3">
+                                    <dt class="col-6 text-right">
+                                        @Html.DisplayNameFor(model => model.TieneGaleria)
+                                    </dt>
+                                    <dd class="col-6">
+                                        @Html.DisplayFor(model => model.TieneGaleria)
+                                    </dd>
+
+                                    <dt class="col-6 text-right">
+                                        @Html.DisplayNameFor(model => model.Idioma)
+                                    </dt>
+
+                                    <dd class="col-6">
+                                        @Model.Idioma.GetDisplayName()
+                                    </dd>
+
+                                    <dt class="col-6 text-right">
+                                        @Html.DisplayNameFor(model => model.FechaPublicacion)
+                                    </dt>
+
+                                    <dd class="col-6">
+                                        @Html.DisplayFor(model => model.FechaPublicacion)
+                                    </dd>
+
+                                    <dt class="col-6 text-right">
+                                        @Html.DisplayNameFor(model => model.FechaCreacion)
+                                    </dt>
+
+                                    <dd class="col-6">
+                                        @Html.DisplayFor(model => model.FechaCreacion)
+                                    </dd>
+
+                                    <dt class="col-6 text-right">
+                                        @Html.DisplayNameFor(model => model.FechaActualizacion)
+                                    </dt>
+
+                                    <dd class="col-6">
+                                        @Html.DisplayFor(model => model.FechaActualizacion)
+                                    </dd>
+
+                                    <dt class="col-6 text-right">
+                                        @Html.DisplayNameFor(model => model.UsuarioActualizacion)
+                                    </dt>
+
+                                    <dd class="col-6">
+                                        @Html.DisplayFor(model => model.UsuarioActualizacion)
+                                    </dd>
+                                </dl>
+                            </div>
+                            <div class="tab-pane fade" id="archivos" role="tabpanel" aria-labelledby="archivos-tab">
+                                <h4 class="mt-3">Archivos</h4>
+                                <div id="archivosDiv">
+                                    @Html.Partial("~/Areas/Admin/Views/Archivos/_archivosList.cshtml", Model.Archivos)
+                                </div>
+                            </div>
+                            <div class="tab-pane fade" id="notas" role="tabpanel" aria-labelledby="notas-tab">
+                                <h4 class="mt-3">Notas</h4>
+                                <div id="notasDiv">
+                                    @Html.Partial("~/Areas/Admin/Views/Notas/_notasList.cshtml", Model.Notas)
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+</div>
+<div class="modal-footer">
+    <div class="row">
+        <div class="col-12">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+
+            @switch (Model.Status)
+            {
+                case NoticiaStatus.Eliminada:
+                    if (Model.Origen == "details")
+                    {
+                        <form action="/Admin/Noticias/Activar/@Model.NoticiaID" method="post" style="float: right; margin-left: .5em;">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn btn-success">
+                                <i class='bi-arrow-clockwise'></i> Reactivar
+                            </button>
+                        </form>
+                    }
+                    else
+                    {
+                        <form action="/Admin/Noticias/Delete/@Model.NoticiaID" method="post" style="float: right; margin-left: .5em;">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn btn-danger" onclick="return confirm('Esta acción ELIMINARA DEFINITIVAMENTE el registro y no se puede deshacer. ¿Esta seguro?');">
+                                <i class='bi-x-square'></i> Eliminar
+                            </button>
+                        </form>
+                    }
+                    break;
+                default:
+                    if (Model.Origen == "details")
+                    {
+                        @Html.Raw(
+                            Html.ActionLink("[edit]", "Edit", new { id = Model.NoticiaID }, new { @class = "btn btn-primary" })
+                                .ToHtmlString()
+                                .Replace("[edit]", "<i class='bi-pencil-square'></i> Editar")
+                        )
+                    }
+                    else
+                    {
+                        <form action="/Admin/Noticias/Delete/@Model.NoticiaID" method="post" style="float: right; margin-left: .5em;">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn btn-danger" onclick="return confirm('Esta acción no se puede deshacer. ¿Esta seguro?');">
+                                <i class='bi-x-square'></i> Eliminar
+                            </button>
+                        </form>
+                    }
+
+                    break;
+            }
+
+        </div>
+
+
+
+    </div>
+</div>
