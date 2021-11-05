@@ -144,7 +144,7 @@ namespace Arysoft.Website.Controllers
 
         // PAGINAS
 
-        [Route("{friendlyUrl}")]
+        [Route("Paginas/{friendlyUrl}")]
         public async Task<ActionResult> Pagina(string friendlyUrl)
         {
             Pagina pagina = await db.Paginas

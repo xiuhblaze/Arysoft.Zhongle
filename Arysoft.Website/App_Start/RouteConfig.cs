@@ -23,8 +23,8 @@ namespace Arysoft.Website
                 defaults: new { controller = "Home", action = "Noticia", friendlyUrl = UrlParameter.Optional });
 
             routes.MapRoute(
-                name: "FriendlyUrl",
-                url: "{friendlyUrl}",
+                name: "Paginas",
+                url: "Paginas/{friendlyUrl}",
                 defaults: new { controller = "Home", action = "Pagina", friendlyUrl = UrlParameter.Optional });
         }
     }

@@ -3,11 +3,31 @@
 @{
     ViewBag.Title = "Usuarios";
 }
+
+<div class="modal fade" id="detailsModal" tabindex="-1" aria-labelledby="detailsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content" id="details-modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="detailsModalLabel">Usuarios</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" id="details-modal-body">
+                ...
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">...</button>
+            </div>
+        </div> <!-- modal-content -->
+    </div>
+</div>
+
 <div class="container">
     <h2>@ViewBag.Title</h2>
 
-    <ul class="nav nav-pills">
-        <li>@Html.ActionLink("Nuevo usuario", "Create")</li>
+    <ul class="nav nav-pills mb-2">
+        <li class="nav-item">@Html.ActionLink("Nuevo usuario", "Create", null, new { @class = "nav-link" })</li>
     </ul>
 
     @using (Html.BeginForm("Index", "UsersAdmin", FormMethod.Get))
@@ -15,18 +35,21 @@
         <div class="row" style="margin-top: 10px; margin-bottom: 10px;">
             <div class="col-md-12">
                 <div class="form-inline">
-                    <div class="form-group">
+                    <div class="form-group mr-1">
                         <label for="buscar" class="sr-only">Buscar</label>
-                        @Html.TextBox("buscar", ViewBag.Filtro as string, htmlAttributes: new { @class = "form-control", @placeHolder = "Buscar..." })
+                        <div class="input-group">
+                            @Html.TextBox("buscar", ViewBag.Filtro as string, htmlAttributes: new { @class = "form-control", @placeHolder = "Buscar..." })
+                            <div class="input-group-append">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi-search mr-1"></i>
+                                    Buscar
+                                </button>
+                            </div>
+                        </div>
                     </div>
-
-                    <button type="submit" class="btn btn-primary">
-                        <span class="glyphicon glyphicon-search"></span>
-                        Buscar
-                    </button>
                     @Html.Raw(
-                        @Html.ActionLink("Limpiar", "Index", null, new { @class = "btn btn-default" }).ToHtmlString()
-                        .Replace("Limpiar", "<span class=\"glyphicon glyphicon-remove\" style=\"font-size: 14px;\" title=\"Limpiar\"></span>")
+                        @Html.ActionLink("Limpiar", "Index", null, new { @class = "btn btn-outline-secondary" }).ToHtmlString()
+                        .Replace("Limpiar", "<i class='bi-x-lg' title='Limpiar'></i>")
                     )
                 </div>
             </div>            
@@ -46,7 +69,7 @@
                     Sector
                 </th>*@
                 
-                <th class="col-md-1"></th>
+                <th class="col-md-2"></th>
             </tr>
         </thead>
         <tbody>
@@ -65,20 +88,105 @@
                     
                     <td class="text-right">
                         @Html.Raw(
-                            @Html.ActionLink("Editar", "Edit", new { id = item.Id }).ToHtmlString()
-                            .Replace("Editar", "<span class='glyphicon glyphicon-edit' style='font-size: 18px;' title='Editar'></span>")
+                            @Html.ActionLink("Editar", "Edit", new { id = item.Id }, new { @class = "mr-1" }).ToHtmlString()
+                            .Replace("Editar", "<i class='bi-pencil-square' style='font-size: 1.2rem;' title='Editar'></i>")
                         )
-                        @Html.Raw(
-                            @Html.ActionLink("Detalles", "Details", new { id = item.Id }).ToHtmlString()
-                            .Replace("Detalles", "<span class=\"glyphicon glyphicon-share\" style=\"font-size: 18px;\" title=\"Detalles\"></span>")
-                        )
-                        @Html.Raw(
-                            @Html.ActionLink("Eliminar", "Delete", new { id = item.Id }).ToHtmlString()
-                            .Replace("Eliminar", "<span class=\"glyphicon glyphicon-trash\" style=\"font-size: 18px;\" title=\"Eliminar\"></span>")
-                        )
+                        <a href="#" onclick="getDetails('@item.Id'); return false;" class="mr-2">
+                            <i class="bi-info-square" style="font-size: 1.2rem;" title="Detalles"></i>
+                        </a>
+                        <a href="#" onclick="getDelete('@item.Id'); return false;" class="mr-2">
+                            <i class="bi-x-square text-danger" style="font-size: 1.2rem;" title="Eliminar"></i>
+                        </a>
                     </td>
                 </tr>
             }
         </tbody>
     </table>
 </div>
+
+@section scripts {
+
+    <script>
+        var modalDetailsOriginalContent = $('#details-modal-content').html();
+
+        $(document).ready(function () {
+
+            $('#detailsModal').on('hidden.bs.modal', function (e) {
+
+                $('#details-modal-content').html(modalDetailsOriginalContent);
+            })
+        });
+
+        function getDetails(id) {
+            var url = '@Url.Action("Details", "UsersAdmin")/' + id;
+
+            $('#detailsModal').modal('show');
+            $.ajax({
+                cache: false,
+                async: true,
+                type: 'get',
+                url: url,
+                data: {},
+                beforeSend: function () {
+                    $('#details-modal-body').html('<p class="text-center" style="margin: 50px;"><img src="@Url.Content("~/Images/ajax-loader.gif")" /></p>');
+                },
+                success: function (vista) {
+                    switch (vista) {
+                        case "BadRequest":
+                            alert('No se recibió un identificador del usuario');
+                            $('#detailsModal').modal('hide');
+                            $('#details-modal-content').html(modalDetailsOriginalContent);
+                            break;
+                        case "HttpNotFound":
+                            alert('No se encontró el usuario solicitado');
+                            $('#detailsModal').modal('hide');
+                            $('#details-modal-content').html(modalDetailsOriginalContent);
+                            break;
+                        default:
+                            $('#details-modal-content').html(vista);
+                            break;
+                    }
+                },
+                error: function (xhr, status, error) {
+                    alert('A ocurrido una excepción: ' + status + '\n error: ' + error);
+                }
+            });
+        } // getDetails
+
+        function getDelete(id) {
+            var url = '@Url.Action("Delete", "UsersAdmin")/' + id;
+
+            $('#detailsModal').modal('show');
+            $.ajax({
+                cache: false,
+                async: true,
+                type: 'get',
+                url: url,
+                data: {},
+                beforeSend: function () {
+                    $('#details-modal-body').html('<p class="text-center" style="margin: 50px;"><img src="@Url.Content("~/Images/ajax-loader.gif")" /></p>');
+                },
+                success: function (vista) {
+                    switch (vista) {
+                        case "BadRequest":
+                            alert('No se recibió un identificador de usuario');
+                            $('#detailsModal').modal('hide');
+                            $('#details-modal-content').html(modalDetailsOriginalContent);
+                            break;
+                        case "HttpNotFound":
+                            alert('No se encontró el usuario solicitado');
+                            $('#detailsModal').modal('hide');
+                            $('#details-modal-content').html(modalDetailsOriginalContent);
+                            break;
+                        default:
+                            $('#details-modal-content').html(vista);
+                            break;
+                    }
+                },
+                error: function (xhr, status, error) {
+                    alert('A ocurrido una excepción: ' + status + '\n error: ' + error);
+                }
+            });
+        } // getDelete
+    </script>
+}

@@ -4,84 +4,91 @@
     ViewBag.Title = "Editar";
 }
 <div class="container">
-    <h2>Usuario <small style="text-transform: uppercase;">@ViewBag.Title</small></h2>
-
+    <h2 class="my-3">Usuario <small style="text-transform: uppercase;">@ViewBag.Title</small></h2>
     @using (Html.BeginForm())
     {
         @Html.AntiForgeryToken()
 
-        <div class="form-horizontal">
-            <h4>Datos del usuario</h4>
-            @Html.ValidationSummary(true)
-            @Html.HiddenFor(model => model.Id)
+        <div class="row my-5 pb-5">
+            <div class="col-md-12">
+                <div class="card shadow">
+                    <div class="card-header">
+                        Datos del Usuario
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-8">
+                                @Html.ValidationSummary(true)
+                                @Html.HiddenFor(model => model.Id)
 
-            <div class="form-group">
-                @Html.LabelFor(model => model.Email, new { @class = "control-label col-md-2" })
-                <div class="col-md-10">
-                    @Html.TextBoxFor(m => m.Email, new { @class = "form-control" })
-                    @Html.ValidationMessageFor(model => model.Email)
-                </div>
-            </div>
-
-            <hr />
-
-            <div class="form-group">
-                @Html.LabelFor(m => m.Nombres, new { @class = "col-md-2 control-label" })
-                <div class="col-md-10">
-                    @Html.TextBoxFor(m => m.Nombres, new { @class = "form-control" })
-                    @Html.ValidationMessageFor(model => model.Nombres, "", new { @class = "text-danger"})
-                </div>
-            </div>
-            <div class="form-group">
-                @Html.LabelFor(m => m.PrimerApellido, new { @class = "col-md-2 control-label" })
-                <div class="col-md-10">
-                    @Html.TextBoxFor(m => m.PrimerApellido, new { @class = "form-control" })
-                </div>
-            </div>
-            <div class="form-group">
-                @Html.LabelFor(m => m.SegundoApellido, new { @class = "col-md-2 control-label" })
-                <div class="col-md-10">
-                    @Html.TextBoxFor(m => m.SegundoApellido, new { @class = "form-control" })
-                </div>
-            </div>
-            @*<div class="form-group">
-                @Html.LabelFor(m => m.SectorID, new { @class = "col-md-2 control-label" })
-                <div class="col-md-10">
-                    @Html.DropDownList("SectorID", null, htmlAttributes: new { @class = "form-control" })
-                    @Html.ValidationMessageFor(model => model.SectorID, "", new { @class = "text-danger" })
-                </div>
-            </div>*@
-
-            <hr />
-
-            <div class="form-group">
-                @Html.Label("Roles", new { @class = "control-label col-md-2" })
-                <span class="col-md-10">
-                    @foreach (var item in Model.RolesList)
-                    {
-                        <label class="checkbox-inline">
-                            <input type="checkbox" name="SelectedRole" value="@item.Value" checked="@item.Selected" />
-                            @item.Value
-                        </label>
-                    }
-                </span>
-            </div>
-
-            <div class="form-group">
-                <div class="col-md-offset-2 col-md-10 text-right">
-                    @Html.Raw(
-                            @Html.ActionLink("Cancelar", "Index", null, new { @class = "btn btn-default" }).ToHtmlString()
-                                .Replace("Cancelar", "<span class=\"glyphicon glyphicon-remove\" title=\"Cancelar cambios\"></span> Cancelar")
+                                <div class="form-group">
+                                    @Html.LabelFor(model => model.Email, new { @class = "" })
+                                    @Html.TextBoxFor(m => m.Email, new { @class = "form-control", @aria_describedby = "emailHelp" })
+                                    @Html.ValidationMessageFor(model => model.Email)
+                                    <small id="emailHelp" class="form-text text-muted">El correo electrónico es también el nombre de usuario.</small>
+                                </div>
+                                <hr />
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            @Html.LabelFor(m => m.Nombres, new { @class = "" })
+                                            @Html.TextBoxFor(m => m.Nombres, new { @class = "form-control" })
+                                            @Html.ValidationMessageFor(model => model.Nombres, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            @Html.LabelFor(m => m.PrimerApellido, new { @class = "" })
+                                            @Html.TextBoxFor(m => m.PrimerApellido, new { @class = "form-control" })
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            @Html.LabelFor(m => m.SegundoApellido, new { @class = "" })
+                                            @Html.TextBoxFor(m => m.SegundoApellido, new { @class = "form-control" })
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                @*<div class="form-group">
+                                    @Html.LabelFor(m => m.SectorID, new { @class = "col-md-2 control-label" })
+                                    <div class="col-md-10">
+                                        @Html.DropDownList("SectorID", null, htmlAttributes: new { @class = "form-control" })
+                                        @Html.ValidationMessageFor(model => model.SectorID, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>*@
+                            </div>
+                            <div class="col-md-4">
+                                <h3>Roles</h3>
+                                <ul class="list-group list-group-flush">
+                                    @foreach (var item in Model.RolesList)
+                                    {
+                                        <li class="list-group-item">
+                                            <label class="checkbox-inline">
+                                                <input type="checkbox" name="SelectedRole" value="@item.Value" checked="@item.Selected" class="mr-2" />
+                                                @item.Value
+                                            </label>
+                                        </li>
+                                    }
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer text-right">
+                        @Html.Raw(
+                            @Html.ActionLink("Cancelar", "Index", null, new { @class = "btn btn-secondary" }).ToHtmlString()
+                                .Replace("Cancelar", "<i class='bi-x-circle' title='Cancelar cambios'></i> Cancelar")
                         )
-                    <button type="submit" class="btn btn-primary">
-                        <span class="glyphicon glyphicon-floppy-disk"></span>
-                        Guardar
-                    </button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi-box-arrow-down"></i>
+                            Guardar
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
     }
-        
+
 </div>
 
 @section Scripts {

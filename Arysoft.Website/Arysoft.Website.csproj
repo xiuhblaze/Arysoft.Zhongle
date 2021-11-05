@@ -246,6 +246,16 @@
     <Content Include="icon-hires.png" />
     <Content Include="icon-normal.png" />
     <Content Include="Images\ajax-loader.gif" />
+    <Content Include="Images\W_2013_071.jpg" />
+    <Content Include="Images\W_2013_118.jpg" />
+    <Content Include="Images\W_2013_125.jpg" />
+    <Content Include="Images\W_2013_193.jpg" />
+    <Content Include="Images\W_2013_246.jpg" />
+    <Content Include="Images\W_2013_258.jpg" />
+    <Content Include="Images\W_2013_311.jpg" />
+    <Content Include="Images\W_2013_326.jpg" />
+    <Content Include="Images\W_2014_332.jpg" />
+    <Content Include="Images\W_2014_338.jpg" />
     <Content Include="packages.config" />
     <Content Include="ApplicationInsights.config">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -529,6 +539,10 @@
     <Content Include="Views\Home\Pagina.cshtml" />
     <Content Include="Views\Home\Noticias.cshtml" />
     <Content Include="Views\Home\Noticia.cshtml" />
+    <Content Include="Views\UsersAdmin\_details.cshtml" />
+    <Content Include="Views\UsersAdmin\_delete.cshtml" />
+    <Content Include="Views\RolesAdmin\_details.cshtml" />
+    <Content Include="Views\RolesAdmin\_delete.cshtml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>

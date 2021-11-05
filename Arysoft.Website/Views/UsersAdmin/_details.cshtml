@@ -1,0 +1,62 @@
+﻿@using Arysoft.Website.Models;
+
+@model ApplicationUser
+
+<div class="modal-header">
+    <h5 class="modal-title">Usuario</h5>
+    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+    </button>
+</div>
+<div class="modal-body">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-6">
+                <h4>Información</h4>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item d-flex justify-content-between">
+                        <div>
+                            <h6 class="my-0">Nombre de usuario</h6>
+                            <small class="text-muted">@Html.DisplayFor(model => model.UserName)</small>
+                        </div>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between">
+                        <div>
+                            <h6 class="my-0">Nombre completo</h6>
+                            <small class="text-muted">@Html.DisplayFor(model => model.NombreCompleto)</small>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+            <div class="col-md-6">
+                <h4>Roles</h4>
+                @if (ViewBag.RoleNames.Count == 0)
+                {
+                    <p class="text-muted">No se encontrarón roles para este usuario.</p>
+                }
+                else
+                {
+                    <ul class="list-group">
+                        @foreach (var item in ViewBag.RoleNames)
+                        {
+                        <li class="list-group-item">@item</li>
+                        }
+                    </ul>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal-footer">
+    <div class="row">
+        <div class="col-md-12">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                Cerrar
+            </button>
+            @Html.Raw(
+                @Html.ActionLink("Editar", "Edit", new { id = Model.Id }, new { @class = "btn btn-primary" }).ToHtmlString()
+                    .Replace("Editar", "<i class='bi-box-arrow-down'></i> Editar")
+            )
+        </div>
+    </div>
+</div>

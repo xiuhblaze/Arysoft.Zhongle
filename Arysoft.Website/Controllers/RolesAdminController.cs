@@ -68,6 +68,8 @@ namespace Arysoft.Website.Controllers
         {
             if (id == null)
             {
+                TempData["MessageBox"] = "No se recibió el identificador";
+                if (Request.IsAjaxRequest()) return Content("BadRequest");
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
             var role = await RoleManager.FindByIdAsync(id);
@@ -85,6 +87,12 @@ namespace Arysoft.Website.Controllers
 
             ViewBag.Users = users;
             ViewBag.UserCount = users.Count();
+
+            if (Request.IsAjaxRequest())
+            {
+                return PartialView("_details", role);
+            }
+
             return View(role);
         }
 
@@ -161,13 +169,37 @@ namespace Arysoft.Website.Controllers
         {
             if (id == null)
             {
+                TempData["MessageBox"] = "No se recibió el identificador";
+                if (Request.IsAjaxRequest()) return Content("BadRequest");
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
             var role = await RoleManager.FindByIdAsync(id);
             if (role == null)
             {
+                TempData["MessageBox"] = "No se encontró el identificador";
+                if (Request.IsAjaxRequest()) return Content("NotFound");
                 return HttpNotFound();
             }
+
+            // Get the list of Users in this Role
+            var users = new List<ApplicationUser>();
+
+            // Get the list of Users in this Role
+            foreach (var user in UserManager.Users.ToList())
+            {
+                if (await UserManager.IsInRoleAsync(user.Id, role.Name))
+                {
+                    users.Add(user);
+                }
+            }
+
+            ViewBag.Users = users;
+            ViewBag.UserCount = users.Count();
+            if (Request.IsAjaxRequest())
+            {
+                return PartialView("_delete", role);
+            }
+
             return View(role);
         }
 

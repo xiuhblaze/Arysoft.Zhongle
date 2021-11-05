@@ -107,12 +107,17 @@ namespace Arysoft.Website.Controllers
         {
             if (id == null)
             {
+                TempData["MessageBox"] = "No se recibió el identificador";
+                if (Request.IsAjaxRequest()) return Content("BadRequest");
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
             var user = await UserManager.FindByIdAsync(id);
-
-
             ViewBag.RoleNames = await UserManager.GetRolesAsync(user.Id);
+
+            if (Request.IsAjaxRequest())
+            {
+                return PartialView("_details", user);
+            }
 
             return View(user);
         }
@@ -215,7 +220,7 @@ namespace Arysoft.Website.Controllers
         // POST: /Users/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> Edit([Bind(Include = "Email,Id,SectorID,Nombres,ApellidoPaterno,ApellidoMaterno")] EditUserViewModel editUser, params string[] selectedRole)
+        public async Task<ActionResult> Edit([Bind(Include = "Email,Id,SectorID,Nombres,PrimerApellido,SegundoApellido")] EditUserViewModel editUser, params string[] selectedRole)
         {
             if (ModelState.IsValid)
             {
@@ -263,15 +268,24 @@ namespace Arysoft.Website.Controllers
         {
             if (id == null)
             {
+                TempData["MessageBox"] = "No se recibió el identificador";
+                if (Request.IsAjaxRequest()) return Content("BadRequest");
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
             var user = await UserManager.FindByIdAsync(id);
             if (user == null)
             {
+                TempData["MessageBox"] = "No se encontró el identificador";
+                if (Request.IsAjaxRequest()) return Content("NotFound");
                 return HttpNotFound();
             }
+            ViewBag.RoleNames = await UserManager.GetRolesAsync(user.Id);
+            if (Request.IsAjaxRequest())
+            {
+                return PartialView("_delete", user);
+            }
             return View(user);
-        }
+        } // Delete
 
         //
         // POST: /Users/Delete/5
