@@ -3,8 +3,8 @@
 }
 
 @section styles {
-
     <link href="~/Content/bootstrap-chosen.css" rel="stylesheet" />
+    <link href="~/Content/unite-gallery.css" rel="stylesheet" />
 
 }
 
@@ -68,16 +68,108 @@
             <p><a class="btn btn-secondary" href="#">View details &raquo;</a></p>
         </div><!-- /.col-lg-4 -->
     </div><!-- /.row -->
+
+    <hr />
+
+    <div id="gallery" style="display:none;">
+
+        <a href="http://unitegallery.net">
+            <img alt="Lemon Slice"
+                 src="/Images/W_2013_071.jpg"
+                 data-image="/Images/W_2013_071.jpg"
+                 data-description="This is a Lemon Slice"
+                 style="display:none">
+        </a>
+        <a href="http://unitegallery.net">
+            <img alt="Lemon Slice"
+                 src="/Images/W_2013_125.jpg"
+                 data-image="/Images/W_2013_125.jpg"
+                 data-description="This is a Lemon Slice"
+                 style="display:none">
+        </a>
+        <a href="http://unitegallery.net">
+            <img alt="Lemon Slice"
+                 src="/Images/W_2013_193.jpg"
+                 data-image="/Images/W_2013_193.jpg"
+                 data-description="This is a Lemon Slice"
+                 style="display:none">
+        </a>
+        <a href="http://unitegallery.net">
+            <img alt="Lemon Slice"
+                 src="/Images/W_2014_332.jpg"
+                 data-image="/Images/W_2014_332.jpg"
+                 data-description="This is a Lemon Slice"
+                 style="display:none">
+        </a>
+        <a href="http://unitegallery.net">
+            <img alt="Lemon Slice"
+                 src="/Images/W_2013_193.jpg"
+                 data-image="/Images/W_2013_193.jpg"
+                 data-description="This is a Lemon Slice"
+                 style="display:none">
+        </a>
+        <a href="http://unitegallery.net">
+            <img alt="Lemon Slice"
+                 src="/Images/W_2013_125.jpg"
+                 data-image="/Images/W_2013_125.jpg"
+                 data-description="This is a Lemon Slice"
+                 style="display:none">
+        </a>
+        <a href="http://unitegallery.net">
+            <img alt="Lemon Slice"
+                 src="/Images/W_2013_193.jpg"
+                 data-image="/Images/W_2013_193.jpg"
+                 data-description="This is a Lemon Slice"
+                 style="display:none">
+        </a>
+        <a href="http://unitegallery.net">
+            <img alt="Lemon Slice"
+                 src="/Images/W_2014_332.jpg"
+                 data-image="/Images/W_2014_332.jpg"
+                 data-description="This is a Lemon Slice"
+                 style="display:none">
+        </a>
+    </div>
+    @*<div id="mygallery" class="justified-gallery">
+            <a href="/Images/W_2013_071.jpg">
+                <img alt="lorem ipsum" src="/Images/W_2013_071.jpg" />
+            </a>
+            <a href="/Images/W_2013_125.jpg">
+                <img alt="Dolor sit amet" src="/Images/W_2013_125.jpg" />
+            </a>
+            <a href="/Images/W_2013_118.jpg">
+                <img alt="Consecte" src="/Images/W_2013_118.jpg" />
+            </a>
+            <a href="/Images/W_2013_193.jpg">
+                <img alt="Title 2" src="/Images/W_2013_193.jpg" />
+            </a>
+            <a href="/Images/W_2013_246.jpg">
+                <img alt="Title 2" src="/Images/W_2013_246.jpg" />
+            </a>
+            <a href="/Images/W_2013_258.jpg">
+                <img alt="Title 2" src="/Images/W_2013_258.jpg" />
+            </a>
+        </div>*@
 </div>
 
 @section Scripts {
+    <script src="~/Scripts/jquery-11.0.min.js"></script>
     <script src="~/Scripts/chosen.jquery.min.js"></script>
     <script src="~/Scripts/jquery.table2excel.js"></script>
     <script src="~/Scripts/jquery.sortElements.js"></script>
-
+    <script src="~/Scripts/unitegallery.min.js"></script>
+    <script src="~/themes/tiles/ug-theme-tiles.js"></script>
     <script>
 
-    
+
+
+        $(document).ready(function () {
+
+            jQuery("#gallery").unitegallery({
+                tiles_type: "nested"
+            });
+
+        });
 
     </script>
 }

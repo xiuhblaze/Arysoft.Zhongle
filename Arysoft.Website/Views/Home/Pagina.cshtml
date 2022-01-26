@@ -3,7 +3,28 @@
 @using Arysoft.Website.Models;
 
 @{
+    bool tieneGaleria = Model.TieneGaleria == BoolTipo.Si;
+    string galeriaHTML = string.Empty;
+
     ViewBag.Title = Model.Titulo;
+
+    if (tieneGaleria) {
+        galeriaHTML = "<div id='gallery' style='display: none;'>";
+        foreach (var archivo in Model.Archivos.Where(a => a.EnGaleria == BoolTipo.Si))
+        {
+            string imageUrl = "/Archivos/Paginas/" + Model.PaginaID.ToString() + "/" + archivo.Nombre;
+            galeriaHTML += @"<a href='http://unitegallery.net'><img alt='' src='" + imageUrl + "' data-image='" + imageUrl + "' data-description='' style='display:none' /></a>";
+        }
+        galeriaHTML += "</div>";
+        Model.HTMLContent = Model.HTMLContent.Replace("[GALERIA]", galeriaHTML);
+    }
+}
+
+@section styles {
+    @if (tieneGaleria)
+    {
+        <link href="~/Content/unite-gallery.css" rel="stylesheet" />
+    }
 }
 
 <div class="container mt-4">
@@ -33,7 +54,7 @@
             <div class="list-group">
                 @if (Model.PaginaPadre != null)
                 {
-                    <a href="/@Model.PaginaPadre.FriendlyUrl" class="list-group-item  list-group-item-action" title="Regresar">
+                    <a href="/Paginas/@Model.PaginaPadre.FriendlyUrl" class="list-group-item  list-group-item-action" title="Regresar">
                         <i class="bi-arrow-90deg-left"></i>
                         @Model.PaginaPadre.EtiquetaMenu
                     </a>
@@ -42,7 +63,7 @@
                 {
                     if (paginaHijo.Status == PaginaStatus.Publicada)
                     {
-                        <a href="/@paginaHijo.FriendlyUrl" class="list-group-item list-group-item-action">
+                        <a href="/Paginas/@paginaHijo.FriendlyUrl" class="list-group-item list-group-item-action">
                             @paginaHijo.EtiquetaMenu
                         </a>
                     }
@@ -52,3 +73,22 @@
     </div>
 
 </div>
+
+@section Scripts {
+    @if (tieneGaleria)
+    {
+        <script src="~/Scripts/jquery-11.0.min.js"></script>
+        <script src="~/Scripts/unitegallery.min.js"></script>
+        <script src="~/themes/tiles/ug-theme-tiles.js"></script>
+
+        <script>
+            $(document).ready(function () {
+
+                jQuery("#gallery").unitegallery({
+                    tiles_type: "nested"
+                });
+
+            });
+        </script>
+    }
+}

@@ -3,6 +3,8 @@
 @using Arysoft.Website.Models;
 
 @{
+    bool tieneGaleria = Model.TieneGaleria == BoolTipo.Si;
+    string galeriaHTML = string.Empty;
     string imagenPrincipalTag = string.Empty;
 
     ViewBag.Title = "Noticia";
@@ -10,6 +12,25 @@
     if (!string.IsNullOrEmpty(Model.ImagenArchivo))
     {
         imagenPrincipalTag = "<img src='/Archivos/Noticias/" + Model.NoticiaID.ToString() + "/" + Model.ImagenArchivo + "' class='card-img-top' alt='" + Html.DisplayNameFor(model => model.ImagenArchivo) + "' />";
+    }
+
+    if (tieneGaleria)
+    {
+        galeriaHTML = "<div id='gallery' style='display: none;'>";
+        foreach (var archivo in Model.Archivos.Where(a => a.EnGaleria == BoolTipo.Si))
+        {
+            string imageUrl = "/Archivos/Noticias/" + Model.NoticiaID.ToString() + "/" + archivo.Nombre;
+            galeriaHTML += @"<a href='http://unitegallery.net'><img alt='' src='" + imageUrl + "' data-image='" + imageUrl + "' data-description='' style='display:none' /></a>";
+        }
+        galeriaHTML += "</div>";
+        Model.HTMLContent = Model.HTMLContent.Replace("[GALERIA]", galeriaHTML);
+    }
+}
+
+@section styles {
+    @if (tieneGaleria)
+    {
+        <link href="~/Content/unite-gallery.css" rel="stylesheet" />
     }
 }
 
@@ -42,6 +63,23 @@
 
 @section Scripts {
     @Scripts.Render("~/bundles/jqueryval")
+
+    @if (tieneGaleria)
+    {
+        <script src="~/Scripts/jquery-11.0.min.js"></script>
+        <script src="~/Scripts/unitegallery.min.js"></script>
+        <script src="~/themes/tiles/ug-theme-tiles.js"></script>
+
+        <script>
+            $(document).ready(function () {
+
+                jQuery("#gallery").unitegallery({
+                    tiles_type: "nested"
+                });
+
+            });
+        </script>
+    }
 
     <script>
 
